@@ -90,3 +90,6 @@ This project is licensed under the MIT License.
 ## ✨ Contact
 For inquiries, feel free to reach out at **your-email@example.com**
 
+## ✨ Subscribe to get first hand information
+- GitHub: *github.com/MindBlockLabs*  
+- https://t.me/+kjacdy68yfwwNTVk 
