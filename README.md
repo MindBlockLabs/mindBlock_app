@@ -1,13 +1,9 @@
 # 🚀 AI-Powered Challenge Platform Backend
 
 ## 📌 Overview
-
 This project is a modular, scalable, and AI-powered backend built with **NestJS**, **PostgreSQL**, and **TypeORM**. It powers an interactive challenge platform with features such as authentication, AI-driven recommendations, smart contract interactions, and real-time challenge modes.
 
----
-
 ## 🏗️ Tech Stack
-
 - **Backend Framework**: NestJS (TypeScript)
 - **Database**: PostgreSQL (via TypeORM)
 - **Authentication**: Wallet, Email, Google OAuth
@@ -49,6 +45,7 @@ This project is a modular, scalable, and AI-powered backend built with **NestJS*
 ---
 
 ## 📂 Project Structure
+```
 backend/
 │── src/
 │   ├── auth/        # Authentication module
@@ -60,71 +57,39 @@ backend/
 │── .env             # Environment variables
 │── nest-cli.json    # NestJS configuration
 │── package.json     # Dependencies & scripts
+```
+
+---
 
 ## 🛠️ Setup & Installation
 
 ### Prerequisites
-- **Node.js** (v18+)
-- **PostgreSQL**
+Ensure you have the following installed:
+- Node.js (v18+)
+- PostgreSQL
 
-### Installation Steps
-1. **Clone the Repository**
-   ```bash
-   git clone <repo-url>
-   cd backend
-
-### Create a New Branch (if contributing to an open source project)
-git checkout -b feature/initialize-nestjs
-### Install Dependencies
-bash
-Copy code
-npm install
-### Set Up Environment Variables Create a .env file in the backend folder and configure your database variables. Do not edit .env.example.
-env
-Copy code
-DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
-DB_NAME=your_database
-Run Database Migrations
-bash
-
-### npm run typeorm migration:run
-Start the Server
-bash
-
-### npm run start:dev
-
-### 📌 API Documentation
-API documentation will be available via Swagger at:
-
-bash
-
+## 📌 API Documentation
+API documentation will be available via **Swagger** at:
+```
 http://localhost:3000/api
-🚀 Project Setup with NestJS CLI (Handling Merge Conflicts)
-If you encounter a merge conflict while running the NestJS CLI (e.g., a conflict on README.md), follow these steps:
+```
 
-Backup Your Existing README.md
-bash
+## 🛡️ Security & Best Practices
+- Follows NestJS best practices for security & scalability
+- Uses JWT-based authentication for secure access
+- Implements role-based access control (RBAC)
+- Logs and monitors API requests for security insights
 
-mv README.md README.backup.md
-Run the Nest CLI Command
-bash
+---
 
-nest new . --package-manager npm
-The CLI will scaffold your app without conflicting with your backup.
-Merge Changes After scaffolding is complete, compare your README.backup.md with the new README file and merge the changes as needed.
-
-### 📜 License
+## 📜 License
 This project is licensed under the MIT License.
 
-### ✨ Contact
-For inquiries, feel free to reach out at your-email@example.com.
+---
 
-### Additional Resources
-NestJS Documentation – Learn more about the framework.
-Discord Channel – Get support and ask questions.
-NestJS Devtools – Visualize and interact with your application.
-Deployment Documentation – Steps to deploy your application.
-<p align="center"> <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a> </p> ```
+## ✨ Contact
+For inquiries, feel free to reach out at **aminubabafatima8@example.com** or **amalikabdulmalik04@gmail.com**
+
+## ✨ Subscribe to get first hand information
+- GitHub: *github.com/MindBlockLabs*  
+- https://t.me/+kjacdy68yfwwNTVk 
