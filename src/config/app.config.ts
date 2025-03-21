@@ -1,4 +1,4 @@
-'import { registerAs } from "@nestjs/config"
+import { registerAs } from "@nestjs/config"
 
 export default registerAs('appConfig', () => ({
     envirment: process.env.NODE_ENV || 'development',
@@ -8,4 +8,4 @@ export default registerAs('appConfig', () => ({
     smtpUsername: process.env.SMTP_USERNAME,
     smtpPassword: process.env.SMTP_PASSWORD,
     mailSecure: process.env.MAIL_SECURE ==='true',
-}))'
+}))
