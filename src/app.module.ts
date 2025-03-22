@@ -1,6 +1,12 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { UsersController } from './users/controllers/users.controller';
+import { UsersService } from './users/providers/users.service';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -15,6 +21,11 @@ import { AuthModule } from './auth/auth.module';
       synchronize: true, // Set to false in production environments
     }),
     AuthModule,
+    UsersModule,
+    LeaderboardModule,
+    CommonModule,
   ],
+  controllers: [UsersController, LeaderboardController],
+  providers: [UsersService],
 })
 export class AppModule {}
