@@ -7,4 +7,6 @@ import { LeaderboardService } from './providers/leaderboard.service';
   providers: [LeaderboardService],
   exports: [LeaderboardService],
 })
+
+@Module({})
 export class LeaderboardModule {}

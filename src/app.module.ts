@@ -7,6 +7,7 @@ import { UsersService } from './users/providers/users.service';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
 import { CommonModule } from './common/common.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [

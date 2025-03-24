@@ -9,4 +9,6 @@ import { UsersController } from './controllers/users.controller';
   providers: [UsersService],
   exports: [UsersService], // Make service reusable
 })
+
+@Module({})
 export class UsersModule {}
