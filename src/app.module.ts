@@ -8,6 +8,8 @@ import { UsersService } from './users/providers/users.service';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
 import { CommonModule } from './common/common.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
+import { BlockchainController } from './controller/controller/blockchain/blockchain.controller';
 
 @Module({
   imports: [
@@ -32,8 +34,9 @@ import { CommonModule } from './common/common.module';
     UsersModule,
     LeaderboardModule,
     CommonModule,
+    BlockchainModule,
   ],
-  controllers: [UsersController, LeaderboardController],
+  controllers: [UsersController, LeaderboardController, BlockchainController],
   providers: [UsersService],
 })
 export class AppModule {}
