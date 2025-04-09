@@ -9,11 +9,12 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { BlockchainController } from './controller/controller/blockchain/blockchain.controller';
+import { BlockchainController } from './blockchain/controller/blockchain.controller';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: ['.env'],
       isGlobal: true,
     }),
     TypeOrmModule.forRootAsync({
@@ -22,12 +23,13 @@ import { BlockchainController } from './controller/controller/blockchain/blockch
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_DATABASE'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: process.env.NODE_ENV !== 'production', // Adjust synchronization based on environment
+        port: configService.get('DATABASE_PORT'),
+        username: configService.get('DATABASE_USER'),
+        password: configService.get('DATABASE_PASSWORD'),
+        database: configService.get('DATABASE_NAME'),
+        // entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        autoLoadEntities: configService.get('DATABASE_LOAD'),
+        synchronize: configService.get('DATABASE_SYNC')
       }),
     }),
     AuthModule,
