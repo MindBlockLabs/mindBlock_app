@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { LoginDto } from '../dtos/login.dto';
 
 interface OAuthUser {
   email: string;
@@ -13,11 +14,11 @@ interface OAuthUser {
 export class AuthService {
   constructor(private readonly jwtService: JwtService) {}
 
-  login(email: string, password: string) {
-    return `User with email ${email} logged in successfully!`;
+  public login(loginDto: LoginDto) {
+    return `User with email ${loginDto.email} logged in successfully!`;
   }
 
-  register(name: string, email: string, password: string) {
+  public register(name: string, email: string, password: string) {
     return `User ${name} registered successfully!`;
   }
 

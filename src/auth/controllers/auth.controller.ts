@@ -1,31 +1,19 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { LoginDto } from '../dtos/login.dto';
+import { AuthService } from '../providers/auth.service';
 
 @Controller('users')
 export class AuthController {
-  constructor() {}
+  constructor(
+    private readonly authService: AuthService
+  ) {}
 
-  @Get()
-  findAll() {
-    return [];
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return null;
-  }
-
-  @Post()
-  create(@Body() data: any) {
-    return {};
-  }
-
-  @Put(':id')
-  update(@Param('id') id: string, @Body() data: any) {
-    return {};
-  }
-
-  @Delete(':id')
-  delete(@Param('id') id: string) {
-    return { deleted: true };
-  }
+  @Post('/signIn')
+  public async SignIn(@Body() signInDto: LoginDto) {
+    return await this.authService.login(signInDto)
+ }
+//  @Post('/refreshToken')
+//  public RefreshToken(@Body() refreshToken: RefreshTokenDto) {
+//      return this.authService.refreshToken(refreshToken)
+//  }
 }

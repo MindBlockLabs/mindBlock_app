@@ -4,17 +4,17 @@ import { Injectable } from '@nestjs/common';
 export class UsersService {
   constructor() {}
 
-  async findAll(): Promise<any[]> {
+  public async findAll(): Promise<any[]> {
     return [];
   }
 
-  async findOne(): Promise<any> {
+  public async findOne(): Promise<any> {
     return null;
   }
 
-  async create(data: any): Promise<void> {}
+  public async create(data: any): Promise<void> {}
 
-  async update(id: string, data: any): Promise<void> {}
+  public async update(id: string, data: any): Promise<void> {}
 
-  async delete(id: string): Promise<void> {}
+  public async delete(id: string): Promise<void> {}
 }
