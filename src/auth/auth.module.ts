@@ -1,33 +1,26 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
+import { AuthController } from './auth.controller';
 import { AuthService } from './providers/auth.service';
-import { SocialController } from './social/social.controller';
-import { GoogleStrategy } from './social/google.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UsersModule } from 'src/users/users.module';
+import { SignInProvider } from './providers/sign-in.provider';
+import { ConfigModule } from '@nestjs/config';
+import{ JwtModule } from '@nestjs/jwt'
+import { HashingProvider } from './providers/hashing.provider';
+import { BcryptProvider } from './providers/bcrypt.provider';
+import jwtConfig from './authConfig/jwt.config';
 
 @Module({
-  imports: [
-    ConfigModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '1d' },
-      }),
-      inject: [ConfigService],
-    }),
-  ],
-  controllers: [SocialController],
-  providers: [
-    AuthService,
+  imports: [forwardRef(() => UsersModule), 
+    ConfigModule.forFeature(jwtConfig),
+    JwtModule.registerAsync(jwtConfig.asProvider())],
+  controllers: [AuthController],
+  providers: [AuthService, 
     {
-      provide: GoogleStrategy,
-      useFactory: (authService: AuthService, configService: ConfigService) => {
-        return new GoogleStrategy(authService, configService);
-      },
-      inject: [AuthService, ConfigService],
-    },
+      provide: HashingProvider, // Use the abstract class as a token
+      useClass: BcryptProvider, // Bind it to the concrete implementation
+    }, 
+    SignInProvider
   ],
-  exports: [AuthService],
+  exports: [AuthService, HashingProvider]
 })
 export class AuthModule {}
