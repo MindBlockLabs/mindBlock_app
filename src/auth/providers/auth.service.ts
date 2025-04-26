@@ -1,6 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Injectable, Inject } from '@nestjs/common';
+import { forwardRef } from '@nestjs/common';
 import { LoginDto } from '../dtos/login.dto';
+import { UsersService } from 'src/users/providers/users.service';
+import { SignInProvider } from './sign-in.provider';
 
 interface OAuthUser {
   email: string;
@@ -12,30 +14,20 @@ interface OAuthUser {
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    // injecting user service
+    @Inject(forwardRef(() => UsersService))
+    private readonly userService: UsersService,
 
-  public login(loginDto: LoginDto) {
-    return `User with email ${loginDto.email} logged in successfully!`;
-  }
+    // inject signInProvider
+    private readonly signInProvider: SignInProvider,
+) {}
 
-  public register(name: string, email: string, password: string) {
-    return `User ${name} registered successfully!`;
-  }
+public async SignIn(signInDto: LoginDto) {
+    return await this.signInProvider.SignIn(signInDto)
+}
 
-  async validateOAuthUser(user: OAuthUser): Promise<string> {
-    // Here you would typically:
-    // 1. Check if user exists in your database
-    // 2. If not, create a new user
-    // 3. Generate and return JWT token
-
-    // For now, we'll just generate a token
-    const payload = {
-      email: user.email,
-      sub: user.email, // Using email as subject
-      firstName: user.firstName,
-      lastName: user.lastName,
-    };
-
-    return this.jwtService.sign(payload);
-  }
+public isAuth() {
+    return true
+}    
 }
