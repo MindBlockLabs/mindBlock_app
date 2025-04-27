@@ -1,8 +1,11 @@
 import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { UsersService } from '../providers/users.service';
 
 @Controller('users')
 export class UsersController {
-  constructor() {}
+  constructor(
+    private readonly usersService: UsersService
+  ) {}
 
   @Get()
   findAll() {
@@ -15,8 +18,8 @@ export class UsersController {
   }
 
   @Post()
-  create(@Body() data: any) {
-    return {};
+  async create(@Body() userData: any) {
+    return this.usersService.create(userData);
   }
 
   @Put(':id')
