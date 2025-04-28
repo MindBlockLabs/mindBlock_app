@@ -45,7 +45,7 @@ export class GenerateTokensProvider {
         sub: userId,
         userRole,
         ...payload,
-      } as ActiveUserData,
+      },
       {
         secret: this.jwtConfiguration.secret,
         audience: this.jwtConfiguration.audience,

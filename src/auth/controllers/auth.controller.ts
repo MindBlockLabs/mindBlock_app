@@ -10,6 +10,7 @@ export class AuthController {
     private readonly authservice: AuthService,
   ) {}
   @Post('/signIn')
+  // @Auth(authTypes.None)
   @HttpCode(HttpStatus.OK)
   public async SignIn(@Body() signInDto: LoginDto) {
     return await this.authservice.SignIn(signInDto);

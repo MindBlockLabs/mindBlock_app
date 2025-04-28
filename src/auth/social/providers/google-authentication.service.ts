@@ -1,4 +1,11 @@
-import { forwardRef, Inject, Injectable, Logger, OnModuleInit, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  OnModuleInit,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigType } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import jwtConfig from 'src/auth/authConfig/jwt.config';
@@ -28,7 +35,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
      */
     @Inject(jwtConfig.KEY)
     private readonly jwtConfigurattion: ConfigType<typeof jwtConfig>,
-    
+
     /**
      * Injects the GenerateTokensProvider to handle token generation.
      */
@@ -47,7 +54,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
 
   /**
    * Authenticates a user with a Google token.
-   * 
+   *
    * @param {GoogleTokenDto} googleTokenDto - The DTO containing the Google token.
    * @returns {Promise<any>} Returns generated tokens if authentication is successful.
    * @throws {UnauthorizedException} If authentication fails.
@@ -56,36 +63,45 @@ export class GoogleAuthenticationService implements OnModuleInit {
   /**authenticate class with google tokendto as params */
   public async authenticate(googleTokenDto: GoogleTokenDto) {
     try {
-      console.log("Received Token:", googleTokenDto.token);
+      console.log('Received Token:', googleTokenDto.token);
 
       this.logger.log('Initializing OAuth Client...');
       try {
         this.oAuthClient = new OAuth2Client(
           process.env.GOOGLE_CLIENT_ID,
           process.env.GOOGLE_CLIENT_SECRET,
-          process.env.GOOGLE_REDIRECT_URI
+          process.env.GOOGLE_REDIRECT_URI,
         );
-  
+
         if (!this.oAuthClient) {
           throw new Error('OAuth Client is undefined after initialization');
         }
       } finally {
-        console.log('oAuth Ended')
+        console.log('oAuth Ended');
       }
       // Verify the Google token sent by user
       const loginTicket = await this.oAuthClient.verifyIdToken({
         idToken: googleTokenDto.token,
       });
 
-      console.log("Google Token Payload:", loginTicket);
+      console.log('Google Token Payload:', loginTicket);
 
+      // Get the payload then store it
+      const payload = loginTicket.getPayload();
+
+      // Check if it's defined,
+      if (!payload) {
+        throw new UnauthorizedException('Invalid Google token payload.');
+      }
+
+      // Destructure only after ensuring payload is not undefined
       // Extract the payload from Google JWT token
       const {
         email,
         sub: googleId,
         given_name: firstName,
         family_name: lastName,
-      } = loginTicket.getPayload();
+      } = payload;
 
       // Find the user in the database using googleId
       const user = await this.userService.findOneByGoogleId(googleId);
@@ -94,7 +110,11 @@ export class GoogleAuthenticationService implements OnModuleInit {
       if (user) {
         return this.generateTokensProvider.generateTokens(user);
       }
-      
+
+      if (!email || !googleId || !firstName || !lastName) {
+        throw new UnauthorizedException('Incomplete Google token data.');
+      }
+
       // Else, create a new user and generate the token
       const newUser = await this.userService.createGoogleUser({
         email: email,
@@ -105,7 +125,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
       return this.generateTokensProvider.generateTokens(newUser);
     } catch (error) {
       // If any step fails, throw an UnauthorizedException
-      console.error("Google Auth Error:", error);
+      console.error('Google Auth Error:', error);
       throw new UnauthorizedException('Failed to authenticate with Google');
     }
   }

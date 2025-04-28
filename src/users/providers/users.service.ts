@@ -9,6 +9,7 @@ import { FindOneByGoogleIdProvider } from './find-one-by-googleId';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateGoogleUserProvider } from './googleUserProvider';
 import { GoogleInterface } from 'src/auth/social/interfaces/user.interface';
+import { CreateUserDto } from '../dtos/createUserDto';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +34,7 @@ export class UsersService {
     return this.findOneByEmail.findOneByEmail(email)
 }
 
-  public async create(userData: any): Promise<User> {
+  public async create(userData: CreateUserDto): Promise<User> {
     return this.createUserService.execute(userData);
   }
 
