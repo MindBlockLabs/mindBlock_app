@@ -1,34 +1,47 @@
 import { Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { User } from '../user.entity';
 
+/**
+ * Service for finding a user by email.
+ */
+@ApiTags('Users')
 @Injectable()
 export class FindOneByEmail {
-    constructor(
-        @InjectRepository(User)
-        private userRepository: Repository<User>
-    ) {}
+    /**
+     * Injects the User repository.
+     * @param userRepository - The repository for User entity.
+     */
+    constructor(@InjectRepository(User) private userRepository: Repository<User>) {}
 
-    public async FindOneByEmail(email: string) {
-        let user: User | undefined
+    /**
+     * Finds a user by email.
+     * @param email - The email of the user to find.
+     * @returns The user entity if found.
+     * @throws RequestTimeoutException if there is an error connecting to the database.
+     * @throws UnauthorizedException if the user does not exist.
+     */
+    @ApiOperation({ summary: 'Find a user by email' })
+    @ApiResponse({ status: 200, description: 'User found', type: User })
+    @ApiResponse({ status: 408, description: 'Request Timeout - Could not fetch user' })
+    @ApiResponse({ status: 401, description: 'Unauthorized - User does not exist' })
+    public async findOneByEmail(email: string): Promise<User> {
+        let user: User | null;
 
         try {
-        // check if user exist in db
-            user = await this.userRepository.findOneBy({email})
+            user = await this.userRepository.findOneBy({ email });
         } catch (error) {
-            throw new RequestTimeoutException('Unable to process request at the moment. Please try again later', {
-                description: 'Error connecting to the database',
-                cause: 'possible network error'
-            })
+            throw new RequestTimeoutException('Could not fetch user', {
+                description: 'Error connecting to database',
+            });
         }
 
-        // throw error if user doesn't exist
         if (!user) {
-            throw new UnauthorizedException('User not found')
+            throw new UnauthorizedException('User does not exist');
         }
 
-        return user
-        // conpare password
+        return user; 
     }
 }

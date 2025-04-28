@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user.entity';
 import { isEmail } from 'class-validator';
+import { CreateUserDto } from '../dtos/createUserDto';
 
 @Injectable()
 export class CreateUserService {
@@ -11,7 +12,7 @@ export class CreateUserService {
         private usersRepository: Repository<User>,
     ) { }
 
-    async execute(userData: any): Promise<User> {
+    async execute(userData: CreateUserDto): Promise<User> {
         // 1. Validation
         if (!userData.email || !isEmail(userData.email)) {
             throw new BadRequestException('Invalid email');
