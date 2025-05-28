@@ -13,4 +13,9 @@ export class AuthController {
 public async SignIn(@Body() signInDto: LoginDto) {
    return await this.authservice.SignIn(signInDto)
 }
+@Post('/refreshToken')
+@HttpCode(HttpStatus.OK)
+public async refreshToken(@Body() refreshToken: RefreshToken) {
+   return await this.authservice.refresh(refreshToken)
+}
 }
