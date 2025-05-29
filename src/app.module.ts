@@ -10,6 +10,7 @@ import { LeaderboardController } from './leaderboard/controllers/leaderboard.con
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { BlockchainController } from './blockchain/controller/blockchain.controller';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -39,6 +40,6 @@ import { BlockchainController } from './blockchain/controller/blockchain.control
     BlockchainModule,
   ],
   controllers: [UsersController, LeaderboardController, BlockchainController],
-  providers: [UsersService],
+  providers: [AppService],
 })
 export class AppModule {}

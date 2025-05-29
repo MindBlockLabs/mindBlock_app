@@ -1,5 +1,4 @@
 import { forwardRef, Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
 import { AuthService } from './providers/auth.service';
 import { UsersModule } from 'src/users/users.module';
 import { SignInProvider } from './providers/sign-in.provider';
@@ -8,6 +7,9 @@ import{ JwtModule } from '@nestjs/jwt'
 import { HashingProvider } from './providers/hashing.provider';
 import { BcryptProvider } from './providers/bcrypt.provider';
 import jwtConfig from './authConfig/jwt.config';
+import { AuthController } from './controllers/auth.controller';
+import { RefreshTokensProvider } from './providers/refreshTokensProvider';
+import { GenerateTokensProvider } from './providers/generate-tokens.provider';
 
 @Module({
   imports: [forwardRef(() => UsersModule), 
@@ -19,7 +21,9 @@ import jwtConfig from './authConfig/jwt.config';
       provide: HashingProvider, // Use the abstract class as a token
       useClass: BcryptProvider, // Bind it to the concrete implementation
     }, 
-    SignInProvider
+    SignInProvider,
+    RefreshTokensProvider,
+    GenerateTokensProvider
   ],
   exports: [AuthService, HashingProvider]
 })
