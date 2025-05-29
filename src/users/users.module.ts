@@ -7,15 +7,28 @@ import { User } from './user.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { CreateUserService } from './providers/create-user.service';
 import { DeleteUserService } from './providers/delete-user.service';
+import { FindAll } from './providers/find-all.service';
 import { FindOneByGoogleIdProvider } from './providers/find-one-by-googleId';
 import { CreateGoogleUserProvider } from './providers/googleUserProvider';
+import { PaginationModule } from 'src/common/pagination/pagination.module';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), TypeOrmModule.forFeature([User])],
+  imports: [
+    forwardRef(() => AuthModule),
+    TypeOrmModule.forFeature([User]),
+    PaginationModule,
+  ],
   controllers: [UsersController],
-  providers: [UsersService,  CreateUserService, FindOneByEmail, DeleteUserService, FindOneByGoogleIdProvider, CreateGoogleUserProvider],
+  providers: [
+    UsersService,
+    CreateUserService,
+    FindOneByEmail,
+    FindAll,
+    DeleteUserService,
+    FindOneByGoogleIdProvider,
+    CreateGoogleUserProvider,
+  ],
   exports: [UsersService], // Make service reusable
 })
-
 @Module({})
 export class UsersModule {}
