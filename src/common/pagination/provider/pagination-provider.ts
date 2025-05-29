@@ -1,10 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { paginationQueryDto } from '../dtos/paginationQueryDto';
 import { ObjectLiteral, Repository } from 'typeorm';
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { concatAll } from 'rxjs';
-import { PaginatedInterface } from '../interfaces/paginatedInterfaces';
+import { paginationQueryDto } from '../paginationQueryDto';
+import { PaginatedInterface } from '../paginatedInterfaces';
 
 @Injectable()
 export class PaginationProvider {
