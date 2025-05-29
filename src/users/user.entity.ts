@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
+import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 
 /** this is the structure of the users table */
 @Entity()
@@ -23,7 +24,11 @@ export class User {
   /**
    * Role of the user.
    */
-  @ApiProperty({ enum: userRole, example: userRole.USER, description: 'Role of the user' })
+  @ApiProperty({
+    enum: userRole,
+    example: userRole.USER,
+    description: 'Role of the user',
+  })
   @Column({ type: 'enum', enum: userRole, default: userRole.USER })
   userRole?: userRole;
 
@@ -37,4 +42,7 @@ export class User {
   })
   @Column('varchar', { length: 225, nullable: true })
   googleId?: string;
+
+  @OneToMany(() => LeaderboardEntry, (entry) => entry.user)
+  leaderboardEntries: LeaderboardEntry[];
 }
