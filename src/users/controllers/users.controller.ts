@@ -1,15 +1,23 @@
 // src/users/controllers/users.controller.ts
 
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  Query,
+} from '@nestjs/common';
 import { UsersService } from '../providers/users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
 
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user by ID' })
@@ -21,8 +29,8 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return [];
+  findAll(@Query() dto: paginationQueryDto) {
+    return this.usersService.findAllUsers(dto);
   }
 
   @Get(':id')
