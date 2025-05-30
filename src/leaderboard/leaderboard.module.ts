@@ -7,8 +7,10 @@ import { LeaderboardEntry } from './entities/leaderboard.entity';
 import { Badge } from 'src/badge/entities/badge.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([LeaderboardEntry, User, Badge])],
+  imports: [
+    TypeOrmModule.forFeature([LeaderboardEntry, User, Badge])],
   controllers: [LeaderboardController],
   providers: [LeaderboardService],
+  exports: [LeaderboardService],
 })
 export class LeaderboardModule {}

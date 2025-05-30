@@ -63,9 +63,9 @@ export class LeaderboardService {
       badge: entry.badge
         ? {
             id: entry.badge.id,
-            name: entry.badge.name,
+            name: entry.badge.title,
             description: entry.badge.description,
-            icon: entry.badge.icon,
+            icon: entry.badge.iconUrl,
           }
         : undefined,
       rank: offset + index + 1,

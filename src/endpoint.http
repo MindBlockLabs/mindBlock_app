@@ -1,0 +1,10 @@
+
+POST http://localhost:3000/badges
+Content-Type: application/json
+
+{
+  "title": "New Badge",
+  "description": "This is a new badge.",
+  "iconUrl": "http://example.com/badge.png",
+  "rank":2
+}
