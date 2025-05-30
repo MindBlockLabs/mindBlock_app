@@ -10,6 +10,7 @@ import { AppService } from './app.service';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { BadgeModule } from './badge/badge.module';
 import { AppController } from './app.controller';
+import { TimeFilterModule } from './timefilter/timefilter.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { AppController } from './app.controller';
     CommonModule,
     BlockchainModule,
     BadgeModule,
+    TimeFilterModule,
   ],
   controllers: [AppController],
   providers: [AppService],
