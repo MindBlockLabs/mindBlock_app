@@ -1,16 +1,15 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { UsersController } from './users/controllers/users.controller';
-import { UsersService } from './users/providers/users.service';
-import { LeaderboardModule } from './leaderboard/leaderboard.module';
-import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { BlockchainController } from './blockchain/controller/blockchain.controller';
 import { AppService } from './app.service';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { BadgeModule } from './badge/badge.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -30,7 +29,7 @@ import { AppService } from './app.service';
         database: configService.get('DATABASE_NAME'),
         // entities: [__dirname + '/**/*.entity{.ts,.js}'],
         autoLoadEntities: configService.get('DATABASE_LOAD'),
-        synchronize: configService.get('DATABASE_SYNC')
+        synchronize: configService.get('DATABASE_SYNC'),
       }),
     }),
     AuthModule,
@@ -38,8 +37,9 @@ import { AppService } from './app.service';
     LeaderboardModule,
     CommonModule,
     BlockchainModule,
+    BadgeModule,
   ],
-  controllers: [UsersController, LeaderboardController, BlockchainController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
