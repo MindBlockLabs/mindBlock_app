@@ -11,6 +11,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { BadgeModule } from './badge/badge.module';
 import { AppController } from './app.controller';
 import { TimeFilterModule } from './timefilter/timefilter.module';
+import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { TimeFilterModule } from './timefilter/timefilter.module';
     BlockchainModule,
     BadgeModule,
     TimeFilterModule,
+    IQAssessmentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
