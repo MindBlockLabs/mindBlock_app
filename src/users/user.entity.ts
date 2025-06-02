@@ -7,8 +7,8 @@ import {
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
-import { PuzzleSubmission } from 'src/modules/puzzle/entities/puzzle-submission.entity';
-import { PuzzleProgress } from 'src/modules/puzzle/entities/puzzle-progress.entity';
+import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
+import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
 
 /** this is the structure of the users table */
 @Entity()
