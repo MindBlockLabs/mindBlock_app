@@ -1,10 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  Column,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
@@ -22,8 +17,8 @@ export class User {
   @Column('varchar', { length: 90, nullable: true })
   lastname: string;
 
-  @Column('varchar', { length: 150, nullable: false, unique: true })
-  email: string;
+  @Column('varchar', { length: 150, nullable: true, unique: true })
+  email?: string;
 
   @Column('varchar', { length: 225, nullable: true })
   password: string;
@@ -57,7 +52,7 @@ export class User {
    * Starknet Wallet (optional).
    */
   @ApiProperty({ example: '0xabc...', required: false })
-  @Column('varchar', { length: 150, nullable: true })
+  @Column('varchar', { length: 150, nullable: true, unique: true })
   starknetWallet?: string;
 
   /**
