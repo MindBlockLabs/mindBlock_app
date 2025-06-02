@@ -10,6 +10,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { BadgeModule } from './badge/badge.module';
 import { TimeFilterModule } from './timefilter/timefilter.module';
+import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
 
 import { AppService } from './app.service';
@@ -48,6 +49,7 @@ import { PuzzleProgress } from './puzzle/entities/puzzle-progress.entity';
     BlockchainModule,
     BadgeModule,
     TimeFilterModule,
+    IQAssessmentModule,
     PuzzleModule,
   ],
   controllers: [AppController],
