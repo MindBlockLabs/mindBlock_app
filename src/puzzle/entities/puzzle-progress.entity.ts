@@ -4,9 +4,9 @@ import {
   ManyToOne,
   Column,
 } from 'typeorm';
-import { User } from 'src/modules/user/entities/user.entity';
 import { PuzzleType } from '../enums/puzzle-type.enum';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from 'src/users/user.entity';
 
 @Entity()
 export class PuzzleProgress {

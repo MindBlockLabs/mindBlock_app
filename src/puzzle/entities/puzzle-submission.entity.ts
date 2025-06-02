@@ -6,8 +6,8 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { Puzzle } from './puzzle.entity';
-import { User } from 'src/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
+import { User } from 'src/users/user.entity';
 
 @Entity()
 export class PuzzleSubmission {
@@ -24,7 +24,12 @@ export class PuzzleSubmission {
   user: User;
 
   @Column({ type: 'jsonb' })
-  @ApiProperty({ type: 'object', description: 'Submission data like code or answers' })
+  // @ApiProperty({ type: 'object', description: 'Submission data like code or answers' })
+  @ApiProperty({
+  type: 'object',
+  description: 'Submission data like code or answers',
+  additionalProperties: true
+})
   attemptData: Record<string, any>;
 
   @Column()
