@@ -1,68 +1,88 @@
-// src/users/providers/users.service.ts
-
-import { Injectable } from '@nestjs/common';
-import { FindOneByEmail } from './find-one-by-email.provider';
-import { FindAll } from './find-all.service';
-import { CreateUserService } from './create-user.service';
-import { DeleteUserService } from './delete-user.service'; // <-- import DeleteUserService
-import { User } from '../user.entity';
-import { FindOneByGoogleIdProvider } from './find-one-by-googleId';
-import { ApiOperation } from '@nestjs/swagger';
-import { CreateGoogleUserProvider } from './googleUserProvider';
-import { GoogleInterface } from 'src/auth/social/interfaces/user.interface';
-import { CreateUserDto } from '../dtos/createUserDto';
-import { PaginatedInterface } from '../../common/pagination/paginatedInterfaces';
-import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { Injectable, ConflictException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserProfileDto } from './dtos/update-user-profile.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private readonly findOneByEmail: FindOneByEmail,
-    private readonly findAll: FindAll,
-    private readonly createUserService: CreateUserService,
-    private readonly deleteUserService: DeleteUserService, // <-- injected delete a user
-    private readonly findOneByGoogleIdProvider: FindOneByGoogleIdProvider,
-
-    private readonly createGoogleUserProvider: CreateGoogleUserProvider,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  public async findAllUsers(
-    dto: paginationQueryDto,
-  ): Promise<PaginatedInterface<User>> {
-    return this.findAll.findAll(dto);
+  /** Creates a new user, hashing the password */
+  async create(dto: CreateUserDto): Promise<User> {
+    // Check uniqueness of username/email
+    const exists = await this.userRepository.findOne({
+      where: [{ username: dto.username }, { email: dto.email }],
+    });
+    if (exists) {
+      throw new ConflictException('Username or email already in use.');
+    }
+
+    // Hash password if provided
+    let hashedPassword: string | null = null;
+    if (dto.password) {
+      hashedPassword = await bcrypt.hash(dto.password, 10);
+    }
+
+    const user = this.userRepository.create({
+      username: dto.username,
+      email: dto.email,
+      password: hashedPassword,
+      userRole: dto.userRole,
+      googleId: dto.googleId,
+    });
+
+    return this.userRepository.save(user);
   }
 
-  public async findOne(): Promise<any> {
-    return null;
+  /** Finds a user by ID */
+  async findById(id: number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { id } });
   }
 
-  public async GetOneByEmail(email: string) {
-    return this.findOneByEmail.findOneByEmail(email);
+  /** Finds a user by username */
+  async findByUsername(username: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { username } });
   }
 
-  public async create(userData: CreateUserDto): Promise<User> {
-    return this.createUserService.execute(userData);
+  /** Finds a user by email */
+  async findByEmail(email: string): Promise<User | null> {
+    return this.userRepository.findOne({ where: { email } });
   }
 
-  /**
-   * Create a new Google user.
-   */
-  @ApiOperation({ summary: 'Create a new Google user' })
-  public async createGoogleUser(googleUser: GoogleInterface) {
-    return this.createGoogleUserProvider.createGoogleUser(googleUser);
+  /** Finds a user by Google ID */
+  async findOneByGoogleId(googleId: string | number): Promise<User | null> {
+    return this.userRepository.findOne({ where: { googleId: `${googleId}` } });
   }
 
-  /**
-   * Find a user by Google ID.
-   */
-  @ApiOperation({ summary: 'Find a user by Google ID' })
-  public async findOneByGoogleId(googleId: string) {
-    return this.findOneByGoogleIdProvider.findOneByGoogleId(googleId);
-  }
+  /** Updates a user's profile */
+  async updateProfile(
+    id: number,
+    dto: UpdateUserProfileDto,
+  ): Promise<User> {
+    const user = await this.findById(id);
+    if (!user) {
+      return null;
+    }
 
-  public async update(id: string, data: any): Promise<void> {}
+    if (dto.username) {
+      // Ensure new username is unique
+      const conflict = await this.findByUsername(dto.username);
+      if (conflict && conflict.id !== id) {
+        throw new ConflictException('Username is already taken.');
+      }
+      user.username = dto.username;
+    }
 
-  public async delete(id: string): Promise<void> {
-    return this.deleteUserService.execute(id); // <-- use the new DeleteUserService
+    if (dto.avatar !== undefined) {
+      (user as any).avatar = dto.avatar;
+    }
+
+    return this.userRepository.save(user);
   }
 }

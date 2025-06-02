@@ -1,48 +1,66 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { forwardRef } from '@nestjs/common';
-import { LoginDto } from '../dtos/login.dto';
-import { UsersService } from 'src/users/providers/users.service';
-import { SignInProvider } from './sign-in.provider';
-import { ApiBody, ApiOperation } from '@nestjs/swagger';
-import { RefreshTokenDto } from '../dtos/refreshTokenDto';
-import { RefreshTokensProvider } from './refreshTokensProvider';
-
-interface OAuthUser {
-  email: string;
-  firstName: string;
-  lastName: string;
-  picture: string;
-  accessToken: string;
-}
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
+import { UsersService } from 'src/users/users.service';
+import { CreateUserDto } from 'src/users/dtos/create-user.dto';
+import { GenerateTokensProvider } from './generate-tokens.provider';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // injecting user service
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
-
-    // inject signInProvider
-    private readonly signInProvider: SignInProvider,
-
-    /**
-     * Injecting RefreshTokensProvider for token management
-     */
-    private readonly refreshTokensProvider: RefreshTokensProvider,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly generateTokensProvider: GenerateTokensProvider,
   ) {}
 
-  public async SignIn(signInDto: LoginDto) {
-    return await this.signInProvider.SignIn(signInDto);
+  /** Registers a new user (local signup) */
+  async register(dto: CreateUserDto) {
+    // UsersService.create() already hashes the password
+    const newUser = await this.usersService.create(dto);
+    const tokens = await this.generateTokensProvider.generateTokens(newUser);
+    return { user: newUser, tokens };
   }
 
-  /**
-   * Handles refreshing of access tokens
-   * @param refreshTokenDto - DTO containing the refresh token
-   * @returns A new access token if the refresh token is valid
-   */
-  @ApiOperation({ summary: 'Refresh Access Token' })
-  @ApiBody({ type: RefreshTokenDto })
-  public refreshToken(refreshTokenDto: RefreshTokenDto) {
-    return this.refreshTokensProvider.refreshTokens(refreshTokenDto);
+  /** Validates credentials and returns tokens */
+  async login(username: string, password: string) {
+    const user = await this.usersService.findByUsername(username);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException(
+        'User registered via OAuth; please log in with Google',
+      );
+    }
+
+    const passwordMatches = await bcrypt.compare(password, user.password);
+    if (!passwordMatches) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const tokens = await this.generateTokensProvider.generateTokens(user);
+    return { user, tokens };
+  }
+
+  /** (Optional) Validate JWT payload for Guards: returns ActiveUserData */
+  async validateUserPayload(payload: {
+    sub: number;
+    username: string;
+    email: string;
+  }) {
+    const user = await this.usersService.findById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+    return {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+    };
   }
 }

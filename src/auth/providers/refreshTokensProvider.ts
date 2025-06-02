@@ -61,7 +61,7 @@ export class RefreshTokensProvider {
     );
 
     // Retrieve the user from the database
-    const user = await this.userService.findOneByGoogleId(sub);
+   const user = await this.userService.findById(sub);
 
     // inside refreshTokens
     if (!user) {

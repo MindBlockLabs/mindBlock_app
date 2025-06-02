@@ -37,29 +37,18 @@ import { userRole } from '../enums/userRole.enum';
    * DTO for creating a user
    */
   export class CreateUserDto {
-    /**
-     * First name field
-     */
-    @ApiProperty({
-      type: 'string',
-      example: 'Fatima',
-    })
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(100)
-    firstName: string;
-  
-    /**
-     * Last name field
-     */
-    @ApiProperty({
-      type: 'string',
-      example: 'Aminu',
-    })
-    @IsString()
-    @IsOptional()
-    @MaxLength(100)
-    lastName: string;
+   /**
+   * Username field (replaces firstName + lastName)
+   */
+  @ApiProperty({
+    type: 'string',
+    example: 'fatimaaminu',
+    description: 'Unique username',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(100)
+  username: string;
   
     /**
      * Email field
