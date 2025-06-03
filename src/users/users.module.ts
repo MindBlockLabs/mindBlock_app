@@ -11,6 +11,7 @@ import { FindAll } from './providers/find-all.service';
 import { FindOneByGoogleIdProvider } from './providers/find-one-by-googleId';
 import { CreateGoogleUserProvider } from './providers/googleUserProvider';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
+import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { PaginationModule } from 'src/common/pagination/pagination.module';
     UsersService,
     CreateUserService,
     FindOneByEmail,
+    FindOneByWallet,
     FindAll,
     DeleteUserService,
     FindOneByGoogleIdProvider,
