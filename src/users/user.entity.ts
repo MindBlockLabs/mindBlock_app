@@ -1,7 +1,16 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { userRole } from '../enums/userRole.enum';
+
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
+import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
+import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
 
 /** Structure of the users table */
 @Entity()
@@ -46,4 +55,37 @@ export class User {
 
   @OneToMany(() => LeaderboardEntry, (entry) => entry.user)
   leaderboardEntries: LeaderboardEntry[];
+
+  /**
+   * Starknet Wallet (optional).
+   */
+  @ApiProperty({ example: '0xabc...', required: false })
+  @Column('varchar', { length: 150, nullable: true })
+  starknetWallet?: string;
+
+  /**
+   * User XP points for puzzle solving.
+   */
+  @ApiProperty({ example: 120 })
+  @Column('int', { default: 0 })
+  xp: number;
+
+  /**
+   * User level based on XP.
+   */
+  @ApiProperty({ example: 3 })
+  @Column('int', { default: 1 })
+  level: number;
+
+  /**
+   * One-to-many relation with puzzle progress records.
+   */
+  @OneToMany(() => PuzzleProgress, (progress) => progress.user)
+  puzzleProgress: PuzzleProgress[];
+
+  /**
+   * One-to-many relation with puzzle submissions.
+   */
+  @OneToMany(() => PuzzleSubmission, (submission) => submission.user)
+  puzzleSubmissions: PuzzleSubmission[];
 }
