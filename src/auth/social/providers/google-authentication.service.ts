@@ -97,11 +97,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
 
       // Destructure only after ensuring payload is not undefined
       // Extract the payload from Google JWT token
-      const {
-        email,
-        sub: googleId,
-        username: given_name,
-      } = payload;
+      const { email, sub: googleId, given_name } = payload;
 
       // Find the user in the database using googleId
       const user = await this.userService.findOneByGoogleId(googleId);
@@ -111,7 +107,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
         return this.generateTokensProvider.generateTokens(user);
       }
 
-      if (!email || !googleId ) {
+      if (!email || !googleId) {
         throw new UnauthorizedException('Incomplete Google token data.');
       }
 
