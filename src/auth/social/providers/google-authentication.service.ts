@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   forwardRef,
   Inject,
@@ -99,8 +100,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
       const {
         email,
         sub: googleId,
-        given_name: firstName,
-        family_name: lastName,
+        username: given_name,
       } = payload;
 
       // Find the user in the database using googleId
@@ -111,15 +111,15 @@ export class GoogleAuthenticationService implements OnModuleInit {
         return this.generateTokensProvider.generateTokens(user);
       }
 
-      if (!email || !googleId || !firstName || !lastName) {
+      if (!email || !googleId ) {
         throw new UnauthorizedException('Incomplete Google token data.');
       }
 
       // Else, create a new user and generate the token
       const newUser = await this.userService.createGoogleUser({
         email: email,
-        firstName: firstName,
-        lastName: lastName,
+        username: given_name,
+        // eslint-disable-next-line prettier/prettier
         googleId: googleId,
       });
       return this.generateTokensProvider.generateTokens(newUser);

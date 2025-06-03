@@ -54,7 +54,7 @@ export class LeaderboardService {
       id: entry.id,
       user: {
         id: entry.user.id,
-        username: entry.user.firstname,
+        username: entry.user.username
         // avatar: entry.user.avatar,
       },
       puzzlesCompleted: entry.puzzlesCompleted,
