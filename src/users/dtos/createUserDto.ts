@@ -38,30 +38,6 @@ import { userRole } from '../enums/userRole.enum';
    */
   export class CreateUserDto {
     /**
-     * First name field
-     */
-    @ApiProperty({
-      type: 'string',
-      example: 'Fatima',
-    })
-    @IsString()
-    @IsNotEmpty()
-    @MaxLength(100)
-    firstName: string;
-  
-    /**
-     * Last name field
-     */
-    @ApiProperty({
-      type: 'string',
-      example: 'Aminu',
-    })
-    @IsString()
-    @IsOptional()
-    @MaxLength(100)
-    lastName: string;
-  
-    /**
      * Email field
      */
     @ApiProperty({
@@ -72,6 +48,15 @@ import { userRole } from '../enums/userRole.enum';
     @MaxLength(150)
     @Column({ unique: true, length: 150 })
     email: string;
+
+    @ApiProperty({
+      type: 'string',
+      example: 'fatimaaminu@mail.com',
+    })
+    @IsString()
+    @MaxLength(150)
+    @Column({ length: 150 })
+    username: string;
   
     /**
      * Password should contain numbers, alphabets, and uppercase

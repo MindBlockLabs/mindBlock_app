@@ -9,8 +9,7 @@ import { WalletLoginProvider } from './wallet-login.provider';
 
 interface OAuthUser {
   email: string;
-  firstName: string;
-  lastName: string;
+  username: string;
   picture: string;
   accessToken: string;
 }

@@ -11,11 +11,8 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('varchar', { length: 90, nullable: false })
-  firstname: string;
-
-  @Column('varchar', { length: 90, nullable: true })
-  lastname: string;
+  @Column('varchar', { length: 150, nullable: true }) 
+  username?: string;
 
   @Column('varchar', { length: 150, nullable: true, unique: true })
   email?: string;
