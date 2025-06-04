@@ -1,16 +1,15 @@
-import { Injectable, Inject } from '@nestjs/common';
-import { forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LoginDto } from '../dtos/login.dto';
-import { UsersService } from 'src/users/providers/users.service';
 import { SignInProvider } from './sign-in.provider';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { RefreshTokensProvider } from './refreshTokensProvider';
+import { WalletLoginDto } from '../dtos/walletLogin.dto';
+import { WalletLoginProvider } from './wallet-login.provider';
 
 interface OAuthUser {
   email: string;
-  firstName: string;
-  lastName: string;
+  username: string;
   picture: string;
   accessToken: string;
 }
@@ -18,12 +17,11 @@ interface OAuthUser {
 @Injectable()
 export class AuthService {
   constructor(
-    // injecting user service
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
-
     // inject signInProvider
     private readonly signInProvider: SignInProvider,
+
+    // inject walletLoginProvider
+    private readonly walletLoginProvider: WalletLoginProvider,
 
     /**
      * Injecting RefreshTokensProvider for token management
@@ -33,6 +31,10 @@ export class AuthService {
 
   public async SignIn(signInDto: LoginDto) {
     return await this.signInProvider.SignIn(signInDto);
+  }
+
+  public async WalletLogin(dto: WalletLoginDto) {
+    return await this.walletLoginProvider.WalletLogin(dto);
   }
 
   /**

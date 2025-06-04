@@ -1,18 +1,27 @@
+/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
 import { UsersModule } from './users/users.module';
-import { UsersController } from './users/controllers/users.controller';
-import { UsersService } from './users/providers/users.service';
-import { LeaderboardModule } from './leaderboard/leaderboard.module';
-import { LeaderboardController } from './leaderboard/controllers/leaderboard.controller';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { BlockchainController } from './blockchain/controller/blockchain.controller';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { BadgeModule } from './badge/badge.module';
+import { TimeFilterModule } from './timefilter/timefilter.module';
+import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
+import { PuzzleModule } from './puzzle/puzzle.module';
+
 import { AppService } from './app.service';
+import { AppController } from './app.controller';
+
+// Entities
+import { Puzzle } from './puzzle/entities/puzzle.entity';
+import { PuzzleSubmission } from './puzzle/entities/puzzle-submission.entity';
+import { PuzzleProgress } from './puzzle/entities/puzzle-progress.entity';
 
 
 const ENV = process.env.NODE_ENV;
@@ -37,6 +46,7 @@ console.log('ENV:', ENV);
         database: configService.get('database.name'),
         synchronize: configService.get('database.synchronize'),
         autoLoadEntities: configService.get('database.autoload'),
+
       }),
     }),
     AuthModule,
@@ -44,8 +54,12 @@ console.log('ENV:', ENV);
     LeaderboardModule,
     CommonModule,
     BlockchainModule,
+    BadgeModule,
+    TimeFilterModule,
+    IQAssessmentModule,
+    PuzzleModule,
   ],
-  controllers: [UsersController, LeaderboardController, BlockchainController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}

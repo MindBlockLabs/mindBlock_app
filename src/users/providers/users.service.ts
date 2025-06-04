@@ -13,11 +13,13 @@ import { GoogleInterface } from 'src/auth/social/interfaces/user.interface';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { PaginatedInterface } from '../../common/pagination/paginatedInterfaces';
 import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { FindOneByWallet } from './find-one-by-wallet.provider';
 
 @Injectable()
 export class UsersService {
   constructor(
     private readonly findOneByEmail: FindOneByEmail,
+    private readonly findOneByWallet: FindOneByWallet,
     private readonly findAll: FindAll,
     private readonly createUserService: CreateUserService,
     private readonly deleteUserService: DeleteUserService, // <-- injected delete a user
@@ -38,6 +40,10 @@ export class UsersService {
 
   public async GetOneByEmail(email: string) {
     return this.findOneByEmail.findOneByEmail(email);
+  }
+
+  public async getOneByWallet(wallet: string) {
+    return this.findOneByWallet.findOneByWallet(wallet);
   }
 
   public async create(userData: CreateUserDto): Promise<User> {

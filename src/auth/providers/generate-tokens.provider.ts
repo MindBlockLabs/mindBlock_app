@@ -1,4 +1,5 @@
-import { forwardRef, Inject, Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../authConfig/jwt.config';
@@ -39,11 +40,11 @@ export class GenerateTokensProvider {
    * @returns A signed JWT token
    */
   @ApiOperation({ summary: 'Sign JWT Token' })
-  public async signToken<T>(userId: number, userRole, expiresIn: number, payload?: T) {
+  public async signToken<T>(userId: number, username: string, expiresIn: number, payload?: T) {
     return await this.jwtService.signAsync(
       {
         sub: userId,
-        userRole,
+        username,
         ...payload,
       },
       {
@@ -61,15 +62,17 @@ export class GenerateTokensProvider {
    * @returns An object containing access and refresh tokens
    */
   @ApiOperation({ summary: 'Generate Access and Refresh Tokens' })
-  public async generateTokens(user: User) {
-    const [accessToken, refreshToken] = await Promise.all([
-      // Generate access token
-      this.signToken(user.id, user.userRole, this.jwtConfiguration.ttl, { email: user.email }),
-
-      // Generate refresh token
-      this.signToken(user.id, user.userRole, this.jwtConfiguration.ttl)
-    ]);
-    
-    return { accessToken, refreshToken, user };
+public async generateTokens(user: User) {
+  if (!user.username) {
+    throw new Error('user not found');
   }
+
+  const [accessToken, refreshToken] = await Promise.all([
+    this.signToken(user.id, user.username, this.jwtConfiguration.ttl, { email: user.email }),
+    this.signToken(user.id, user.username, this.jwtConfiguration.ttl)
+  ]);
+
+  return { accessToken, refreshToken, user };
+}
+
 }
