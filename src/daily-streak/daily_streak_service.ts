@@ -82,12 +82,12 @@ export class DailyStreakService {
           milestoneReward = milestone;
           
           // Award milestone rewards
-          await this.gamificationService.awardBonusRewards(
+          await this.gamificationService.awardBonusRewards({
             userId,
-            milestone.bonusXp,
-            milestone.bonusTokens,
-            `Streak Milestone: ${milestone.title}`
-          );
+            bonusXp: milestone.bonusXp,
+            bonusTokens: milestone.bonusTokens,
+            reason: `Streak Milestone: ${milestone.title}`,
+          });;
         }
       } else {
         // Streak broken - reset to 1
