@@ -7,6 +7,7 @@ import { NotFoundException } from '@nestjs/common';
 import { User } from 'src/users/user.entity';
 import { LeaderboardEntry } from '../entities/leaderboard.entity';
 import { SortBy, TimePeriod } from '../dto/leaderboard-query.dto';
+import { Badge } from 'src/badge/entities/badge.entity';
 
 describe('LeaderboardService', () => {
   let service: LeaderboardService;

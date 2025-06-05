@@ -1,24 +1,25 @@
-// gamification.controller.ts
-import { Controller, Post, Body } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { GamificationController } from './gamification.controller';
 import { GamificationService } from './gamification.service';
-import { BonusRewardDto } from './dto/bonus-reward.dto';
-import { PuzzleSubmissionDto } from './dto/puzzle-submission.dto';
-import { PuzzleRewardResponseDto } from './dto/puzzle-reward-response.dto';
-import { ApiTags } from '@nestjs/swagger';
 
-@ApiTags('Gamification')
-@Controller('gamification')
-export class GamificationController {
-  constructor(private readonly gamificationService: GamificationService) {}
+describe('GamificationController', () => {
+  let controller: GamificationController;
 
-  @Post('bonus-reward')
-  async awardBonus(@Body() dto: BonusRewardDto): Promise<void> {
-    return this.gamificationService.awardBonusRewards(dto);
-  }
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [GamificationController],
+      providers: [
+        {
+          provide: GamificationService,
+          useValue: {},
+        },
+      ],
+    }).compile();
 
-  @Post('submit-puzzle')
-  async submitPuzzle(@Body() dto: PuzzleSubmissionDto): Promise<PuzzleRewardResponseDto> {
-    const { userId, puzzleId, isCorrect } = dto;
-    return this.gamificationService.processPuzzleSubmission(userId, puzzleId, isCorrect);
-  }
-}
+    controller = module.get<GamificationController>(GamificationController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});

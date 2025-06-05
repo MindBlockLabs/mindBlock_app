@@ -1,4 +1,4 @@
-// gamification.controller.ts
+
 import { Controller, Post, Body } from '@nestjs/common';
 import { GamificationService } from './gamification.service';
 import { BonusRewardDto } from './dto/bonus-reward.dto';
@@ -15,7 +15,6 @@ export class GamificationController {
   async awardBonus(@Body() dto: BonusRewardDto): Promise<void> {
     return this.gamificationService.awardBonusRewards(dto);
   }
-
   @Post('submit-puzzle')
   async submitPuzzle(@Body() dto: PuzzleSubmissionDto): Promise<PuzzleRewardResponseDto> {
     const { userId, puzzleId, isCorrect } = dto;
