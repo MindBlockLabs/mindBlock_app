@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
-import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
-import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
+// import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
+// import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
 
 /** this is the structure of the users table */
 @Entity()
@@ -69,12 +69,12 @@ export class User {
   /**
    * One-to-many relation with puzzle progress records.
    */
-  @OneToMany(() => PuzzleProgress, (progress) => progress.user)
-  puzzleProgress: PuzzleProgress[];
+  // @OneToMany(() => PuzzleProgress, (progress) => progress.user)
+  // puzzleProgress: PuzzleProgress[];
 
   /**
    * One-to-many relation with puzzle submissions.
    */
-  @OneToMany(() => PuzzleSubmission, (submission) => submission.user)
-  puzzleSubmissions: PuzzleSubmission[];
+  // @OneToMany(() => PuzzleSubmission, (submission) => submission.user)
+  // puzzleSubmissions: PuzzleSubmission[];
 }
