@@ -1,19 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  Puzzle,
-  PuzzleProgress,
-  PuzzleSubmission,
-  User,
-  PuzzleType,
-  PuzzleDifficulty,
-} from '../entities';
-import {
-  XP_BY_DIFFICULTY,
-  TOKENS_BY_DIFFICULTY,
-  XP_PER_LEVEL,
-} from '../constants';
+import { Puzzle, PuzzleDifficulty } from './puzzle.entity';
+import { PuzzleSubmission } from './puzzle-submission.entity';
+import { PuzzleProgress } from './puzzle-progress.entity';
+import { User } from './user.entity';
+import { PuzzleType } from 'src/puzzle/enums/puzzle-type.enum';
+import { TOKENS_BY_DIFFICULTY, XP_BY_DIFFICULTY, XP_PER_LEVEL } from './constants';
 
 @Injectable()
 export class PuzzleService {
