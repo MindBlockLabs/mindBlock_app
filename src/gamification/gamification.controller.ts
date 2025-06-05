@@ -1,11 +1,11 @@
-// import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-// import { GamificationService } from './gamification.service';
-// import { CreateGamificationDto } from './dto/create-gamification.dto';
-// import { UpdateGamificationDto } from './dto/update-gamification.dto';
+import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { GamificationService } from './gamification.service';
+import { CreateGamificationDto } from './dto/create-gamification.dto';
+import { UpdateGamificationDto } from './dto/update-gamification.dto';
 
-// @Controller('gamification')
-// export class GamificationController {
-//   constructor(private readonly gamificationService: GamificationService) {}
+@Controller('gamification')
+export class GamificationController {
+  constructor(private readonly gamificationService: GamificationService) {}
 
 //   @Post()
 //   create(@Body() createGamificationDto: CreateGamificationDto) {
@@ -31,4 +31,4 @@
 //   remove(@Param('id') id: string) {
 //     return this.gamificationService.remove(+id);
 //   }
-// }
+}
