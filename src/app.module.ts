@@ -14,10 +14,8 @@ import { BadgeModule } from './badge/badge.module';
 import { TimeFilterModule } from './timefilter/timefilter.module';
 import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
-
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
-
 // Entities
 // import { Puzzle } from './puzzle/entities/puzzle.entity';
 // import { PuzzleSubmission } from './puzzle/entities/puzzle-submission.entity';
@@ -26,14 +24,14 @@ import { DailyStreakModule } from './daily-streak/daily_streak_module';
 import { GamificationModule } from './gamification/gamification.module';
 
 
-const ENV = process.env.NODE_ENV;
-console.log('NODE_ENV:', process.env.NODE_ENV);
-console.log('ENV:', ENV);
+// const ENV = process.env.NODE_ENV;
+// console.log('NODE_ENV:', process.env.NODE_ENV);
+// console.log('ENV:', ENV);
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: [!ENV ? '.env' : `.env.${ENV.trim()}`],
+      envFilePath: ['.env'],
       load: [appConfig, databaseConfig],
     }),
     TypeOrmModule.forRootAsync({
@@ -48,7 +46,6 @@ console.log('ENV:', ENV);
         database: configService.get('database.name'),
         synchronize: configService.get('database.synchronize'),
         autoLoadEntities: configService.get('database.autoload'),
-
       }),
     }),
     AuthModule,
