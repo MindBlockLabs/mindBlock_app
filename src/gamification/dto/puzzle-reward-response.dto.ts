@@ -5,6 +5,6 @@ export class PuzzleRewardResponseDto {
   @ApiProperty({ example: { xp: 100, tokens: 10 } })
   puzzleRewards: any;
 
-  @ApiProperty({ type: 'object', required: false })
+  @ApiProperty({ required: false })
   streakResult: StreakUpdateResult | null;
 }
