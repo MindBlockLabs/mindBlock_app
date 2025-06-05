@@ -1,34 +1,24 @@
-// import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-// import { GamificationService } from './gamification.service';
-// import { CreateGamificationDto } from './dto/create-gamification.dto';
-// import { UpdateGamificationDto } from './dto/update-gamification.dto';
+// gamification.controller.ts
+import { Controller, Post, Body } from '@nestjs/common';
+import { GamificationService } from './gamification.service';
+import { BonusRewardDto } from './dto/bonus-reward.dto';
+import { PuzzleSubmissionDto } from './dto/puzzle-submission.dto';
+import { PuzzleRewardResponseDto } from './dto/puzzle-reward-response.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-// @Controller('gamification')
-// export class GamificationController {
-//   constructor(private readonly gamificationService: GamificationService) {}
+@ApiTags('Gamification')
+@Controller('gamification')
+export class GamificationController {
+  constructor(private readonly gamificationService: GamificationService) {}
 
-//   @Post()
-//   create(@Body() createGamificationDto: CreateGamificationDto) {
-//     return this.gamificationService.create(createGamificationDto);
-//   }
+  @Post('bonus-reward')
+  async awardBonus(@Body() dto: BonusRewardDto): Promise<void> {
+    return this.gamificationService.awardBonusRewards(dto);
+  }
 
-//   @Get()
-//   findAll() {
-//     return this.gamificationService.findAll();
-//   }
-
-//   @Get(':id')
-//   findOne(@Param('id') id: string) {
-//     return this.gamificationService.findOne(+id);
-//   }
-
-//   @Patch(':id')
-//   update(@Param('id') id: string, @Body() updateGamificationDto: UpdateGamificationDto) {
-//     return this.gamificationService.update(+id, updateGamificationDto);
-//   }
-
-//   @Delete(':id')
-//   remove(@Param('id') id: string) {
-//     return this.gamificationService.remove(+id);
-//   }
-// }
+  @Post('submit-puzzle')
+  async submitPuzzle(@Body() dto: PuzzleSubmissionDto): Promise<PuzzleRewardResponseDto> {
+    const { userId, puzzleId, isCorrect } = dto;
+    return this.gamificationService.processPuzzleSubmission(userId, puzzleId, isCorrect);
+  }
+}
