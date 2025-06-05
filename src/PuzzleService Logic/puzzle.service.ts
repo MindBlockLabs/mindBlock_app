@@ -120,10 +120,9 @@ export class PuzzleService {
     await this.progressRepository.save(progress);
   }
 
-  private calculateRewards(difficulty: PuzzleDifficulty): {
-    xpEarned: number;
-    tokensEarned: number;
-  } {
+  private calculateRewards(
+    difficulty: PuzzleDifficulty
+  ): { xpEarned: number; tokensEarned: number } {
     return {
       xpEarned: XP_BY_DIFFICULTY[difficulty],
       tokensEarned: TOKENS_BY_DIFFICULTY[difficulty],

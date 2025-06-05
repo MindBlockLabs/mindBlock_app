@@ -1,7 +1,7 @@
 import { Controller, Post, Param, Body, UseGuards } from '@nestjs/common';
 import { PuzzleService } from './puzzle.service';
-import { AuthGuard } from '../auth/auth.guard';
-import { UserId } from '../decorators/user-id.decorator';
+import { AuthGuard } from '@nestjs/passport';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 
 @Controller('puzzles')
 @UseGuards(AuthGuard)
@@ -16,4 +16,12 @@ export class PuzzleController {
   ) {
     return this.puzzleService.submitPuzzleSolution(userId, puzzleId, attemptData);
   }
-}
+};
+
+export const UserId = createParamDecorator(
+  (data: unknown, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    // Assumes user object is attached to request by AuthGuard
+    return request.user?.id;
+  },
+);

@@ -102,7 +102,7 @@ describe("IQAssessmentService", () => {
       jest.spyOn(questionRepository, "createQueryBuilder").mockReturnValue({
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue([mockQuestion]),
+        getMany: jest.fn().mockResolvedValue(Array(8).fill(mockQuestion)),
       } as any)
       jest.spyOn(sessionRepository, "create").mockReturnValue(mockSession as any)
       jest.spyOn(sessionRepository, "save").mockResolvedValue(mockSession as any)
