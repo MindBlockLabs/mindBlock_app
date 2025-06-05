@@ -25,16 +25,15 @@ describe('PuzzleService', () => {
       providers: [
         PuzzleService,
         {
-          provide: getRepositoryToken(Puzzle),
-          useClass: Repository,
-        },
-        {
           provide: getRepositoryToken(PuzzleSubmission),
           useValue: {
             create: jest.fn(),
             save: jest.fn(),
             findOne: jest.fn(),
           },
+        },
+        {
+          provide: getRepositoryToken(Puzzle),
           useClass: Repository,
         },
         {

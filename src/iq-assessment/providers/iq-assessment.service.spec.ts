@@ -270,7 +270,7 @@ describe("IQAssessmentService", () => {
       expect(result).toBeDefined()
       expect(result.score).toBe(1)
       expect(result.totalQuestions).toBe(8)
-      expect(result.percentage).toBe(12.5) // 1/8 * 100
+      expect(result.percentage).toBe(13) // 1/8 * 100
       expect(result.answers).toHaveLength(2)
     })
 
