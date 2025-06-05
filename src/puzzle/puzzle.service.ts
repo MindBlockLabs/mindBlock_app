@@ -1,16 +1,25 @@
 // src/puzzle/puzzle.service.ts
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { PuzzleType } from './enums/puzzle-type.enum';
+import { PuzzleDifficulty } from './enums/puzzle-difficulty.enum';
 import { Logger } from '@nestjs/common';
 import { GamificationService } from '../gamification/gamification.service';
 import { DailyStreakService } from 'src/daily-streak/daily_streak_service';
-
+import { Puzzle } from './entities/puzzle.entity';
+// import { PuzzleSubmission } from './entities/puzzle-submission.entity'; // Uncomment if you implement this entity
 
 @Injectable()
 export class PuzzleService {
+
   private readonly logger = new Logger(PuzzleService.name);
 
   constructor(
+    @InjectRepository(Puzzle)
+    private readonly puzzleRepository: Repository<Puzzle>,
+    // @InjectRepository(PuzzleSubmission)
+    // private readonly submissionRepository: Repository<PuzzleSubmission>,
     @Inject(forwardRef(() => GamificationService))
     private readonly gamificationService: GamificationService,
     @Inject(forwardRef(() => DailyStreakService))
@@ -86,24 +95,63 @@ export class PuzzleService {
     }
   }
 
-  // Placeholder methods - implement based on your existing logic
+  // Validate the user's solution against the correct answer
   private async validatePuzzleSolution(puzzleId: number, solution: any): Promise<boolean> {
-    // Implement puzzle validation logic
-    return true; // placeholder
+    const puzzle = await this.puzzleRepository.findOne({ where: { id: puzzleId } });
+    if (!puzzle) return false;
+    // For demo: compare as string, case-insensitive
+    return (solution?.toString().trim().toLowerCase() === puzzle.solution.trim().toLowerCase());
   }
 
   private async calculatePuzzleScore(puzzleId: number, solution: any): Promise<number> {
-    // Implement score calculation logic
-    return 100; // placeholder
+    // Simple scoring: correct = 100, incorrect = 0
+    const isCorrect = await this.validatePuzzleSolution(puzzleId, solution);
+    return isCorrect ? 100 : 0;
   }
 
   private async generateFeedback(puzzleId: number, solution: any, isCorrect: boolean): Promise<string> {
-    // Implement feedback generation logic
     return isCorrect ? 'Correct solution!' : 'Try again!';
   }
 
+  // Save puzzle submission (mock: just log, or implement using repository if entity exists)
   private async savePuzzleSubmission(submission: any): Promise<void> {
-    // Implement puzzle submission saving logic
+    // If you have a submissionRepository, save to DB:
+    // await this.submissionRepository.save(submission);
     this.logger.debug('Puzzle submission saved:', submission);
+  }
+
+  // List puzzles with filters and solved status
+  async listPuzzles(filters: any, userId: number) {
+    const qb = this.puzzleRepository.createQueryBuilder('puzzle');
+    qb.where('puzzle.isPublished = :published', { published: true });
+    if (filters.type) {
+      qb.andWhere('puzzle.type = :type', { type: filters.type });
+    }
+    if (filters.difficulty) {
+      qb.andWhere('puzzle.difficulty = :difficulty', { difficulty: filters.difficulty });
+    }
+    // TODO: If you have submissions, join to filter by solved status
+    // if (filters.solved !== undefined) { ... }
+    return qb.getMany();
+  }
+
+  // Get a single puzzle by ID
+  async getPuzzleById(id: number, userId: number) {
+    const puzzle = await this.puzzleRepository.findOne({ where: { id, isPublished: true } });
+    if (!puzzle) throw new Error('Puzzle not found');
+    return puzzle;
+  }
+
+  // Get user progress per puzzle type
+  async getUserProgress(userId: number) {
+    // For demo: count total and solved per type
+    const puzzles = await this.puzzleRepository.find({ where: { isPublished: true } });
+    // TODO: If you have submissions, fetch solved by user
+    const progress = Object.values(PuzzleType).map((type) => {
+      const total = puzzles.filter((p) => p.type === type).length;
+      // For demo, solved is 0
+      return { type, solved: 0, total };
+    });
+    return progress;
   }
 }
