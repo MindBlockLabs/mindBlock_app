@@ -24,14 +24,14 @@ export class GamificationService {
 
   private async updateDailyStreak(userId: number, submittedAt: Date): Promise<void> {
     const dailyStreakService = this.moduleRef.get(DailyStreakService, { strict: false });
-    const result = await dailyStreakService.updateStreak(userId, submittedAt);
+    const result = await dailyStreakService.updateStreak(userId);
     
     if (result?.milestoneReached) {
       this.logger.log(`User ${userId} hit streak milestone: ${result.milestoneReward?.title}`);
       await this.awardBonusRewards({
         userId,
-        bonusXp: result.milestoneReward?.xp ?? 0,
-        bonusTokens: result.milestoneReward?.tokens ?? 0,
+        bonusXp: result.milestoneReward?.bonusXp ?? 0,
+        bonusTokens: result.milestoneReward?.bonusTokens ?? 0,
         reason: `Streak milestone: ${result.milestoneReward?.title}`,
       });
     }
@@ -73,8 +73,8 @@ export class GamificationService {
           this.logger.log(`User ${userId} reached milestone: ${streakResult.milestoneReward?.title}`);
           await this.awardBonusRewards({
             userId,
-            bonusXp: streakResult.milestoneReward?.xp ?? 0,
-            bonusTokens: streakResult.milestoneReward?.tokens ?? 0,
+            bonusXp: streakResult.milestoneReward?.bonusXp ?? 0,
+            bonusTokens: streakResult.milestoneReward?.bonusTokens ?? 0,
             reason: `Milestone: ${streakResult.milestoneReward?.title}`,
           });
         }
