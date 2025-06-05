@@ -1,7 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 @Entity('daily_streaks')
-@Index(['userId'], { unique: true })
 export class DailyStreak {
   @PrimaryGeneratedColumn()
   id: number;
