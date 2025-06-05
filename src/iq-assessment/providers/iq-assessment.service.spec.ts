@@ -62,9 +62,7 @@ describe("IQAssessmentService", () => {
             createQueryBuilder: jest.fn(() => ({
               orderBy: jest.fn().mockReturnThis(),
               limit: jest.fn().mockReturnThis(),
-              getMany: jest.fn().mockResolvedValue(
-                Array(8).fill(mockQuestion)
-              ),
+              getMany: jest.fn().mockResolvedValue(Array(8).fill(mockQuestion)),
             })),
             findByIds: jest.fn(),
             findOne: jest.fn(),
