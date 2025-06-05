@@ -3,17 +3,15 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PuzzleService } from './puzzle.service';
 import {
-  Puzzle,
-  PuzzleSubmission,
-  PuzzleProgress,
-  User,
-  PuzzleType,
-  PuzzleDifficulty,
-} from './entities';
-import {
   XP_BY_DIFFICULTY,
   TOKENS_BY_DIFFICULTY,
 } from './constants';
+import { PuzzleType } from 'src/puzzle/enums/puzzle-type.enum';
+import { Puzzle } from './puzzle.entity';
+import { PuzzleSubmission } from './puzzle-submission.entity';
+import { PuzzleProgress } from './puzzle-progress.entity';
+import { User } from './user.entity';
+import { PuzzleDifficulty } from 'src/puzzle/enums/puzzle-difficulty.enum';
 
 describe('PuzzleService', () => {
   let service: PuzzleService;
