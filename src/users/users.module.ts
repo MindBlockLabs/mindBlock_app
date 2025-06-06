@@ -12,6 +12,7 @@ import { FindOneByGoogleIdProvider } from './providers/find-one-by-googleId';
 import { CreateGoogleUserProvider } from './providers/googleUserProvider';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
 import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
+import { UpdateUserService } from './providers/update-user.service';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
     DeleteUserService,
     FindOneByGoogleIdProvider,
     CreateGoogleUserProvider,
+    UpdateUserService
   ],
   exports: [UsersService], // Make service reusable
 })
