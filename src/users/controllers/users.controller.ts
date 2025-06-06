@@ -4,7 +4,7 @@ import {
   Controller,
   Get,
   Post,
-  Put,
+  Patch,
   Delete,
   Param,
   Body,
@@ -13,6 +13,7 @@ import {
 import { UsersService } from '../providers/users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { EditUserDto } from '../dtos/editUserDto.dto';
 
 @Controller('users')
 @ApiTags('users')
@@ -43,8 +44,11 @@ export class UsersController {
     return this.usersService.create(userData);
   }
 
-  @Put(':id')
-  update(@Param('id') id: string, @Body() data: any) {
-    return {};
+  @Patch(':id')
+  @ApiOperation({summary: "Update user by ID"})
+  @ApiResponse({status: 200, description: "user successfully updated"})
+  @ApiResponse({status: 404, description: "User not found"})
+  async update(@Param('id') id: string, @Body() editUserDto: EditUserDto) {
+    return this.usersService.update(id,editUserDto);
   }
 }

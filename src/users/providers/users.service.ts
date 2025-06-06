@@ -14,6 +14,8 @@ import { CreateUserDto } from '../dtos/createUserDto';
 import { PaginatedInterface } from '../../common/pagination/paginatedInterfaces';
 import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
 import { FindOneByWallet } from './find-one-by-wallet.provider';
+import { UpdateUserService } from './update-user.service';
+import { EditUserDto } from '../dtos/editUserDto.dto';
 
 @Injectable()
 export class UsersService {
@@ -26,6 +28,7 @@ export class UsersService {
     private readonly findOneByGoogleIdProvider: FindOneByGoogleIdProvider,
 
     private readonly createGoogleUserProvider: CreateGoogleUserProvider,
+    private readonly updateUserService: UpdateUserService
   ) {}
 
   public async findAllUsers(
@@ -66,7 +69,9 @@ export class UsersService {
     return this.findOneByGoogleIdProvider.findOneByGoogleId(googleId);
   }
 
-  public async update(id: string, data: any): Promise<void> {}
+  public async update(id: string, data: EditUserDto): Promise<User> {
+    return this.updateUserService.editUser(id,data)
+  }
 
   public async delete(id: string): Promise<void> {
     return this.deleteUserService.execute(id); // <-- use the new DeleteUserService
