@@ -1,7 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { TimeFilter } from '../timefilter.enum.ts/timefilter.enum';
-
-
 
 @Injectable()
 export class TimeFilterService {
@@ -17,5 +15,32 @@ export class TimeFilterService {
       default:
         return null;
     }
+  }
+
+  resolveDateRange(
+    timeFilter?: TimeFilter,
+    fromStr?: string,
+    toStr?: string,
+  ): { from?: Date; to?: Date } {
+    if (fromStr && toStr) {
+      const from = new Date(fromStr);
+      const to = new Date(toStr);
+
+      if (isNaN(from.getTime()) || isNaN(to.getTime())) {
+        throw new BadRequestException('Invalid date format');
+      }
+      if (from > to) {
+        throw new BadRequestException(`'from' date must be earlier than 'to' date`);
+      }
+
+      return { from, to };
+    }
+
+    if (timeFilter) {
+      const range = this.getDateRange(timeFilter);
+      return range ? { from: range.from } : {};
+    }
+
+    return {};
   }
 }
