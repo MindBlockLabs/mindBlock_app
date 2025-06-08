@@ -1,14 +1,22 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
-import { AnalyticsService } from './analytics.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ApiQuery } from '@nestjs/swagger';
+import { GetAnalyticsQueryDto } from './dto/get-analytics-query.dto';
+import { TimeFilter } from 'src/timefilter/timefilter.enum.ts/timefilter.enum';
+import { AnalyticsService } from './providers/analytics.service';
 
 @Controller('analytics')
-@UseGuards(JwtAuthGuard)
+// @UseGuards(JwtAuthGuard)
 export class AnalyticsController {
   constructor(private readonly analyticsService: AnalyticsService) {}
 
+  // @Get()
+  // findAll(query: GetAnalyticsQueryDto) {
+  //   return this.analyticsService.findAll(query);
+  // }
+
   @Get()
-  findAll() {
-    return this.analyticsService.findAll();
-  }
+  @ApiQuery({ name: 'timeFilter', enum: TimeFilter, required: false })
+  async getAnalytics(@Query() query: GetAnalyticsQueryDto) {
+    return this.analyticsService.findAll(query);
+}
 }

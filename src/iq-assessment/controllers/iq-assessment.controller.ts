@@ -10,38 +10,53 @@ import {
   ParseIntPipe,
   UsePipes,
   ValidationPipe,
-} from "@nestjs/common"
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from "@nestjs/swagger"
-import { CreateSessionDto } from "../dto/create-session.dto"
-import { SubmitAnswerDto } from "../dto/submit-answer.dto"
-import { CompleteSessionDto } from "../dto/complete-session.dto"
-import { SessionResponseDto, CompletedSessionResponseDto } from "../dto/session-response.dto"
-import { IQAssessmentService } from "../providers/iq-assessment.service"
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+} from '@nestjs/swagger';
+import { CreateSessionDto } from '../dto/create-session.dto';
+import { SubmitAnswerDto } from '../dto/submit-answer.dto';
+import { CompleteSessionDto } from '../dto/complete-session.dto';
+import {
+  SessionResponseDto,
+  CompletedSessionResponseDto,
+} from '../dto/session-response.dto';
+import { IQAssessmentService } from '../providers/iq-assessment.service';
 
-@ApiTags("IQ Assessment")
-@Controller("iq-assessment")
+@ApiTags('IQ Assessment')
+@Controller('iq-assessment')
 @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
 export class IQAssessmentController {
-  constructor(private readonly iqAssessmentService: IQAssessmentService) {}
+  constructor(
+    private readonly iqAssessmentService: IQAssessmentService,
+    private readonly svc: IQAssessmentService,
+  ) {}
 
-  @Post("sessions")
+  @Post('sessions')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: "Start a new IQ assessment session" })
+  @ApiOperation({ summary: 'Start a new IQ assessment session' })
   @ApiBody({ type: CreateSessionDto })
   @ApiResponse({
     status: HttpStatus.CREATED,
-    description: "Session created successfully",
+    description: 'Session created successfully',
     type: SessionResponseDto,
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: "User already has an active session or not enough questions available",
+    description:
+      'User already has an active session or not enough questions available',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: "User not found",
+    description: 'User not found',
   })
-  async createSession(@Body() createSessionDto: CreateSessionDto): Promise<SessionResponseDto> {
+  async createSession(
+    @Body() createSessionDto: CreateSessionDto,
+  ): Promise<SessionResponseDto> {
     console.log('Received createSessionDto:', createSessionDto);
     return this.iqAssessmentService.createSession(createSessionDto);
   }
@@ -82,9 +97,12 @@ export class IQAssessmentController {
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
-    description: 'Session completed or answer already submitted for this question',
+    description:
+      'Session completed or answer already submitted for this question',
   })
-  async submitAnswer(@Body() submitAnswerDto: SubmitAnswerDto): Promise<SessionResponseDto> {
+  async submitAnswer(
+    @Body() submitAnswerDto: SubmitAnswerDto,
+  ): Promise<SessionResponseDto> {
     return this.iqAssessmentService.submitAnswer(submitAnswerDto);
   }
 
@@ -104,25 +122,29 @@ export class IQAssessmentController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Session is already completed',
   })
-  async completeSession(@Body() completeSessionDto: CompleteSessionDto): Promise<CompletedSessionResponseDto> {
-    return this.iqAssessmentService.completeSession(completeSessionDto.sessionId);
+  async completeSession(
+    @Body() completeSessionDto: CompleteSessionDto,
+  ): Promise<CompletedSessionResponseDto> {
+    return this.iqAssessmentService.completeSession(
+      completeSessionDto.sessionId,
+    );
   }
 
-  @Post("sessions/:sessionId/skip/:questionId")
+  @Post('sessions/:sessionId/skip/:questionId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Skip a question" })
-  @ApiParam({ name: "sessionId", description: "Session UUID" })
-  @ApiParam({ name: "questionId", description: "Question UUID" })
+  @ApiOperation({ summary: 'Skip a question' })
+  @ApiParam({ name: 'sessionId', description: 'Session UUID' })
+  @ApiParam({ name: 'questionId', description: 'Question UUID' })
   @ApiResponse({
     status: HttpStatus.OK,
-    description: "Question skipped successfully",
+    description: 'Question skipped successfully',
     type: SessionResponseDto,
   })
   async skipQuestion(
     @Param('sessionId', ParseUUIDPipe) sessionId: string,
     @Param('questionId', ParseUUIDPipe) questionId: string,
   ): Promise<SessionResponseDto> {
-    return this.iqAssessmentService.skipQuestion(sessionId, questionId)
+    return this.iqAssessmentService.skipQuestion(sessionId, questionId);
   }
 
   @Get('users/:userId/sessions')
@@ -147,7 +169,17 @@ export class IQAssessmentController {
     status: HttpStatus.NOT_FOUND,
     description: 'Session not found',
   })
-  async getSessionDetails(@Param('sessionId', ParseUUIDPipe) sessionId: string) {
+  async getSessionDetails(
+    @Param('sessionId', ParseUUIDPipe) sessionId: string,
+  ) {
     return this.iqAssessmentService.getSessionById(sessionId);
+  }
+
+  @Get('external/random')
+  async getOneExternal() {
+    const questions: ExternalIQQuestion[] =
+      await this.svc.fetchExternalQuestions(1);
+    const [q] = questions;
+    return q;
   }
 }

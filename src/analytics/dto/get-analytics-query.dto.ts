@@ -1,0 +1,20 @@
+import { IsEnum, IsOptional, IsISO8601 } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { TimeFilter } from 'src/timefilter/timefilter.enum.ts/timefilter.enum';
+
+export class GetAnalyticsQueryDto {
+  @ApiPropertyOptional({ enum: TimeFilter })
+  @IsOptional()
+  @IsEnum(TimeFilter)
+  timeFilter?: TimeFilter;
+
+  @ApiPropertyOptional({ type: String, description: 'Start date in ISO format' })
+  @IsOptional()
+  @IsISO8601()
+  from?: string;
+
+  @ApiPropertyOptional({ type: String, description: 'End date in ISO format' })
+  @IsOptional()
+  @IsISO8601()
+  to?: string;
+}
