@@ -40,7 +40,7 @@ export class GenerateTokensProvider {
    * @returns A signed JWT token
    */
   @ApiOperation({ summary: 'Sign JWT Token' })
-  public async signToken<T>(userId: number, username: string, expiresIn: number, payload?: T) {
+  public async signToken<T>(userId: string, username: string, expiresIn: number, payload?: T) {
     return await this.jwtService.signAsync(
       {
         sub: userId,

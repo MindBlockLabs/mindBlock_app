@@ -8,7 +8,7 @@ export class IQAssessmentSession {
   id: string
 
   @Column("uuid")
-  userId: number
+  userId: string
 
   @ManyToOne(() => User, { eager: true })
   user: User

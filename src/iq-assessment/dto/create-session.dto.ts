@@ -7,7 +7,7 @@ export class CreateSessionDto {
     example: 1,
   })
   @IsNumber()
-  userId: number
+  userId: string
 
   @ApiPropertyOptional({
     description: "Number of questions for the session",

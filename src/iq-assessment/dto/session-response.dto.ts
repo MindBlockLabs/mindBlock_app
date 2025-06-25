@@ -33,7 +33,7 @@ export class SessionResponseDto {
   id: string
 
   @ApiProperty()
-  userId: number
+  userId: string
 
   @ApiProperty()
   startTime: Date

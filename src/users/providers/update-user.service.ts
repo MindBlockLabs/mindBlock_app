@@ -19,8 +19,7 @@ export class UpdateUserService {
     }
 
     // Conditionally update fields
-    user.firstName = editUserDto.firstName ?? user.firstName;
-    user.lastName = editUserDto.lastName ?? user.lastName;
+    user.username = editUserDto.username ?? user.username;
     user.email = editUserDto.email ?? user.email;
     user.password = editUserDto.password ?? user.password;
 

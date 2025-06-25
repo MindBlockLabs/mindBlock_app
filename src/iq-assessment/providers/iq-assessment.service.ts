@@ -372,7 +372,7 @@ export class IQAssessmentService {
     };
   }
 
-  async getUserSessions(userId: number): Promise<IQAssessmentSession[]> {
+  async getUserSessions(userId: string): Promise<IQAssessmentSession[]> {
     return this.sessionRepository.find({
       where: { userId },
       order: { startTime: 'DESC' },

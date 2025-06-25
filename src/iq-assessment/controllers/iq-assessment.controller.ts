@@ -154,7 +154,7 @@ export class IQAssessmentController {
     status: HttpStatus.OK,
     description: 'User sessions retrieved successfully',
   })
-  async getUserSessions(@Param('userId', ParseIntPipe) userId: number) {
+  async getUserSessions(@Param('userId', ParseIntPipe) userId: string) {
     return this.iqAssessmentService.getUserSessions(userId);
   }
 

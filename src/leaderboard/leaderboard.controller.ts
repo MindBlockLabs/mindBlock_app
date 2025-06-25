@@ -37,7 +37,7 @@ export class LeaderboardController {
 
   @Get('user/:userId/rank')
   async getUserRank(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe) userId: string,
     @Query('sort') sort?: SortBy,
   ): Promise<{ rank: number }> {
     const sortBy: SortBy = sort || SortBy.TOKENS;
@@ -49,7 +49,7 @@ export class LeaderboardController {
   @HttpCode(HttpStatus.OK)
   // @UseGuards(JwtAuthGuard) // Uncomment if you have authentication
   async updatePlayerStats(
-    @Param('userId', ParseIntPipe) userId: number,
+    @Param('userId', ParseIntPipe) userId: string,
     @Body() updateData: UpdateLeaderboardDto,
   ) {
     const entry = await this.leaderboardService.updatePlayerStats(
