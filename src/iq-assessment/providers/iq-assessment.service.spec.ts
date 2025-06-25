@@ -107,7 +107,7 @@ describe("IQAssessmentService", () => {
       jest.spyOn(sessionRepository, "create").mockReturnValue(mockSession as any)
       jest.spyOn(sessionRepository, "save").mockResolvedValue(mockSession as any)
 
-      const result = await service.createSession({ userId: 1, totalQuestions: 8 })
+      const result = await service.createSession({ userId: '1', totalQuestions: 8 })
 
       expect(result).toBeDefined()
       expect(result.userId).toBe(1)
@@ -118,14 +118,14 @@ describe("IQAssessmentService", () => {
     it("should throw NotFoundException when user does not exist", async () => {
       jest.spyOn(userRepository, "findOne").mockResolvedValue(null)
 
-      await expect(service.createSession({ userId: 999, totalQuestions: 8 })).rejects.toThrow(NotFoundException)
+      await expect(service.createSession({ userId: '999', totalQuestions: 8 })).rejects.toThrow(NotFoundException)
     })
 
     it("should throw BadRequestException when user has active session", async () => {
       jest.spyOn(userRepository, "findOne").mockResolvedValue(mockUser as any)
       jest.spyOn(sessionRepository, "findOne").mockResolvedValue(mockSession as any)
 
-      await expect(service.createSession({ userId: 1, totalQuestions: 8 })).rejects.toThrow(BadRequestException)
+      await expect(service.createSession({ userId: '1', totalQuestions: 8 })).rejects.toThrow(BadRequestException)
     })
   })
 
@@ -383,7 +383,7 @@ describe("IQAssessmentService", () => {
       jest.spyOn(sessionRepository, "create").mockReturnValue(mockSession as any)
       jest.spyOn(sessionRepository, "save").mockResolvedValue(mockSession as any)
 
-      await service.createSession({ userId: 1, totalQuestions: 3 })
+      await service.createSession({ userId: '1', totalQuestions: 3 })
 
       expect(mockQueryBuilder.orderBy).toHaveBeenCalledWith("RANDOM()")
       expect(mockQueryBuilder.limit).toHaveBeenCalledWith(3)

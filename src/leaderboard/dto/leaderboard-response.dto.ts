@@ -1,7 +1,7 @@
 export class LeaderboardResponseDto {
   id: number;
   user: {
-    id: number;
+    id: string;
     username?: string;
     avatar?: string;
   };

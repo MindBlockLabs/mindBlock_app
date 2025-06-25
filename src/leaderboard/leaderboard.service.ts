@@ -74,7 +74,7 @@ export class LeaderboardService {
   }
 
   async updatePlayerStats(
-    userId: number,
+    userId: string,
     updateData: UpdateLeaderboardDto,
   ): Promise<LeaderboardEntry> {
     // Find or create leaderboard entry for user
@@ -123,7 +123,7 @@ export class LeaderboardService {
   }
 
   async getUserRank(
-    userId: number,
+    userId: string,
     sortBy: SortBy = SortBy.TOKENS,
   ): Promise<number> {
     const userEntry = await this.leaderboardRepository.findOne({

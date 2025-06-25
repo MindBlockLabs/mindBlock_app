@@ -1,14 +1,17 @@
 // src/puzzle/puzzle.module.ts
 import { forwardRef, Module } from '@nestjs/common';
 import { PuzzleController } from './puzzle.controller';
-import { PuzzleService } from './puzzle.service';
 import { GamificationModule } from 'src/gamification/gamification.module';
-import { DailyStreakModule } from 'src/daily-streak/daily_streak_module';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Puzzle } from './entities/puzzle.entity';
 
 @Module({
-  imports: [forwardRef(() => GamificationModule), forwardRef(() => DailyStreakModule),],
+  imports: [
+    forwardRef(() => GamificationModule),
+    TypeOrmModule.forFeature([Puzzle]),
+  ],
   controllers: [PuzzleController],
-  providers: [PuzzleService],
-  exports: [PuzzleService],
+  providers: [],
+  exports: [],
 })
 export class PuzzleModule {}

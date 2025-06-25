@@ -3,20 +3,12 @@ import { IsOptional, IsString, IsEmail, MinLength } from 'class-validator';
 
 export class EditUserDto {
   @ApiProperty({
-    description: "First name of the user",
+    description: "username of the user",
     required: false,
   })
   @IsOptional()
   @IsString()
-  firstName?: string;
-
-  @ApiProperty({
-    description: "Last name of the user",
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  lastName?: string;
+  username?: string
 
   @ApiProperty({
     description: "Email address of the user",

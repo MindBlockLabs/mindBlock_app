@@ -9,7 +9,7 @@ import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @Column('varchar', { length: 150, nullable: true }) 
   username?: string;

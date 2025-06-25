@@ -16,17 +16,12 @@ import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
 import { PuzzleModule } from './puzzle/puzzle.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
-// Entities
-// import { Puzzle } from './puzzle/entities/puzzle.entity';
-// import { PuzzleSubmission } from './puzzle/entities/puzzle-submission.entity';
-// import { PuzzleProgress } from './puzzle/entities/puzzle-progress.entity';
-import { DailyStreakModule } from './daily-streak/daily_streak_module';
 import { GamificationModule } from './gamification/gamification.module';
-
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
 // console.log('ENV:', ENV);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -57,7 +52,6 @@ import { GamificationModule } from './gamification/gamification.module';
     TimeFilterModule,
     IQAssessmentModule,
     PuzzleModule,
-    DailyStreakModule,
     GamificationModule,
   ],
   controllers: [AppController],
