@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, Logger } from "@nestjs/common"
-import { Repository } from "typeorm"
+import { Repository, Between } from "typeorm"
 import { IqAttempt } from "../entities/iq-attempt.entity"
 import { IQQuestion } from "../entities/iq-question.entity"
 import { User } from "../../users/user.entity"
@@ -12,18 +12,11 @@ export class IqAttemptService {
   private readonly logger = new Logger(IqAttemptService.name)
 
   constructor(
-    @InjectRepository(IQQuestion)
-    private readonly questionRepository: Repository<IQQuestion>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(IqAttempt) private readonly attemptRepository: Repository<IqAttempt>,
+    @InjectRepository(IQQuestion) private readonly questionRepository: Repository<IQQuestion>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
-  @InjectRepository(IqAttempt)
-  private readonly attemptRepository: Repository<IqAttempt>;
-
-  /**
-   * Create a new attempt record
-   */
   async create(createAttemptDto: CreateAttemptDto): Promise<AttemptResponseDto> {
     // Verify question exists
     const question = await this.questionRepository.findOne({
@@ -34,27 +27,27 @@ export class IqAttemptService {
       throw new NotFoundException("Question not found")
     }
 
-    // Verify user exists if userId is provided
-    let user: User | null = null
+    // Verify user exists (if userId provided)
+    let user: User | undefined
     if (createAttemptDto.userId) {
-      user = await this.userRepository.findOne({
+      const foundUser = await this.userRepository.findOne({
         where: { id: createAttemptDto.userId },
       })
+      user = foundUser === null ? undefined : foundUser
 
       if (!user) {
         throw new NotFoundException("User not found")
       }
     }
 
-    // Create the attempt
     const attempt = this.attemptRepository.create({
       userId: createAttemptDto.userId,
-      user,
       questionId: createAttemptDto.questionId,
-      question,
       selectedAnswer: createAttemptDto.selectedAnswer,
       correctAnswer: createAttemptDto.correctAnswer,
       isCorrect: createAttemptDto.isCorrect,
+      user,
+      question,
     })
 
     const savedAttempt = await this.attemptRepository.save(attempt)
@@ -66,9 +59,6 @@ export class IqAttemptService {
     return this.mapToResponseDto(savedAttempt)
   }
 
-  /**
-   * Find all attempts by user ID
-   */
   async findAllByUser(userId: string): Promise<AttemptResponseDto[]> {
     const attempts = await this.attemptRepository.find({
       where: { userId },
@@ -79,26 +69,19 @@ export class IqAttemptService {
     return attempts.map((attempt) => this.mapToResponseDto(attempt))
   }
 
-  /**
-   * Find all attempts for a specific question
-   */
   async findAllByQuestion(questionId: string): Promise<AttemptResponseDto[]> {
     const attempts = await this.attemptRepository.find({
       where: { questionId },
-      relations: ["question", "user"],
+      relations: ["user", "question"],
       order: { createdAt: "DESC" },
     })
 
     return attempts.map((attempt) => this.mapToResponseDto(attempt))
   }
 
-  /**
-   * Get user attempt statistics
-   */
   async getUserStats(userId: string): Promise<UserAttemptsStatsDto> {
     const attempts = await this.attemptRepository.find({
       where: { userId },
-      order: { createdAt: "DESC" },
     })
 
     const totalAttempts = attempts.length
@@ -108,6 +91,7 @@ export class IqAttemptService {
     const lastAttemptDate = attempts.length > 0 ? attempts[0].createdAt : undefined
 
     return {
+      userId,
       totalAttempts,
       correctAttempts,
       incorrectAttempts,
@@ -116,12 +100,9 @@ export class IqAttemptService {
     }
   }
 
-  /**
-   * Get recent attempts (for analytics)
-   */
   async getRecentAttempts(limit = 100): Promise<AttemptResponseDto[]> {
     const attempts = await this.attemptRepository.find({
-      relations: ["question", "user"],
+      relations: ["user", "question"],
       order: { createdAt: "DESC" },
       take: limit,
     })
@@ -129,79 +110,76 @@ export class IqAttemptService {
     return attempts.map((attempt) => this.mapToResponseDto(attempt))
   }
 
-  /**
-   * Get attempts by date range
-   */
-  async getAttemptsByDateRange(startDate: Date, endDate: Date, userId?: string): Promise<AttemptResponseDto[]> {
-    const queryBuilder = this.attemptRepository
-      .createQueryBuilder("attempt")
-      .leftJoinAndSelect("attempt.question", "question")
-      .leftJoinAndSelect("attempt.user", "user")
-      .where("attempt.createdAt >= :startDate", { startDate })
-      .andWhere("attempt.createdAt <= :endDate", { endDate })
-
-    if (userId) {
-      queryBuilder.andWhere("attempt.userId = :userId", { userId })
-    }
-
-    const attempts = await queryBuilder.orderBy("attempt.createdAt", "DESC").getMany()
-
-    return attempts.map((attempt) => this.mapToResponseDto(attempt))
-  }
-
-  /**
-   * Get global statistics
-   */
   async getGlobalStats(): Promise<{
     totalAttempts: number
-    totalCorrect: number
-    totalIncorrect: number
-    globalAccuracy: number
+    totalCorrectAttempts: number
+    totalIncorrectAttempts: number
+    globalAccuracyPercentage: number
     uniqueUsers: number
-    anonymousAttempts: number
+    uniqueQuestions: number
   }> {
     const totalAttempts = await this.attemptRepository.count()
-    const totalCorrect = await this.attemptRepository.count({
+    const totalCorrectAttempts = await this.attemptRepository.count({
       where: { isCorrect: true },
     })
-    const totalIncorrect = totalAttempts - totalCorrect
-    const globalAccuracy = totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0
+    const totalIncorrectAttempts = totalAttempts - totalCorrectAttempts
+    const globalAccuracyPercentage = totalAttempts > 0 ? Math.round((totalCorrectAttempts / totalAttempts) * 100) : 0
 
-    const uniqueUsersResult = await this.attemptRepository
+    const uniqueUsers = await this.attemptRepository
       .createQueryBuilder("attempt")
       .select("COUNT(DISTINCT attempt.userId)", "count")
       .where("attempt.userId IS NOT NULL")
       .getRawOne()
+      .then((result) => Number.parseInt(result.count) || 0)
 
-    const uniqueUsers = Number.parseInt(uniqueUsersResult?.count || "0")
-
-    const anonymousAttempts = await this.attemptRepository.count({
-      where: { userId: require("typeorm").IsNull() },
-    })
+    const uniqueQuestions = await this.attemptRepository
+      .createQueryBuilder("attempt")
+      .select("COUNT(DISTINCT attempt.questionId)", "count")
+      .getRawOne()
+      .then((result) => Number.parseInt(result.count) || 0)
 
     return {
       totalAttempts,
-      totalCorrect,
-      totalIncorrect,
-      globalAccuracy,
+      totalCorrectAttempts,
+      totalIncorrectAttempts,
+      globalAccuracyPercentage,
       uniqueUsers,
-      anonymousAttempts,
+      uniqueQuestions,
     }
   }
 
-  /**
-   * Map entity to response DTO
-   */
+  async getAttemptsByDateRange(startDate: Date, endDate: Date, userId?: string): Promise<AttemptResponseDto[]> {
+    const whereCondition: any = {
+      createdAt: Between(startDate, endDate),
+    }
+
+    if (userId) {
+      whereCondition.userId = userId
+    }
+
+    const attempts = await this.attemptRepository.find({
+      where: whereCondition,
+      relations: ["user", "question"],
+      order: { createdAt: "DESC" },
+    })
+
+    return attempts.map((attempt) => this.mapToResponseDto(attempt))
+  }
+
   private mapToResponseDto(attempt: IqAttempt): AttemptResponseDto {
     return {
       id: attempt.id,
       userId: attempt.userId,
       questionId: attempt.questionId,
+      questionText: attempt.question?.questionText,
       selectedAnswer: attempt.selectedAnswer,
       correctAnswer: attempt.correctAnswer,
       isCorrect: attempt.isCorrect,
       createdAt: attempt.createdAt,
-      questionText: attempt.question?.questionText,
+      userName:
+        attempt.user?.username
+          ? attempt.user.username
+          : undefined,
     }
   }
 }
