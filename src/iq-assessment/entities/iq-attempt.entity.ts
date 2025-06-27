@@ -1,35 +1,45 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, JoinColumn } from "typeorm"
-import { IQQuestion } from "./iq-question.entity"
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, CreateDateColumn, Index } from "typeorm"
 import { User } from "../../users/user.entity"
+import { IQQuestion } from "./iq-question.entity"
 
 @Entity("iq_attempts")
+@Index(["userId", "createdAt"])
+@Index(["questionId", "isCorrect"])
+@Index(["createdAt"])
 export class IqAttempt {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Column("uuid", { nullable: true })
-  userId?: string | null
+  @Column({ nullable: true })
+  @Index()
+  userId?: string
 
-  @ManyToOne(() => User, { nullable: true, eager: false })
-  @JoinColumn({ name: "userId" })
-  user?: User | null
-
-  @Column("uuid")
+  @Column()
+  @Index()
   questionId: string
 
-  @ManyToOne(() => IQQuestion, { eager: true })
-  @JoinColumn({ name: "questionId" })
-  question: IQQuestion
-
-  @Column("varchar", { length: 500 })
+  @Column()
   selectedAnswer: string
 
-  @Column("varchar", { length: 500 })
+  @Column()
   correctAnswer: string
 
-  @Column("boolean")
+  @Column({ default: false })
+  @Index()
   isCorrect: boolean
 
   @CreateDateColumn()
   createdAt: Date
+
+  @ManyToOne(() => User, { nullable: true, onDelete: "SET NULL" })
+  @JoinColumn({ name: "userId" })
+  user?: User
+
+  @ManyToOne(
+    () => IQQuestion,
+    (question) => question.attempts,
+    { onDelete: "CASCADE" },
+  )
+  @JoinColumn({ name: "questionId" })
+  question: IQQuestion
 }

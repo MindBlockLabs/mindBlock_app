@@ -11,21 +11,17 @@ import { HttpService } from "@nestjs/axios"
 import { firstValueFrom } from "rxjs"
 import { map } from "rxjs/operators"
 import { IqAttemptService } from "./iq-attempt.service"
-import { InjectRepository } from "@nestjs/typeorm/dist/common/typeorm.decorators"
+import { InjectRepository } from "@nestjs/typeorm"
 
 @Injectable()
 export class IQAssessmentService {
-  private readonly logger = new Logger("IQAssessmentService")
+  private readonly logger = new Logger(IQAssessmentService.name)
 
   constructor(
-    @InjectRepository(IQAssessmentSession)
-    private readonly sessionRepository: Repository<IQAssessmentSession>,
-    @InjectRepository(IQQuestion)
-    private readonly questionRepository: Repository<IQQuestion>,
-    @InjectRepository(IQAnswer)
-    private readonly answerRepository: Repository<IQAnswer>,
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(IQAssessmentSession) private readonly sessionRepository: Repository<IQAssessmentSession>,
+    @InjectRepository(IQQuestion) private readonly questionRepository: Repository<IQQuestion>,
+    @InjectRepository(IQAnswer) private readonly answerRepository: Repository<IQAnswer>,
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly httpService: HttpService,
     private readonly iqAttemptService: IqAttemptService,
   ) {}
