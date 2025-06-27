@@ -10,13 +10,17 @@ import {
   ParseIntPipe,
   UsePipes,
   ValidationPipe,
+  Body,
 } from "@nestjs/common"
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from "@nestjs/swagger"
 import { CreateSessionDto } from "../dto/create-session.dto"
-import { SubmitAnswerDto } from "../dto/submit-answer.dto"
+import { SubmitAnswerDto, StandaloneSubmitAnswerDto } from "../dto/submit-answer.dto"
 import { CompleteSessionDto } from "../dto/complete-session.dto"
 import { SessionResponseDto, CompletedSessionResponseDto } from "../dto/session-response.dto"
 import { AttemptResponseDto, UserAttemptsStatsDto } from "../dto/attempt-response.dto"
+import { AnswerSubmissionResponseDto } from "../dto/answer-submission-response.dto"
+import { RandomQuestionsQueryDto } from "../dto/random-questions-query.dto"
+import { RandomQuestionResponseDto } from "../dto/random-question-response.dto"
 import { IQAssessmentService } from "../providers/iq-assessment.service"
 import { IqAttemptService } from "../providers/iq-attempt.service"
 
@@ -48,7 +52,7 @@ export class IQAssessmentController {
     description: "User not found",
   })
   async createSession(
-    createSessionDto: CreateSessionDto, // Remove the decorator here
+    createSessionDto: CreateSessionDto, 
   ): Promise<SessionResponseDto> {
     console.log("Received createSessionDto:", createSessionDto)
     return this.iqAssessmentService.createSession(createSessionDto)
@@ -93,7 +97,7 @@ export class IQAssessmentController {
     description: "Session completed or answer already submitted for this question",
   })
   async submitAnswer(
-    submitAnswerDto: SubmitAnswerDto, // Remove the decorator here
+    submitAnswerDto: SubmitAnswerDto, 
   ): Promise<SessionResponseDto> {
     return this.iqAssessmentService.submitAnswer(submitAnswerDto)
   }
@@ -115,7 +119,7 @@ export class IQAssessmentController {
     description: "Session is already completed",
   })
   async completeSession(
-    completeSessionDto: CompleteSessionDto, // Remove the decorator here
+    completeSessionDto: CompleteSessionDto,
   ): Promise<CompletedSessionResponseDto> {
     return this.iqAssessmentService.completeSession(completeSessionDto.sessionId)
   }
@@ -256,5 +260,56 @@ export class IQAssessmentController {
     @Query('userId') userId?: string,
   ): Promise<AttemptResponseDto[]> {
     return this.iqAttemptService.getAttemptsByDateRange(new Date(startDate), new Date(endDate), userId)
+  }
+
+  @Post("submit")
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Submit a standalone answer for a question" })
+  @ApiBody({ type: StandaloneSubmitAnswerDto })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Answer submitted successfully",
+    type: AnswerSubmissionResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: "Question not found",
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: "Invalid request data",
+  })
+  async submitStandaloneAnswer(
+    @Body() submitAnswerDto: StandaloneSubmitAnswerDto,
+  ): Promise<AnswerSubmissionResponseDto> {
+    
+    return this.iqAssessmentService.submitStandaloneAnswer(submitAnswerDto)
+  }
+
+  @Get("questions/random")
+  @ApiOperation({ summary: "Get random questions with optional filtering" })
+  @ApiQuery({ name: "difficulty", required: false, enum: ["easy", "medium", "hard"] })
+  @ApiQuery({ name: "category", required: false, enum: ["Science", "Mathematics", "Logic", "Language", "History", "Geography", "Literature", "Art", "Sports", "Entertainment", "General Knowledge"] })
+  @ApiQuery({ name: "count", required: false, type: Number, minimum: 1, maximum: 50 })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: "Random questions retrieved successfully",
+    type: [RandomQuestionResponseDto],
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: "Invalid filter parameters",
+  })
+  async getRandomQuestions(
+    @Query() queryDto: RandomQuestionsQueryDto,
+  ): Promise<RandomQuestionResponseDto[]> {
+    const questions = await this.iqAssessmentService.getRandomQuestionsWithFilters(queryDto)
+    return questions.map(question => ({
+      id: question.id,
+      questionText: question.questionText,
+      options: question.options,
+      difficulty: question.difficulty,
+      category: question.category,
+    }))
   }
 }

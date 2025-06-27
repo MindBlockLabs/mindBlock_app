@@ -1,17 +1,20 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from "@nestjs/common"
 import { Repository } from "typeorm"
 import { IQAssessmentSession } from "../entities/iq-assessment-session.entity"
-import { IQQuestion } from "../entities/iq-question.entity"
+import { IQQuestion, QuestionDifficulty, QuestionCategory } from "../entities/iq-question.entity"
 import { IQAnswer } from "../entities/iq-answer.entity"
 import { User } from "../../users/user.entity"
 import { CreateSessionDto } from "../dto/create-session.dto"
-import { SubmitAnswerDto } from "../dto/submit-answer.dto"
+import { SubmitAnswerDto, StandaloneSubmitAnswerDto } from "../dto/submit-answer.dto"
 import { SessionResponseDto, CompletedSessionResponseDto } from "../dto/session-response.dto"
+import { AnswerSubmissionResponseDto } from "../dto/answer-submission-response.dto"
+import { RandomQuestionsQueryDto } from "../dto/random-questions-query.dto"
 import { HttpService } from "@nestjs/axios"
 import { firstValueFrom } from "rxjs"
 import { map } from "rxjs/operators"
 import { IqAttemptService } from "./iq-attempt.service"
 import { InjectRepository } from "@nestjs/typeorm"
+import { CreateAttemptDto } from "../dto/create-attempt.dto"
 
 @Injectable()
 export class IQAssessmentService {
@@ -40,6 +43,8 @@ export class IQAssessmentService {
         options: allOptions,
         correctAnswer: q.correct_answer,
         explanation: null,
+        difficulty: QuestionDifficulty.MEDIUM,
+        category: QuestionCategory.GENERAL_KNOWLEDGE,
       }
     })
   }
@@ -114,6 +119,11 @@ export class IQAssessmentService {
   }
 
   async submitAnswer(submitAnswerDto: SubmitAnswerDto): Promise<SessionResponseDto> {
+    // For session-based submissions, sessionId is required
+    if (!submitAnswerDto.sessionId) {
+      throw new BadRequestException("Session ID is required for session-based submissions")
+    }
+
     const session = await this.sessionRepository.findOne({
       where: { id: submitAnswerDto.sessionId },
       relations: ["answers"],
@@ -162,13 +172,14 @@ export class IQAssessmentService {
     // Log the attempt using IqAttemptService
     if (!submitAnswerDto.skipped && submitAnswerDto.selectedOption) {
       try {
-        await this.iqAttemptService.create({
+        const createAttemptDto: CreateAttemptDto = {
           userId: session.userId,
           questionId: submitAnswerDto.questionId,
           selectedAnswer: submitAnswerDto.selectedOption,
           correctAnswer: question.correctAnswer,
           isCorrect,
-        })
+        }
+        await this.iqAttemptService.create(createAttemptDto)
       } catch (error) {
         this.logger.warn(`Failed to log attempt for session ${submitAnswerDto.sessionId}: ${error.message}`)
         // Don't fail the submission if attempt logging fails
@@ -347,5 +358,144 @@ export class IQAssessmentService {
     }
 
     return session
+  }
+
+  async submitStandaloneAnswer(
+    submitAnswerDto: StandaloneSubmitAnswerDto,
+    userId?: string,
+  ): Promise<AnswerSubmissionResponseDto> {
+    // Get the question to validate the answer
+    const question = await this.questionRepository.findOne({
+      where: { id: submitAnswerDto.questionId },
+    })
+
+    if (!question) {
+      throw new NotFoundException("Question not found")
+    }
+
+    // Determine if answer is correct
+    const isCorrect = submitAnswerDto.selectedAnswer === question.correctAnswer
+
+    // Log the attempt using IqAttemptService
+    try {
+      const createAttemptDto: CreateAttemptDto = {
+        userId,
+        questionId: submitAnswerDto.questionId,
+        selectedAnswer: submitAnswerDto.selectedAnswer,
+        correctAnswer: question.correctAnswer,
+        isCorrect,
+      }
+      await this.iqAttemptService.create(createAttemptDto)
+    } catch (error) {
+      this.logger.warn(`Failed to log attempt for question ${submitAnswerDto.questionId}: ${error.message}`)
+      // Don't fail the submission if attempt logging fails
+    }
+
+    this.logger.log(`Standalone answer submitted for question ${submitAnswerDto.questionId}`)
+
+    return {
+      isCorrect,
+      correctAnswer: question.correctAnswer,
+      explanation: question.explanation,
+      selectedAnswer: submitAnswerDto.selectedAnswer,
+      questionId: submitAnswerDto.questionId,
+    }
+  }
+
+  async getRandomQuestionsWithFilters(queryDto: RandomQuestionsQueryDto): Promise<IQQuestion[]> {
+    const { difficulty, category, count = 1 } = queryDto
+
+    // Build query with filters
+    const queryBuilder = this.questionRepository
+      .createQueryBuilder("question")
+      .orderBy("RANDOM()")
+      .limit(count)
+
+    if (difficulty) {
+      queryBuilder.andWhere("question.difficulty = :difficulty", { difficulty })
+    }
+
+    if (category) {
+      queryBuilder.andWhere("question.category = :category", { category })
+    }
+
+    const dbQuestions = await queryBuilder.getMany()
+
+    if (dbQuestions.length >= count) {
+      // Shuffle options for each question before returning
+      return dbQuestions.map(question => ({
+        ...question,
+        options: [...question.options].sort(() => Math.random() - 0.5)
+      }))
+    }
+
+    // If not enough questions in DB, fetch from external API
+    const missing = count - dbQuestions.length
+    const externalQuestions = await this.fetchExternalQuestionsWithFilters(missing, difficulty, category)
+    
+    // Create and save external questions
+    const createdQuestions = this.questionRepository.create(externalQuestions)
+    const savedQuestions = await this.questionRepository.save(createdQuestions)
+
+    // Combine and shuffle options
+    const allQuestions = [...dbQuestions, ...savedQuestions]
+    return allQuestions.map(question => ({
+      ...question,
+      options: [...question.options].sort(() => Math.random() - 0.5)
+    }))
+  }
+
+  private async fetchExternalQuestionsWithFilters(
+    amount: number,
+    difficulty?: QuestionDifficulty,
+    category?: QuestionCategory,
+  ) {
+    // Map our enums to Open Trivia API format
+    const difficultyMap = {
+      [QuestionDifficulty.EASY]: 'easy',
+      [QuestionDifficulty.MEDIUM]: 'medium',
+      [QuestionDifficulty.HARD]: 'hard',
+    }
+
+    const categoryMap = {
+      [QuestionCategory.SCIENCE]: 17, // Science & Nature
+      [QuestionCategory.MATHEMATICS]: 19, // Mathematics
+      [QuestionCategory.HISTORY]: 23, // History
+      [QuestionCategory.GEOGRAPHY]: 22, // Geography
+      [QuestionCategory.LITERATURE]: 10, // Entertainment: Books
+      [QuestionCategory.ART]: 25, // Art
+      [QuestionCategory.SPORTS]: 21, // Sports
+      [QuestionCategory.ENTERTAINMENT]: 11, // Entertainment: Film
+      [QuestionCategory.GENERAL_KNOWLEDGE]: 9, // General Knowledge
+    }
+
+    let url = `https://opentdb.com/api.php?amount=${amount}&type=multiple`
+    
+    if (difficulty) {
+      url += `&difficulty=${difficultyMap[difficulty]}`
+    }
+    
+    if (category && categoryMap[category]) {
+      url += `&category=${categoryMap[category]}`
+    }
+
+    const res$ = this.httpService.get(url).pipe(map((resp) => resp.data))
+    const res: any = await firstValueFrom(res$)
+    
+    if (res.response_code !== 0) {
+      throw new BadRequestException(`Trivia API returned code ${res.response_code}`)
+    }
+    
+    return res.results.map((q: any) => {
+      const allOptions = [q.correct_answer, ...q.incorrect_answers].sort(() => Math.random() - 0.5)
+      return {
+        questionText: q.question,
+        options: allOptions,
+        correctAnswer: q.correct_answer,
+        explanation: null,
+        difficulty: difficulty || QuestionDifficulty.MEDIUM,
+        category: category || QuestionCategory.GENERAL_KNOWLEDGE,
+      }
+    })
   }
 }
