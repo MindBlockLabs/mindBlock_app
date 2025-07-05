@@ -52,7 +52,7 @@ import { GamificationModule } from './gamification/gamification.module';
     TimeFilterModule,
     IQAssessmentModule,
     PuzzleModule,
-    GamificationModule,
+    GamificationModule
   ],
   controllers: [AppController],
   providers: [AppService],
