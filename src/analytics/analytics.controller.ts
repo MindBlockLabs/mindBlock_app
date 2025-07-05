@@ -14,9 +14,20 @@ export class AnalyticsController {
   //   return this.analyticsService.findAll(query);
   // }
 
-  @Get()
-  @ApiQuery({ name: 'timeFilter', enum: TimeFilter, required: false })
+  @Get('analytics')
+  @ApiQuery({
+    name: 'userId',
+    required: false,
+    type: String,
+    description: 'Filter by user ID (UUID)',
+  })
+  @ApiQuery({
+    name: 'sessionId',
+    required: false,
+    type: String,
+    description: 'Filter by session ID (UUID)',
+  })
   async getAnalytics(@Query() query: GetAnalyticsQueryDto) {
-    return this.analyticsService.findAll(query);
-}
+    return this.analyticsService.getAnalytics(query);
+  }
 }
