@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  RequestTimeoutException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
@@ -72,5 +68,19 @@ export class AnalyticsService {
     }
 
     return {};
+  }
+
+  public async getAnalytics(query: GetAnalyticsQueryDto) {
+    const where: any = {};
+
+    if (query.userId) {
+      where.userId = query.userId;
+    }
+
+    if (query.sessionId) {
+      where.sessionId = query.sessionId;
+    }
+
+    return this.analyticsRepo.find({ where });
   }
 }

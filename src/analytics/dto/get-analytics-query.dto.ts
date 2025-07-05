@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsISO8601 } from 'class-validator';
+import { IsEnum, IsOptional, IsISO8601, IsUUID } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { TimeFilter } from 'src/timefilter/timefilter.enum.ts/timefilter.enum';
 
@@ -17,4 +17,14 @@ export class GetAnalyticsQueryDto {
   @IsOptional()
   @IsISO8601()
   to?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by user ID (UUID)' })
+  @IsOptional()
+  @IsUUID()
+  userId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by session ID (UUID)' })
+  @IsOptional()
+  @IsUUID()
+  sessionId?: string;
 }
