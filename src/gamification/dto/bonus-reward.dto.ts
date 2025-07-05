@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsPositive, IsString, Min } from 'class-validator';
 
 export class BonusRewardDto {
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  userId: number;
+  @ApiProperty({ example: "1" })
+  @IsString()
+  userId: string;
 
   @ApiProperty({ example: 100 })
   @IsInt()

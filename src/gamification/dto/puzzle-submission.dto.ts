@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsDate, IsInt } from 'class-validator';
+import { IsBoolean, IsDate, IsInt, IsString } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class PuzzleSubmissionDto {
-  @ApiProperty({ example: 1 })
-  @IsInt()
-  userId: number;
+  @ApiProperty({ example: "1" })
+  @IsString()
+  userId: string;
 
   @ApiProperty({ example: 101 })
   @IsInt()
