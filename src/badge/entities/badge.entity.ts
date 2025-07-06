@@ -1,38 +1,49 @@
-import { LeaderboardEntry } from "src/leaderboard/entities/leaderboard.entity"
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
+import { User } from 'src/users/user.entity';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-@Entity("badges")
+@Entity('badges')
 export class Badge {
   @PrimaryGeneratedColumn()
-  id: number
+  id: number;
 
   @Column({ unique: true })
-  title: string // e.g. Puzzle Master, Grand Champion
+  title: string; // e.g. Puzzle Master, Grand Champion
 
   @Column()
-  description: string // Short badge description
+  description: string; // Short badge description
 
   @Column({ nullable: true })
-  iconUrl: string // Optional: hosted badge icon
+  iconUrl: string; // Optional: hosted badge icon
 
   @Column()
-  rank: number // Used for sorting or tier logic
+  rank: number; // Used for sorting or tier logic
 
   @Column({ default: true })
-  isActive: boolean // Whether badge is currently available
+  isActive: boolean; // Whether badge is currently available
 
   @Column({ default: false })
-  isAutoAssigned: boolean // Whether badge is automatically assigned
+  isAutoAssigned: boolean; // Whether badge is automatically assigned
 
-  @OneToMany(
-    () => LeaderboardEntry,
-    (entry) => entry.badge,
-  )
-  leaderboardEntries: LeaderboardEntry[]
+  @OneToMany(() => User, (user) => user.badge, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
+  user: User[];
+
+  @OneToMany(() => LeaderboardEntry, (entry) => entry.badge)
+  leaderboardEntries: LeaderboardEntry[];
 
   @CreateDateColumn()
-  createdAt: Date
+  createdAt: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date
+  updatedAt: Date;
 }
