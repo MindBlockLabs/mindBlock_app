@@ -33,6 +33,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAttemptDto } from '../dto/create-attempt.dto';
 import { SubmitQuizDto } from '../dto/submit-quiz.dto';
 import { StartQuizDto } from '../dto/start-quiz.dto';
+import { AchievementService } from 'src/achievement/providers/achievement.service';
+import { ActiveUserData } from 'src/auth/interfaces/activeInterface';
 
 @Injectable()
 export class IQAssessmentService {
@@ -49,6 +51,7 @@ export class IQAssessmentService {
     private readonly httpService: HttpService,
     private readonly iqAttemptService: IqAttemptService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly achievementService: AchievementService,
   ) {}
 
   public async fetchExternalQuestions(amount: number) {
@@ -75,7 +78,7 @@ export class IQAssessmentService {
     });
   }
 
-  async createSession(
+  public async createSession(
     createSessionDto: CreateSessionDto,
   ): Promise<SessionResponseDto> {
     // Verify user exists
@@ -133,7 +136,9 @@ export class IQAssessmentService {
     return this.buildSessionResponse(savedSession, questions[0]);
   }
 
-  async getSessionProgress(sessionId: string): Promise<SessionResponseDto> {
+  public async getSessionProgress(
+    sessionId: string,
+  ): Promise<SessionResponseDto> {
     const session = await this.sessionRepository.findOne({
       where: { id: sessionId },
       relations: ['answers', 'user'],
@@ -154,7 +159,7 @@ export class IQAssessmentService {
     return this.buildSessionResponse(session, currentQuestion);
   }
 
-  async submitAnswer(
+  public async submitAnswer(
     submitAnswerDto: SubmitAnswerDto,
   ): Promise<SessionResponseDto> {
     // For session-based submissions, sessionId is required
@@ -411,7 +416,7 @@ export class IQAssessmentService {
     };
   }
 
-  async getUserSessions(userId: string): Promise<IQAssessmentSession[]> {
+  public async getUserSessions(userId: string): Promise<IQAssessmentSession[]> {
     return this.sessionRepository.find({
       where: { userId },
       order: { startTime: 'DESC' },
@@ -605,7 +610,7 @@ export class IQAssessmentService {
     return { questions };
   }
 
-  public async submitQuiz(dto: SubmitQuizDto) {
+  public async submitQuiz(activeUser: ActiveUserData, dto: SubmitQuizDto) {
     let correctCount = 0;
 
     for (const response of dto.responses) {
@@ -630,6 +635,16 @@ export class IQAssessmentService {
     }
 
     const score = Math.round((correctCount / dto.responses.length) * 100);
+
+    const user = await this.userRepository.findOne({
+      where: { id: activeUser.sub },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    await this.achievementService.achievementUnlocker(user);
+
     const incorrectCount = dto.responses.length - correctCount;
 
     return {

@@ -3,7 +3,7 @@
 export interface ActiveUserData {
 
     /**sub of type number */
-    sub: number,
+    sub: string,
 
     /**email of type string */
     email?: string
