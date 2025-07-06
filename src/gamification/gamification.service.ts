@@ -32,7 +32,7 @@ export class GamificationService {
   }
 
   private async awardXP(
-    userId: number,
+    userId: string,
     xp: number,
     reason: string,
   ): Promise<void> {
@@ -42,7 +42,7 @@ export class GamificationService {
   }
 
   private async awardTokens(
-    userId: number,
+    userId: string,
     tokens: number,
     reason: string,
   ): Promise<void> {
@@ -54,7 +54,7 @@ export class GamificationService {
   }
 
   private async processPuzzleRewards(
-    userId: number,
+    userId: string,
     puzzleId: number,
     isCorrect: boolean,
   ): Promise<any> {

@@ -5,6 +5,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { IQAssessmentSession } from '../entities/iq-assessment-session.entity';
 import {
   IQQuestion,
@@ -47,6 +48,7 @@ export class IQAssessmentService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly httpService: HttpService,
     private readonly iqAttemptService: IqAttemptService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   public async fetchExternalQuestions(amount: number) {
@@ -445,6 +447,14 @@ export class IQAssessmentService {
 
     // Determine if answer is correct
     const isCorrect = submitAnswerDto.selectedAnswer === question.correctAnswer;
+
+    // Emit event for streak tracking
+    if (userId) {
+      this.eventEmitter.emit('iq.question.answered', {
+        userId: userId,
+        isCorrect,
+      });
+    }
 
     // Log the attempt using IqAttemptService
     try {
