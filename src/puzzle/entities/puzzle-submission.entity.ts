@@ -4,50 +4,32 @@ import {
   ManyToOne,
   Column,
   CreateDateColumn,
-  JoinColumn,
+  Unique,
 } from 'typeorm';
-import { Puzzle } from './puzzle.entity';
-import { ApiProperty } from '@nestjs/swagger';
 import { User } from 'src/users/user.entity';
+import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
 
-@Entity('puzzle_submission')
+@Entity('puzzle_submissions')
+@Unique(['user', 'puzzle']) 
 export class PuzzleSubmission {
-  @PrimaryGeneratedColumn()
-  @ApiProperty()
-  id: number;
-
-  @Column({ name: 'puzzle_id' })
-  @ApiProperty()
-  puzzleId: number;
-
-  @ManyToOne(() => Puzzle, { eager: true })
-  @JoinColumn({ name: 'puzzle_id' })
-  @ApiProperty({ type: () => Puzzle })
-  puzzle: Puzzle;
-
-  @Column({ name: 'user_id' })
-  @ApiProperty()
-  userId: string;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @ManyToOne(() => User, { eager: true })
-  @JoinColumn({ name: 'user_id' })
-  @ApiProperty({ type: () => User })
   user: User;
 
-  @Column({ type: 'jsonb' })
-  @ApiProperty({
-    type: 'object',
-    description: 'Submission data like code or answers',
-    additionalProperties: true
-  })
-  attemptData: Record<string, any>;
+  @ManyToOne(() => Puzzle, { eager: true })
+  puzzle: Puzzle;
 
-  @Column()
-  @ApiProperty({ description: 'Whether the submission passed or not' })
-  result: boolean;
+  @Column({ default: false })
+  isCorrect: boolean;
 
-  @CreateDateColumn({ name: 'submitted_at' })
-  @ApiProperty({ type: String, format: 'date-time' })
-  submittedAt: Date;
+  @Column({ nullable: true })
+  selectedAnswer?: string;
+
+  @Column({ default: false })
+  skipped: boolean;
+
+  @CreateDateColumn()
+  createdAt: Date;
 }
- 

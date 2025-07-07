@@ -9,6 +9,7 @@ import { User } from '../users/user.entity';
 import { SubmitPuzzleDto } from './dto/puzzle.dto';
 import { PuzzleSubmissionDto } from '../gamification/dto/puzzle-submission.dto';
 import { PuzzleType } from './enums/puzzle-type.enum';
+import { PuzzleProgressProvider } from './providers/puzzle-progress.provider';
 
 @Injectable()
 export class PuzzleService {
@@ -24,6 +25,8 @@ export class PuzzleService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly puzzleProgressProvider: PuzzleProgressProvider,
+
   ) {}
 
   async submitPuzzleSolution(
@@ -196,4 +199,6 @@ export class PuzzleService {
       where: { userId },
     });
   }
+
+  
 }
