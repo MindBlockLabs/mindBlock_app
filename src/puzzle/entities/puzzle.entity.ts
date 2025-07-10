@@ -3,12 +3,33 @@ import { ApiProperty } from '@nestjs/swagger';
 import { PuzzleType } from '../enums/puzzle-type.enum';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
 
+export enum PuzzleCategory {
+  LOGIC = 'logic',
+  CODING = 'coding',
+  BLOCKCHAIN = 'blockchain',
+  MATH = 'math',
+  GENERAL = 'general',
+}
+
+
+
+export interface Puzzle {
+  id: string;
+  title: string;
+  description: string;
+  type: PuzzleType;
+  difficulty: PuzzleDifficulty;
+  solution: string;
+  isPublished: boolean;
+  category: PuzzleCategory; // Added category field
+}
+
 
 @Entity()
 export class Puzzle {
   @PrimaryGeneratedColumn()
   @ApiProperty({ description: 'Unique identifier for the puzzle' })
-  id: number;
+  id: string;
 
   @Column()
   @ApiProperty({ description: 'Title of the puzzle' })

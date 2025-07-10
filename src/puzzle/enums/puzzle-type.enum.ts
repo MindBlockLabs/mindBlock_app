@@ -1,6 +1,8 @@
 export enum PuzzleType {
-  LOGIC = 'logic',
-  CODING = 'coding',
   BLOCKCHAIN = 'blockchain',
+  TRIVIA = 'trivia',
+  RIDDLE = 'riddle',
+  CODING = 'coding',
+  LOGIC = 'logic',
   MATH = 'math',
 }

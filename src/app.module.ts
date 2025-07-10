@@ -19,6 +19,7 @@ import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { GamificationModule } from './gamification/gamification.module';
 import { AchievementModule } from './achievement/achievement.module';
+import { PuzzleProgressModule } from './puzzle-progress/puzzle-progress.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -56,7 +57,8 @@ import { AchievementModule } from './achievement/achievement.module';
     IQAssessmentModule,
     PuzzleModule,
     GamificationModule,
-    AchievementModule
+    AchievementModule,
+    PuzzleProgressModule
   ],
   controllers: [AppController],
   providers: [AppService],
