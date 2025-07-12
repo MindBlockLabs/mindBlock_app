@@ -8,6 +8,12 @@ import { DailyStreakService } from './providers/daily-streak.service';
 import { StreakListener } from './listeners/streak.listener';
 import { DailyStreak } from './entities/daily-streak.entity';
 import { User } from '../users/user.entity';
+import { UpdateStreakService } from './providers/update-streak.service';
+import { GetStreakService } from './providers/get-streak.service';
+import { GetStreakLeaderboardService } from './providers/get-streak-leaderboard.service';
+import { CheckAndAwardMilestonesService } from './providers/check-and-award-milestones.service';
+import { BuildStreakResponseService } from './providers/build-streak-response.service';
+import { GetStreakStatsService } from './providers/get-streak-stats.service';
 
 @Module({
   imports: [
@@ -15,7 +21,17 @@ import { User } from '../users/user.entity';
     TypeOrmModule.forFeature([DailyStreak, User]),
   ],
   controllers: [GamificationController, StreakController],
-  providers: [GamificationService, DailyStreakService, StreakListener],
+  providers: [
+    GamificationService,
+    DailyStreakService,
+    StreakListener,
+    UpdateStreakService,
+    GetStreakService,
+    GetStreakLeaderboardService,
+    CheckAndAwardMilestonesService,
+    BuildStreakResponseService,
+    GetStreakStatsService,
+  ],
   exports: [GamificationService, DailyStreakService],
 })
 export class GamificationModule {}

@@ -76,9 +76,15 @@ describe('PuzzleService', () => {
     }).compile();
 
     service = module.get<PuzzleService>(PuzzleService);
-    puzzleRepository = module.get<Repository<Puzzle>>(getRepositoryToken(Puzzle));
-    submissionRepository = module.get<Repository<PuzzleSubmission>>(getRepositoryToken(PuzzleSubmission));
-    progressRepository = module.get<Repository<PuzzleProgress>>(getRepositoryToken(PuzzleProgress));
+    puzzleRepository = module.get<Repository<Puzzle>>(
+      getRepositoryToken(Puzzle),
+    );
+    submissionRepository = module.get<Repository<PuzzleSubmission>>(
+      getRepositoryToken(PuzzleSubmission),
+    );
+    progressRepository = module.get<Repository<PuzzleProgress>>(
+      getRepositoryToken(PuzzleProgress),
+    );
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
     eventEmitter = module.get<EventEmitter2>(EventEmitter2);
   });
@@ -88,7 +94,7 @@ describe('PuzzleService', () => {
   });
 
   describe('submitPuzzleSolution', () => {
-    const userId = 1;
+    const userId = '1';
     const puzzleId = 101;
     const submitDto: SubmitPuzzleDto = { solution: 'correct answer' };
 
@@ -140,7 +146,11 @@ describe('PuzzleService', () => {
         level: 1,
       });
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDto);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
 
       expect(mockPuzzleRepository.findOne).toHaveBeenCalledWith({
         where: { id: puzzleId },
@@ -194,7 +204,11 @@ describe('PuzzleService', () => {
         submittedAt: new Date(),
       });
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDtoIncorrect);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDtoIncorrect,
+      );
 
       expect(mockEventEmitter.emit).toHaveBeenCalledWith('puzzle.submitted', {
         userId,
@@ -209,8 +223,9 @@ describe('PuzzleService', () => {
     it('should throw NotFoundException when puzzle not found', async () => {
       mockPuzzleRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.submitPuzzleSolution(userId, puzzleId, submitDto))
-        .rejects.toThrow(NotFoundException);
+      await expect(
+        service.submitPuzzleSolution(userId, puzzleId, submitDto),
+      ).rejects.toThrow(NotFoundException);
     });
 
     it('should handle already solved puzzle', async () => {
@@ -245,7 +260,11 @@ describe('PuzzleService', () => {
       mockSubmissionRepository.save.mockResolvedValue(submission);
       mockSubmissionRepository.findOne.mockResolvedValue(previousSuccess);
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDto);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
 
       expect(result.success).toBe(true);
       expect(result.xpEarned).toBe(0);
@@ -319,14 +338,14 @@ describe('PuzzleService', () => {
       const progress = [
         {
           id: 1,
-          userId: 1,
+          userId: '1',
           puzzleType: 'logic',
           completedCount: 5,
           total: 10,
         },
         {
           id: 2,
-          userId: 1,
+          userId: '1',
           puzzleType: 'coding',
           completedCount: 3,
           total: 8,
@@ -335,12 +354,12 @@ describe('PuzzleService', () => {
 
       mockProgressRepository.find.mockResolvedValue(progress);
 
-      const result = await service.getUserProgress(1);
+      const result = await service.getUserProgress('1');
 
       expect(result).toEqual(progress);
       expect(mockProgressRepository.find).toHaveBeenCalledWith({
-        where: { userId: 1 },
+        where: { userId: '1' },
       });
     });
   });
-}); 
+});

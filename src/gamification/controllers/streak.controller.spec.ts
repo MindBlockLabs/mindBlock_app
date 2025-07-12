@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StreakController } from './streak.controller';
 import { DailyStreakService } from '../providers/daily-streak.service';
-import { StreakResponseDto, StreakLeaderboardResponseDto } from '../dto/streak.dto';
+import {
+  StreakResponseDto,
+  StreakLeaderboardResponseDto,
+} from '../dto/streak.dto';
 
 describe('StreakController', () => {
   let controller: StreakController;
@@ -64,14 +67,14 @@ describe('StreakController', () => {
       const mockLeaderboardResponse: StreakLeaderboardResponseDto = {
         entries: [
           {
-            userId: 1,
+            userId: '1',
             username: 'user1',
             streakCount: 10,
             longestStreak: 15,
             lastActiveDate: new Date(),
           },
           {
-            userId: 2,
+            userId: '2',
             username: 'user2',
             streakCount: 8,
             longestStreak: 12,
@@ -83,11 +86,15 @@ describe('StreakController', () => {
         limit: 10,
       };
 
-      mockStreakService.getStreakLeaderboard.mockResolvedValue(mockLeaderboardResponse);
+      mockStreakService.getStreakLeaderboard.mockResolvedValue(
+        mockLeaderboardResponse,
+      );
 
       const result = await controller.getStreakLeaderboard(query);
 
-      expect(mockStreakService.getStreakLeaderboard).toHaveBeenCalledWith(query);
+      expect(mockStreakService.getStreakLeaderboard).toHaveBeenCalledWith(
+        query,
+      );
       expect(result).toEqual(mockLeaderboardResponse);
     });
 
@@ -99,7 +106,9 @@ describe('StreakController', () => {
         limit: 10,
       };
 
-      mockStreakService.getStreakLeaderboard.mockResolvedValue(mockLeaderboardResponse);
+      mockStreakService.getStreakLeaderboard.mockResolvedValue(
+        mockLeaderboardResponse,
+      );
 
       const result = await controller.getStreakLeaderboard({});
 
@@ -125,4 +134,4 @@ describe('StreakController', () => {
       expect(result).toEqual(mockStats);
     });
   });
-}); 
+});

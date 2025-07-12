@@ -3,7 +3,7 @@ import { AnalyticsController } from './analytics.controller';
 import { AnalyticsService } from './providers/analytics.service';
 import { AnalyticsExportService } from './providers/analytics-export.service';
 import { AnalyticsBreakdownService } from './providers/analytics-breakdown.service';
-import { GetAnalyticsQueryDto } from './dto/get-analytics-query.dto';
+import { GetAnalyticsQueryDto, TimeFilter } from './dto/get-analytics-query.dto';
 import { AnalyticsBreakdownResponse } from './dto/analytics-breakdown-response.dto';
 import { EventTypeBreakdown } from './dto/analytics-breakdown-response.dto';
 
@@ -99,7 +99,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
   describe('getBreakdown', () => {
     it('should return analytics breakdown', async () => {
       const query: GetAnalyticsQueryDto = {
-        timeFilter: 'weekly',
+        timeFilter: TimeFilter.WEEKLY,
         userId: '123e4567-e89b-12d3-a456-426614174000',
       };
 
@@ -123,7 +123,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should handle service errors', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
       const error = new Error('Service error');
 
       analyticsBreakdownService.getBreakdown.mockRejectedValue(error);
@@ -134,7 +134,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
 
   describe('getTopEventTypes', () => {
     it('should return top event types with default limit', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
 
       analyticsBreakdownService.getTopEventTypes.mockResolvedValue(mockTopEventTypes);
 
@@ -145,7 +145,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should return top event types with custom limit', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
       const limit = 5;
 
       analyticsBreakdownService.getTopEventTypes.mockResolvedValue(mockTopEventTypes);
@@ -157,7 +157,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should clamp limit to minimum value', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
       const limit = 0;
 
       analyticsBreakdownService.getTopEventTypes.mockResolvedValue(mockTopEventTypes);
@@ -169,7 +169,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should clamp limit to maximum value', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
       const limit = 100;
 
       analyticsBreakdownService.getTopEventTypes.mockResolvedValue(mockTopEventTypes);
@@ -181,7 +181,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should handle service errors', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
       const error = new Error('Service error');
 
       analyticsBreakdownService.getTopEventTypes.mockRejectedValue(error);
@@ -220,7 +220,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
   describe('query parameter validation', () => {
     it('should handle all query parameters correctly', async () => {
       const query: GetAnalyticsQueryDto = {
-        timeFilter: 'monthly',
+        timeFilter: TimeFilter.MONTHLY,
         from: '2024-01-01T00:00:00Z',
         to: '2024-01-31T23:59:59Z',
         userId: '123e4567-e89b-12d3-a456-426614174000',
@@ -237,7 +237,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
 
     it('should handle partial query parameters', async () => {
       const query: GetAnalyticsQueryDto = {
-        timeFilter: 'weekly',
+        timeFilter: TimeFilter.WEEKLY,
         userId: '123e4567-e89b-12d3-a456-426614174000',
       };
 
@@ -252,7 +252,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
 
   describe('response structure validation', () => {
     it('should return properly structured breakdown response', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
 
       analyticsBreakdownService.getBreakdown.mockResolvedValue(mockBreakdownResponse);
 
@@ -266,7 +266,7 @@ describe('AnalyticsController - Breakdown Endpoints', () => {
     });
 
     it('should return properly structured top event types', async () => {
-      const query: GetAnalyticsQueryDto = { timeFilter: 'weekly' };
+      const query: GetAnalyticsQueryDto = { timeFilter: TimeFilter.WEEKLY };
 
       analyticsBreakdownService.getTopEventTypes.mockResolvedValue(mockTopEventTypes);
 
