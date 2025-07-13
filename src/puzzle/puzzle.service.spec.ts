@@ -1,13 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { NotFoundException } from '@nestjs/common';
-import { PuzzleService } from 'src/puzzle/puzzle.service';
-import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
-import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
-import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
-import { User } from 'src/users/user.entity';
-import { SubmitPuzzleDto } from 'src/puzzle/dto/puzzle.dto';
+import { PuzzleService } from './puzzle.service';
+import { Puzzle } from './entities/puzzle.entity';
+import { PuzzleSubmission } from './entities/puzzle-submission.entity';
+import { PuzzleProgress } from './entities/puzzle-progress.entity';
+import { User } from '../users/user.entity';
+import { SubmitPuzzleDto } from './dto/puzzle.dto';
 
 describe('PuzzleService', () => {
   let service: PuzzleService;
@@ -64,7 +65,8 @@ describe('PuzzleService', () => {
   describe('submitPuzzleSolution', () => {
     const userId = 'user-1';
     const puzzleId = 123;
-    const submitDto: SubmitPuzzleDto = { puzzleId, userId, solution: 'answer' };
+    const submitDto: SubmitPuzzleDto = { userId,
+  puzzleId, solution: 'answer' };
 
     const puzzle = {
       id: puzzleId,
