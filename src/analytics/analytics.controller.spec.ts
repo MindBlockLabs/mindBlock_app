@@ -5,6 +5,7 @@ import { AnalyticsService } from './providers/analytics.service';
 import { AnalyticsExportService } from './providers/analytics-export.service';
 import { AnalyticsEvent } from './entities/analytics-event.entity';
 import { ExportFormat } from './dto/export-analytics-query.dto';
+import { AnalyticsBreakdownService } from './providers/analytics-breakdown.service';
 
 describe('AnalyticsController', () => {
   let controller: AnalyticsController;
@@ -44,6 +45,12 @@ describe('AnalyticsController', () => {
       controllers: [AnalyticsController],
       providers: [
         {
+          provide: AnalyticsBreakdownService,
+          useValue: {
+            /* mock methods  */
+          },
+        },
+        {
           provide: AnalyticsService,
           useValue: mockAnalyticsService,
         },
@@ -82,12 +89,12 @@ describe('AnalyticsController', () => {
 
   describe('exportAnalytics', () => {
     it('should export analytics data in CSV format', async () => {
-      const query = { 
+      const query = {
         format: ExportFormat.CSV,
         userId: '123',
-        timeFilter: 'weekly' as any
+        timeFilter: 'weekly' as any,
       };
-      
+
       analyticsService.findAll.mockResolvedValue(mockAnalyticsData);
       analyticsExportService.exportAnalytics.mockResolvedValue(undefined);
 
@@ -97,17 +104,17 @@ describe('AnalyticsController', () => {
       expect(analyticsExportService.exportAnalytics).toHaveBeenCalledWith(
         mockAnalyticsData,
         ExportFormat.CSV,
-        mockResponse
+        mockResponse,
       );
     });
 
     it('should export analytics data in PDF format', async () => {
-      const query = { 
+      const query = {
         format: ExportFormat.PDF,
         from: '2024-01-01',
-        to: '2024-01-31'
+        to: '2024-01-31',
       };
-      
+
       analyticsService.findAll.mockResolvedValue(mockAnalyticsData);
       analyticsExportService.exportAnalytics.mockResolvedValue(undefined);
 
@@ -117,13 +124,13 @@ describe('AnalyticsController', () => {
       expect(analyticsExportService.exportAnalytics).toHaveBeenCalledWith(
         mockAnalyticsData,
         ExportFormat.PDF,
-        mockResponse
+        mockResponse,
       );
     });
 
     it('should default to CSV format when no format specified', async () => {
       const query = { userId: '123' };
-      
+
       analyticsService.findAll.mockResolvedValue(mockAnalyticsData);
       analyticsExportService.exportAnalytics.mockResolvedValue(undefined);
 
@@ -132,13 +139,13 @@ describe('AnalyticsController', () => {
       expect(analyticsExportService.exportAnalytics).toHaveBeenCalledWith(
         mockAnalyticsData,
         ExportFormat.CSV,
-        mockResponse
+        mockResponse,
       );
     });
 
     it('should handle empty analytics data', async () => {
       const query = { format: ExportFormat.CSV };
-      
+
       analyticsService.findAll.mockResolvedValue([]);
       analyticsExportService.exportAnalytics.mockResolvedValue(undefined);
 
@@ -147,31 +154,31 @@ describe('AnalyticsController', () => {
       expect(analyticsExportService.exportAnalytics).toHaveBeenCalledWith(
         [],
         ExportFormat.CSV,
-        mockResponse
+        mockResponse,
       );
     });
 
     it('should handle service errors', async () => {
       const query = { format: ExportFormat.CSV };
       const error = new Error('Service error');
-      
+
       analyticsService.findAll.mockRejectedValue(error);
 
       await expect(
-        controller.exportAnalytics(query, mockResponse as Response)
+        controller.exportAnalytics(query, mockResponse as Response),
       ).rejects.toThrow('Service error');
     });
 
     it('should handle export service errors', async () => {
       const query = { format: ExportFormat.CSV };
       const error = new Error('Export error');
-      
+
       analyticsService.findAll.mockResolvedValue(mockAnalyticsData);
       analyticsExportService.exportAnalytics.mockRejectedValue(error);
 
       await expect(
-        controller.exportAnalytics(query, mockResponse as Response)
+        controller.exportAnalytics(query, mockResponse as Response),
       ).rejects.toThrow('Export error');
     });
   });
-}); 
+});

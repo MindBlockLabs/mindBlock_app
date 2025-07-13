@@ -1,37 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { DailyStreakService } from './daily-streak.service';
-import { DailyStreak } from '../entities/daily-streak.entity';
-import { User } from '../../users/user.entity';
-import { STREAK_MILESTONES } from '../constants/streak.constants';
+import { NotFoundException } from '@nestjs/common';
+import { PuzzleService } from 'src/puzzle/puzzle.service';
+import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
+import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
+import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
+import { User } from 'src/users/user.entity';
+import { SubmitPuzzleDto } from 'src/puzzle/dto/puzzle.dto';
 
-describe('DailyStreakService', () => {
-  let service: DailyStreakService;
-  let streakRepository: Repository<DailyStreak>;
-  let userRepository: Repository<User>;
-  let eventEmitter: EventEmitter2;
+describe('PuzzleService', () => {
+  let service: PuzzleService;
 
-  const mockStreakRepository = {
+  const mockPuzzleRepository = {
     findOne: jest.fn(),
-    create: jest.fn(),
-    save: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
-      leftJoinAndSelect: jest.fn().mockReturnThis(),
-      select: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      addOrderBy: jest.fn().mockReturnThis(),
-      skip: jest.fn().mockReturnThis(),
-      take: jest.fn().mockReturnThis(),
-      getManyAndCount: jest.fn(),
-      select: jest.fn().mockReturnThis(),
-      getRawOne: jest.fn(),
+      andWhere: jest.fn().mockReturnThis(),
+      getMany: jest.fn(),
     })),
   };
 
+  const mockSubmissionRepository = {
+    create: jest.fn(),
+    save: jest.fn(),
+    findOne: jest.fn(),
+  };
+
+  const mockProgressRepository = {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    save: jest.fn(),
+    find: jest.fn(),
+  };
+
   const mockUserRepository = {
-    count: jest.fn(),
+    findOne: jest.fn(),
+    save: jest.fn(),
   };
 
   const mockEventEmitter = {
@@ -41,325 +45,227 @@ describe('DailyStreakService', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        DailyStreakService,
+        PuzzleService,
+        { provide: getRepositoryToken(Puzzle), useValue: mockPuzzleRepository },
         {
-          provide: getRepositoryToken(DailyStreak),
-          useValue: mockStreakRepository,
+          provide: getRepositoryToken(PuzzleSubmission),
+          useValue: mockSubmissionRepository,
         },
         {
-          provide: getRepositoryToken(User),
-          useValue: mockUserRepository,
+          provide: getRepositoryToken(PuzzleProgress),
+          useValue: mockProgressRepository,
         },
-        {
-          provide: EventEmitter2,
-          useValue: mockEventEmitter,
-        },
+        { provide: getRepositoryToken(User), useValue: mockUserRepository },
+        { provide: EventEmitter2, useValue: mockEventEmitter },
       ],
     }).compile();
 
-    service = module.get<DailyStreakService>(DailyStreakService);
-    streakRepository = module.get<Repository<DailyStreak>>(getRepositoryToken(DailyStreak));
-    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
+    service = module.get<PuzzleService>(PuzzleService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('updateStreak', () => {
-    it('should create new streak for first-time user', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+  describe('submitPuzzleSolution', () => {
+    const userId = 'user-1';
+    const puzzleId = 123;
+    const submitDto: SubmitPuzzleDto = { puzzleId, userId, solution: 'answer' };
 
-      mockStreakRepository.findOne.mockResolvedValue(null);
-      mockStreakRepository.create.mockReturnValue({
-        userId,
-        lastActiveDate: today,
-        streakCount: 1,
-        longestStreak: 1,
-        lastMilestoneReached: null,
-      });
-      mockStreakRepository.save.mockResolvedValue({
+    const puzzle = {
+      id: puzzleId,
+      type: 'logic',
+      difficulty: 'easy',
+      solution: 'answer',
+    };
+
+    const user = {
+      id: userId,
+      xp: 100,
+      level: 1,
+    };
+
+    it('should successfully submit a correct puzzle solution', async () => {
+      const submission = {
         id: 1,
-        userId,
-        lastActiveDate: today,
-        streakCount: 1,
-        longestStreak: 1,
-        lastMilestoneReached: null,
-      });
-
-      const result = await service.updateStreak(userId);
-
-      expect(mockStreakRepository.findOne).toHaveBeenCalledWith({
-        where: { userId },
-        relations: ['user'],
-      });
-      expect(mockStreakRepository.create).toHaveBeenCalledWith({
-        userId,
-        lastActiveDate: today,
-        streakCount: 1,
-        longestStreak: 1,
-        lastMilestoneReached: null,
-      });
-      expect(mockStreakRepository.save).toHaveBeenCalled();
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('streak.puzzle.solved', {
-        userId,
-        streakCount: 1,
-        isNewStreak: true,
-      });
-      expect(result.streakCount).toBe(1);
-      expect(result.hasSolvedToday).toBe(true);
-    });
-
-    it('should increment streak for consecutive day', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      const existingStreak = {
-        id: 1,
-        userId,
-        lastActiveDate: yesterday,
-        streakCount: 3,
-        longestStreak: 3,
-        lastMilestoneReached: null,
+        user,
+        puzzle,
+        solution: submitDto.solution,
+        isCorrect: true,
+        createdAt: new Date(),
+        skipped: false,
       };
 
-      mockStreakRepository.findOne.mockResolvedValue(existingStreak);
-      mockStreakRepository.save.mockResolvedValue({
-        ...existingStreak,
-        lastActiveDate: today,
-        streakCount: 4,
-        longestStreak: 4,
-      });
-
-      const result = await service.updateStreak(userId);
-
-      expect(mockStreakRepository.save).toHaveBeenCalledWith({
-        ...existingStreak,
-        lastActiveDate: today,
-        streakCount: 4,
-        longestStreak: 4,
-      });
-      expect(result.streakCount).toBe(4);
-      expect(result.hasSolvedToday).toBe(true);
-    });
-
-    it('should reset streak when day is skipped', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const twoDaysAgo = new Date(today);
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-
-      const existingStreak = {
-        id: 1,
+      mockPuzzleRepository.findOne.mockResolvedValueOnce(puzzle); // puzzle
+      mockUserRepository.findOne.mockResolvedValueOnce(user); // user
+      mockSubmissionRepository.create.mockReturnValue(submission);
+      mockSubmissionRepository.save.mockResolvedValue(submission);
+      mockSubmissionRepository.findOne.mockResolvedValueOnce(null); // no previous correct submission
+      mockProgressRepository.findOne.mockResolvedValue(null);
+      mockProgressRepository.create.mockReturnValue({
         userId,
-        lastActiveDate: twoDaysAgo,
-        streakCount: 5,
-        longestStreak: 5,
-        lastMilestoneReached: null,
-      };
-
-      mockStreakRepository.findOne.mockResolvedValue(existingStreak);
-      mockStreakRepository.save.mockResolvedValue({
-        ...existingStreak,
-        lastActiveDate: today,
-        streakCount: 1,
-        longestStreak: 5, // Should remain the same
+        puzzleType: puzzle.type,
+        completedCount: 0,
       });
+      mockProgressRepository.save.mockResolvedValue({});
+      mockUserRepository.save.mockResolvedValue({ ...user, xp: 200, level: 1 });
 
-      const result = await service.updateStreak(userId);
-
-      expect(mockStreakRepository.save).toHaveBeenCalledWith({
-        ...existingStreak,
-        lastActiveDate: today,
-        streakCount: 1,
-        longestStreak: 5,
-      });
-      expect(result.streakCount).toBe(1);
-      expect(result.hasSolvedToday).toBe(true);
-    });
-
-    it('should not update streak if already solved today', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const existingStreak = {
-        id: 1,
+      const result = await service.submitPuzzleSolution(
         userId,
-        lastActiveDate: today,
-        streakCount: 3,
-        longestStreak: 3,
-        lastMilestoneReached: null,
-      };
+        puzzleId,
+        submitDto,
+      );
 
-      mockStreakRepository.findOne.mockResolvedValue(existingStreak);
-
-      const result = await service.updateStreak(userId);
-
-      expect(mockStreakRepository.save).not.toHaveBeenCalled();
-      expect(mockEventEmitter.emit).not.toHaveBeenCalled();
-      expect(result.streakCount).toBe(3);
-      expect(result.hasSolvedToday).toBe(true);
-    });
-
-    it('should award milestone rewards when reaching milestones', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      const existingStreak = {
-        id: 1,
-        userId,
-        lastActiveDate: yesterday,
-        streakCount: 2,
-        longestStreak: 2,
-        lastMilestoneReached: null,
-      };
-
-      mockStreakRepository.findOne.mockResolvedValue(existingStreak);
-      mockStreakRepository.save.mockResolvedValue({
-        ...existingStreak,
-        lastActiveDate: today,
-        streakCount: 3,
-        longestStreak: 3,
-        lastMilestoneReached: 3,
-      });
-
-      const result = await service.updateStreak(userId);
-
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('streak.milestone.reached', {
-        userId,
-        milestone: 3,
-        reward: {
+      expect(result.success).toBe(true);
+      expect(result.xpEarned).toBe(100);
+      expect(result.tokensEarned).toBe(10);
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'puzzle.submitted',
+        expect.objectContaining({
           userId,
-          bonusXp: STREAK_MILESTONES[3].xp,
-          bonusTokens: STREAK_MILESTONES[3].tokens,
-          reason: STREAK_MILESTONES[3].description,
-        },
+          puzzleId,
+          isCorrect: true,
+        }),
+      );
+    });
+
+    it('should handle incorrect puzzle solution', async () => {
+      const incorrectDto = { solution: 'wrong' };
+
+      mockPuzzleRepository.findOne.mockResolvedValue(puzzle);
+      mockUserRepository.findOne.mockResolvedValue(user);
+      mockSubmissionRepository.create.mockReturnValue({
+        id: 2,
+        user,
+        puzzle,
+        solution: incorrectDto.solution,
+        isCorrect: false,
+        createdAt: new Date(),
+        skipped: false,
       });
-      expect(result.streakCount).toBe(3);
-    });
-  });
+      mockSubmissionRepository.save.mockResolvedValue({});
+      mockSubmissionRepository.findOne.mockResolvedValue(null);
 
-  describe('getStreak', () => {
-    it('should return streak data for existing user', async () => {
-      const userId = 1;
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const existingStreak = {
-        id: 1,
+      const result = await service.submitPuzzleSolution(
         userId,
-        lastActiveDate: today,
-        streakCount: 5,
-        longestStreak: 10,
-        lastMilestoneReached: 3,
-      };
+        puzzleId,
+        submitDto,
+      );
 
-      mockStreakRepository.findOne.mockResolvedValue(existingStreak);
-
-      const result = await service.getStreak(userId);
-
-      expect(result.streakCount).toBe(5);
-      expect(result.longestStreak).toBe(10);
-      expect(result.hasSolvedToday).toBe(true);
-      expect(result.nextMilestone).toBe(7);
-      expect(result.daysUntilNextMilestone).toBe(2);
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Incorrect solution. Try again!');
     });
 
-    it('should return default data for new user', async () => {
-      const userId = 1;
+    it('should throw NotFoundException if puzzle not found', async () => {
+      mockPuzzleRepository.findOne.mockResolvedValue(null);
 
-      mockStreakRepository.findOne.mockResolvedValue(null);
+      await expect(
+        service.submitPuzzleSolution(userId, puzzleId, submitDto),
+      ).rejects.toThrow(NotFoundException);
+    });
 
-      const result = await service.getStreak(userId);
+    it('should throw NotFoundException if user not found', async () => {
+      mockPuzzleRepository.findOne.mockResolvedValue(puzzle);
+      mockUserRepository.findOne.mockResolvedValue(null);
 
-      expect(result.streakCount).toBe(0);
-      expect(result.longestStreak).toBe(0);
-      expect(result.lastActiveDate).toBeNull();
-      expect(result.hasSolvedToday).toBe(false);
-      expect(result.nextMilestone).toBe(3);
-      expect(result.daysUntilNextMilestone).toBe(3);
+      await expect(
+        service.submitPuzzleSolution(userId, puzzleId, submitDto),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should return already solved response if duplicate correct submission', async () => {
+      const newSubmission = {
+        id: 99,
+        user,
+        puzzle,
+        solution: submitDto.solution,
+        isCorrect: true,
+        createdAt: new Date(),
+        skipped: false,
+      };
+
+      const existingSuccess = {
+        id: 1,
+        user,
+        puzzle,
+        isCorrect: true,
+      };
+
+      mockPuzzleRepository.findOne.mockResolvedValue(puzzle);
+      mockUserRepository.findOne.mockResolvedValue(user);
+      mockSubmissionRepository.create.mockReturnValue(newSubmission);
+      mockSubmissionRepository.save.mockResolvedValue(newSubmission);
+      mockSubmissionRepository.findOne.mockResolvedValue(existingSuccess);
+
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.xpEarned).toBe(0);
+      expect(result.tokensEarned).toBe(0);
+      expect(result.message).toBe('Puzzle already solved!');
     });
   });
 
-  describe('getStreakLeaderboard', () => {
-    it('should return leaderboard with pagination', async () => {
-      const query = { page: 1, limit: 10 };
-      const mockEntries = [
-        {
-          userId: 1,
-          streakCount: 10,
-          longestStreak: 15,
-          lastActiveDate: new Date(),
-          user: { username: 'user1' },
-        },
-        {
-          userId: 2,
-          streakCount: 8,
-          longestStreak: 12,
-          lastActiveDate: new Date(),
-          user: { username: 'user2' },
-        },
-      ];
+  describe('getPuzzle', () => {
+    it('should return the puzzle if found', async () => {
+      const puzzle = { id: 1, title: 'Test' };
+      mockPuzzleRepository.findOne.mockResolvedValue(puzzle);
 
+      const result = await service.getPuzzle(1);
+
+      expect(result).toEqual(puzzle);
+    });
+
+    it('should throw if puzzle not found', async () => {
+      mockPuzzleRepository.findOne.mockResolvedValue(null);
+
+      await expect(service.getPuzzle(1)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('getPuzzles', () => {
+    it('should apply filters and return puzzles', async () => {
+      const puzzles = [{ id: 1 }, { id: 2 }];
       const mockQueryBuilder = {
-        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(puzzles),
+        where: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn(),
+        getRawOne: jest.fn(),
         select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        addOrderBy: jest.fn().mockReturnThis(),
-        skip: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
-        getManyAndCount: jest.fn().mockResolvedValue([mockEntries, 2]),
+        leftJoin: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
       };
 
-      mockStreakRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      mockPuzzleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.getStreakLeaderboard(query);
+      const result = await service.getPuzzles({
+        type: 'logic',
+        difficulty: 'easy',
+      });
 
-      expect(result.entries).toHaveLength(2);
-      expect(result.total).toBe(2);
-      expect(result.page).toBe(1);
-      expect(result.limit).toBe(10);
-      expect(result.entries[0].userId).toBe(1);
-      expect(result.entries[0].username).toBe('user1');
+      expect(result).toEqual(puzzles);
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledTimes(2);
     });
   });
 
-  describe('getStreakStats', () => {
-    it('should return streak statistics', async () => {
-      mockUserRepository.count.mockResolvedValue(100);
-      mockStreakRepository.count.mockResolvedValue(50);
+  describe('getUserProgress', () => {
+    it('should return user progress', async () => {
+      const progress = [{ id: 1, completedCount: 2 }];
+      mockProgressRepository.find.mockResolvedValue(progress);
 
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        getRawOne: jest.fn().mockResolvedValue({ average: 5.5 }),
-      };
+      const result = await service.getUserProgress('user-1');
 
-      const mockMaxQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        getRawOne: jest.fn().mockResolvedValue({ max: 30 }),
-      };
-
-      mockStreakRepository.createQueryBuilder
-        .mockReturnValueOnce(mockQueryBuilder)
-        .mockReturnValueOnce(mockMaxQueryBuilder);
-
-      const result = await service.getStreakStats();
-
-      expect(result.totalUsers).toBe(100);
-      expect(result.activeUsers).toBe(50);
-      expect(result.averageStreak).toBe(6);
-      expect(result.topStreak).toBe(30);
+      expect(result).toEqual(progress);
     });
   });
-}); 
+});
