@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { PuzzleType } from '../enums/puzzle-type.enum';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
 
@@ -20,6 +20,21 @@ export class PuzzleFilterDto {
 }
 
 export class SubmitPuzzleDto {
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  userId: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  puzzleId: number;
+
+  @ApiProperty({ default: false })
+  @IsOptional()
+  @IsBoolean()
+  skipped?: boolean = false;
+
   @ApiProperty({ description: 'User solution to the puzzle' })
   @IsNotEmpty()
   @IsString()

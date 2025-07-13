@@ -10,7 +10,7 @@ import { User } from 'src/users/user.entity';
 import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
 
 @Entity('puzzle_submissions')
-@Unique(['user', 'puzzle']) 
+@Unique(['user', 'puzzle'])
 export class PuzzleSubmission {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -25,7 +25,7 @@ export class PuzzleSubmission {
   isCorrect: boolean;
 
   @Column({ nullable: true })
-  selectedAnswer?: string;
+  solution?: string;
 
   @Column({ default: false })
   skipped: boolean;
