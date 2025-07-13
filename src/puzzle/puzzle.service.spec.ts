@@ -48,10 +48,28 @@ describe('PuzzleService', () => {
       providers: [
         PuzzleService,
         { provide: getRepositoryToken(Puzzle), useValue: mockPuzzleRepository },
-        { provide: getRepositoryToken(PuzzleSubmission), useValue: mockSubmissionRepository },
-        { provide: getRepositoryToken(PuzzleProgress), useValue: mockProgressRepository },
+        {
+          provide: getRepositoryToken(PuzzleSubmission),
+          useValue: mockSubmissionRepository,
+        },
+        {
+          provide: getRepositoryToken(PuzzleProgress),
+          useValue: mockProgressRepository,
+        },
         { provide: getRepositoryToken(User), useValue: mockUserRepository },
         { provide: EventEmitter2, useValue: mockEventEmitter },
+        {
+          provide: getRepositoryToken(User),
+          useValue: {
+            findOne: jest.fn().mockResolvedValue(mockUserRepository), // or null to test NotFound
+          },
+        },
+        {
+          provide: getRepositoryToken(Puzzle),
+          useValue: {
+            findOne: jest.fn().mockResolvedValue(mockPuzzleRepository), // or null to test NotFound
+          },
+        }
       ],
     }).compile();
 
@@ -65,8 +83,7 @@ describe('PuzzleService', () => {
   describe('submitPuzzleSolution', () => {
     const userId = 'user-1';
     const puzzleId = 123;
-    const submitDto: SubmitPuzzleDto = { userId,
-  puzzleId, solution: 'answer' };
+    const submitDto: SubmitPuzzleDto = { userId, puzzleId, solution: 'answer' };
 
     const puzzle = {
       id: puzzleId,
@@ -93,7 +110,7 @@ describe('PuzzleService', () => {
       };
 
       mockPuzzleRepository.findOne.mockResolvedValueOnce(puzzle); // puzzle
-      mockUserRepository.findOne.mockResolvedValueOnce(user);     // user
+      mockUserRepository.findOne.mockResolvedValueOnce(user); // user
       mockSubmissionRepository.create.mockReturnValue(submission);
       mockSubmissionRepository.save.mockResolvedValue(submission);
       mockSubmissionRepository.findOne.mockResolvedValueOnce(null); // no previous correct submission
@@ -106,16 +123,23 @@ describe('PuzzleService', () => {
       mockProgressRepository.save.mockResolvedValue({});
       mockUserRepository.save.mockResolvedValue({ ...user, xp: 200, level: 1 });
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDto);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
 
       expect(result.success).toBe(true);
       expect(result.xpEarned).toBe(100);
       expect(result.tokensEarned).toBe(10);
-      expect(mockEventEmitter.emit).toHaveBeenCalledWith('puzzle.submitted', expect.objectContaining({
-        userId,
-        puzzleId,
-        isCorrect: true,
-      }));
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        'puzzle.submitted',
+        expect.objectContaining({
+          userId,
+          puzzleId,
+          isCorrect: true,
+        }),
+      );
     });
 
     it('should handle incorrect puzzle solution', async () => {
@@ -135,7 +159,11 @@ describe('PuzzleService', () => {
       mockSubmissionRepository.save.mockResolvedValue({});
       mockSubmissionRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDto);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Incorrect solution. Try again!');
@@ -182,7 +210,11 @@ describe('PuzzleService', () => {
       mockSubmissionRepository.save.mockResolvedValue(newSubmission);
       mockSubmissionRepository.findOne.mockResolvedValue(existingSuccess);
 
-      const result = await service.submitPuzzleSolution(userId, puzzleId, submitDto);
+      const result = await service.submitPuzzleSolution(
+        userId,
+        puzzleId,
+        submitDto,
+      );
 
       expect(result.success).toBe(true);
       expect(result.xpEarned).toBe(0);
@@ -214,11 +246,25 @@ describe('PuzzleService', () => {
       const mockQueryBuilder = {
         andWhere: jest.fn().mockReturnThis(),
         getMany: jest.fn().mockResolvedValue(puzzles),
+        where: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn(),
+        getRawOne: jest.fn(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
       };
 
       mockPuzzleRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
-      const result = await service.getPuzzles({ type: 'logic', difficulty: 'easy' });
+      const result = await service.getPuzzles({
+        type: 'logic',
+        difficulty: 'easy',
+      });
 
       expect(result).toEqual(puzzles);
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledTimes(2);
