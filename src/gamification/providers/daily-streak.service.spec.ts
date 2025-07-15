@@ -26,6 +26,7 @@ describe('DailyStreakService', () => {
         { provide: GetStreakStatsService, useValue: mockGetStreakStatsService },
       ],
     }).compile();
+
     service = module.get<DailyStreakService>(DailyStreakService);
     jest.clearAllMocks();
   });

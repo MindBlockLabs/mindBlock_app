@@ -7,6 +7,10 @@ import * as request from 'supertest';
 import { AnalyticsModule } from './analytics.module';
 import { AnalyticsEvent } from './entities/analytics-event.entity';
 import { TimeFilterModule } from '../timefilter/timefilter.module';
+import { AnalyticsController } from './analytics.controller';
+import { AnalyticsService } from './providers/analytics.service';
+import { AnalyticsExportService } from './providers/analytics-export.service';
+import { AnalyticsBreakdownService } from './providers/analytics-breakdown.service';
 
 describe('Analytics Breakdown Integration', () => {
   let app: INestApplication;
@@ -33,6 +37,11 @@ describe('Analytics Breakdown Integration', () => {
       getRepositoryToken(AnalyticsEvent),
     );
   });
+
+  const mockAnalyticsBreakdownService = {
+  getBreakdown: jest.fn(),
+};
+
 
   beforeEach(async () => {
     // Clear database before each test
