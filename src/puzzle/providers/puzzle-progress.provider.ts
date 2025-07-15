@@ -1,3 +1,12 @@
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { Repository } from "typeorm";
+import { PuzzleSubmission } from "../entities/puzzle-submission.entity";
+import { Puzzle } from "../entities/puzzle.entity";
+import { User } from "src/users/user.entity";
+import { SubmitPuzzleDto } from "../dto/puzzle.dto";
+import { PuzzleType } from "../enums/puzzle-type.enum";
+
 @Injectable()
 export class PuzzleProgressProvider {
 constructor(
@@ -13,7 +22,7 @@ constructor(
 
  
   async submitPuzzleAnswer(dto: SubmitPuzzleDto): Promise<PuzzleSubmission> {
-    const { userId, puzzleId, selectedAnswer, skipped } = dto;
+    const { userId, puzzleId, solution, skipped } = dto;
 
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
@@ -29,12 +38,12 @@ constructor(
       throw new BadRequestException('Puzzle already submitted');
     }
 
-    const isCorrect = !skipped && selectedAnswer === puzzle.solution;
+    const isCorrect = !skipped && solution === puzzle.solution;
 
     const submission = this.submissionRepo.create({
       user,
       puzzle,
-      selectedAnswer,
+      solution,
       skipped,
       isCorrect,
     });
@@ -46,7 +55,7 @@ constructor(
    * Get user's puzzle progress by category
    */
   async getProgressByCategory(userId: string): Promise<
-    Record<PuzzleCategory, { completed: number; total: number }>
+    Record<PuzzleType, { completed: number; total: number }>
   > {
     const allPuzzles = await this.puzzleRepo.find({
       where: { isPublished: true },
@@ -60,13 +69,13 @@ constructor(
     const progressMap: Record<string, { completed: number; total: number }> = {};
 
     for (const puzzle of allPuzzles) {
-      const key = puzzle.category;
+      const key = puzzle.type;
       progressMap[key] = progressMap[key] || { completed: 0, total: 0 };
       progressMap[key].total += 1;
     }
 
     for (const submission of completed) {
-      const key = submission.puzzle.category;
+      const key = submission.puzzle.type;
       if (progressMap[key]) {
         progressMap[key].completed += 1;
       }

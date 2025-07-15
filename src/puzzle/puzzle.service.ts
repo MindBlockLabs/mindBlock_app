@@ -18,42 +18,59 @@ export class PuzzleService {
   constructor(
     @InjectRepository(Puzzle)
     private readonly puzzleRepository: Repository<Puzzle>,
+
     @InjectRepository(PuzzleSubmission)
     private readonly submissionRepository: Repository<PuzzleSubmission>,
+    
     @InjectRepository(PuzzleProgress)
     private readonly progressRepository: Repository<PuzzleProgress>,
+
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    
     private readonly eventEmitter: EventEmitter2,
-    private readonly puzzleProgressProvider: PuzzleProgressProvider,
-
   ) {}
 
   async submitPuzzleSolution(
     userId: string,
     puzzleId: number,
     submitDto: SubmitPuzzleDto,
-  ): Promise<{ success: boolean; xpEarned?: number; tokensEarned?: number; message?: string }> {
+  ): Promise<{
+    success: boolean;
+    xpEarned?: number;
+    tokensEarned?: number;
+    message?: string;
+  }> {
     try {
       // 1. Get the puzzle and verify it exists
       const puzzle = await this.puzzleRepository.findOne({
         where: { id: puzzleId },
       });
-      
+
+      // 1. Get the user and verify it exists
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+      });
+
       if (!puzzle) {
         throw new NotFoundException('Puzzle not found');
       }
 
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
       // 2. Verify the solution
       const isCorrect = this.verifySolution(puzzle, submitDto.solution);
-      
+
       // 3. Record the submission
       const submission = this.submissionRepository.create({
-        userId,
-        puzzleId,
-        attemptData: { solution: submitDto.solution },
-        result: isCorrect,
-        submittedAt: new Date(),
+        user,
+        puzzle,
+        solution: submitDto.solution,
+        isCorrect,
+        createdAt: new Date(),
+        skipped: false,
       });
       await this.submissionRepository.save(submission);
 
@@ -64,27 +81,31 @@ export class PuzzleService {
         isCorrect,
         timestamp: new Date(),
       };
-      
+
       this.eventEmitter.emit('puzzle.submitted', puzzleSubmissionEvent);
 
       if (!isCorrect) {
-        return { 
-          success: false, 
-          message: 'Incorrect solution. Try again!' 
+        return {
+          success: false,
+          message: 'Incorrect solution. Try again!',
         };
       }
 
       // 5. Check for previous successful submissions (idempotency)
       const previousSuccess = await this.submissionRepository.findOne({
-        where: { userId, puzzleId, result: true },
+        where: {
+          user: { id: userId },
+          puzzle: { id: puzzleId },
+          isCorrect: true,
+        },
       });
-      
+
       if (previousSuccess && previousSuccess.id !== submission.id) {
-        return { 
-          success: true, 
-          xpEarned: 0, 
+        return {
+          success: true,
+          xpEarned: 0,
           tokensEarned: 0,
-          message: 'Puzzle already solved!'
+          message: 'Puzzle already solved!',
         };
       }
 
@@ -92,19 +113,24 @@ export class PuzzleService {
       await this.updatePuzzleProgress(userId, puzzle.type);
 
       // 7. Award XP and tokens
-      const { xpEarned, tokensEarned } = this.calculateRewards(puzzle.difficulty);
+      const { xpEarned, tokensEarned } = this.calculateRewards(
+        puzzle.difficulty,
+      );
       await this.updateUserStats(userId, xpEarned, tokensEarned);
 
       this.logger.log(`User ${userId} successfully solved puzzle ${puzzleId}`);
 
-      return { 
-        success: true, 
-        xpEarned, 
+      return {
+        success: true,
+        xpEarned,
         tokensEarned,
-        message: 'Puzzle solved successfully!'
+        message: 'Puzzle solved successfully!',
       };
     } catch (error) {
-      this.logger.error(`Error submitting puzzle solution: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error submitting puzzle solution: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -112,7 +138,10 @@ export class PuzzleService {
   private verifySolution(puzzle: Puzzle, submittedSolution: string): boolean {
     // Simple string comparison for now
     // In a real implementation, this could involve more complex verification logic
-    return puzzle.solution.toLowerCase().trim() === submittedSolution.toLowerCase().trim();
+    return (
+      puzzle.solution.toLowerCase().trim() ===
+      submittedSolution.toLowerCase().trim()
+    );
   }
 
   private async updatePuzzleProgress(
@@ -135,7 +164,10 @@ export class PuzzleService {
     await this.progressRepository.save(progress);
   }
 
-  private calculateRewards(difficulty: string): { xpEarned: number; tokensEarned: number } {
+  private calculateRewards(difficulty: string): {
+    xpEarned: number;
+    tokensEarned: number;
+  } {
     const rewards = {
       easy: { xp: 100, tokens: 10 },
       medium: { xp: 250, tokens: 25 },
@@ -184,11 +216,15 @@ export class PuzzleService {
     }
 
     if (filters?.difficulty) {
-      queryBuilder.andWhere('puzzle.difficulty = :difficulty', { difficulty: filters.difficulty });
+      queryBuilder.andWhere('puzzle.difficulty = :difficulty', {
+        difficulty: filters.difficulty,
+      });
     }
 
     if (filters?.isPublished !== undefined) {
-      queryBuilder.andWhere('puzzle.isPublished = :isPublished', { isPublished: filters.isPublished });
+      queryBuilder.andWhere('puzzle.isPublished = :isPublished', {
+        isPublished: filters.isPublished,
+      });
     }
 
     return queryBuilder.getMany();
@@ -199,6 +235,4 @@ export class PuzzleService {
       where: { userId },
     });
   }
-
-  
 }
