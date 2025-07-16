@@ -322,7 +322,7 @@ describe('PuzzleService', () => {
 
       mockProgressRepository.find.mockResolvedValue(progress);
 
-      const result = await service.getUserProgress('user-1');
+      const result = await service.getUserProgress('1');
 
       expect(result).toEqual(progress);
       expect(mockProgressRepository.find).toHaveBeenCalledWith({
