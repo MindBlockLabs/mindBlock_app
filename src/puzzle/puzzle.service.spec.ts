@@ -12,12 +12,28 @@ import { SubmitPuzzleDto } from './dto/puzzle.dto';
 
 describe('PuzzleService', () => {
   let service: PuzzleService;
+  let puzzleRepository: any;
+  let submissionRepository: any;
+  let progressRepository: any;
+  let userRepository: any;
+  let eventEmitter: any;
 
   const mockPuzzleRepository = {
     findOne: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(),
+      where: jest.fn().mockReturnThis(),
+      limit: jest.fn().mockReturnThis(),
+      getRawMany: jest.fn(),
+      getRawOne: jest.fn(),
+      select: jest.fn().mockReturnThis(),
+      addSelect: jest.fn().mockReturnThis(),
+      groupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
+      take: jest.fn().mockReturnThis(),
+      leftJoin: jest.fn().mockReturnThis(),
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
     })),
   };
 
@@ -58,22 +74,21 @@ describe('PuzzleService', () => {
         },
         { provide: getRepositoryToken(User), useValue: mockUserRepository },
         { provide: EventEmitter2, useValue: mockEventEmitter },
-        {
-          provide: getRepositoryToken(User),
-          useValue: {
-            findOne: jest.fn().mockResolvedValue(mockUserRepository), // or null to test NotFound
-          },
-        },
-        {
-          provide: getRepositoryToken(Puzzle),
-          useValue: {
-            findOne: jest.fn().mockResolvedValue(mockPuzzleRepository), // or null to test NotFound
-          },
-        }
       ],
     }).compile();
 
     service = module.get<PuzzleService>(PuzzleService);
+    puzzleRepository = module.get<Repository<Puzzle>>(
+      getRepositoryToken(Puzzle),
+    );
+    submissionRepository = module.get<Repository<PuzzleSubmission>>(
+      getRepositoryToken(PuzzleSubmission),
+    );
+    progressRepository = module.get<Repository<PuzzleProgress>>(
+      getRepositoryToken(PuzzleProgress),
+    );
+    userRepository = module.get<Repository<User>>(getRepositoryToken(User));
+    eventEmitter = module.get<EventEmitter2>(EventEmitter2);
   });
 
   afterEach(() => {
@@ -129,6 +144,15 @@ describe('PuzzleService', () => {
         submitDto,
       );
 
+      expect(mockPuzzleRepository.findOne).toHaveBeenCalledWith({
+        where: { id: puzzleId },
+      });
+      expect(mockSubmissionRepository.create).toHaveBeenCalledWith({
+        userId,
+        puzzleId,
+        submitDto,
+      });
+
       expect(result.success).toBe(true);
       expect(result.xpEarned).toBe(100);
       expect(result.tokensEarned).toBe(10);
@@ -143,7 +167,7 @@ describe('PuzzleService', () => {
     });
 
     it('should handle incorrect puzzle solution', async () => {
-      const incorrectDto = { solution: 'wrong' };
+      const incorrectDto = { userId, puzzleId, solution: 'wrong' };
 
       mockPuzzleRepository.findOne.mockResolvedValue(puzzle);
       mockUserRepository.findOne.mockResolvedValue(user);
@@ -162,9 +186,15 @@ describe('PuzzleService', () => {
       const result = await service.submitPuzzleSolution(
         userId,
         puzzleId,
-        submitDto,
+        incorrectDto,
       );
 
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith('puzzle.submitted', {
+        userId,
+        puzzleId,
+        isCorrect: false,
+        timestamp: expect.any(Date),
+      });
       expect(result.success).toBe(false);
       expect(result.message).toBe('Incorrect solution. Try again!');
     });
@@ -272,13 +302,32 @@ describe('PuzzleService', () => {
   });
 
   describe('getUserProgress', () => {
-    it('should return user progress', async () => {
-      const progress = [{ id: 1, completedCount: 2 }];
+    it('should return user puzzle progress', async () => {
+      const progress = [
+        {
+          id: 1,
+          userId: '1',
+          puzzleType: 'logic',
+          completedCount: 5,
+          total: 10,
+        },
+        {
+          id: 2,
+          userId: '1',
+          puzzleType: 'coding',
+          completedCount: 3,
+          total: 8,
+        },
+      ];
+
       mockProgressRepository.find.mockResolvedValue(progress);
 
       const result = await service.getUserProgress('user-1');
 
       expect(result).toEqual(progress);
+      expect(mockProgressRepository.find).toHaveBeenCalledWith({
+        where: { userId: '1' },
+      });
     });
   });
 });
