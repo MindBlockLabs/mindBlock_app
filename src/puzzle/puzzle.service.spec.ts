@@ -125,7 +125,10 @@ describe('PuzzleService', () => {
       };
 
       mockPuzzleRepository.findOne.mockResolvedValueOnce(puzzle); // puzzle
-      mockUserRepository.findOne.mockResolvedValueOnce(user); // user
+      mockUserRepository.findOne.mockImplementation(({ where: { id } }) =>
+        id === userId ? Promise.resolve(user) : Promise.resolve(null),
+      );
+      // user
       mockSubmissionRepository.create.mockReturnValue(submission);
       mockSubmissionRepository.save.mockResolvedValue(submission);
       mockSubmissionRepository.findOne.mockResolvedValueOnce(null); // no previous correct submission
@@ -150,7 +153,10 @@ describe('PuzzleService', () => {
       expect(mockSubmissionRepository.create).toHaveBeenCalledWith({
         userId,
         puzzleId,
-        submitDto,
+        solution: submitDto.solution,
+        isCorrect: true,
+        createdAt: expect.any(Date),
+        skipped: false,
       });
 
       expect(result.success).toBe(true);
@@ -306,7 +312,7 @@ describe('PuzzleService', () => {
       const progress = [
         {
           id: 1,
-          userId: '1',
+          userId: 'user-1',
           puzzleType: 'logic',
           completedCount: 5,
           total: 10,
@@ -326,7 +332,7 @@ describe('PuzzleService', () => {
 
       expect(result).toEqual(progress);
       expect(mockProgressRepository.find).toHaveBeenCalledWith({
-        where: { userId: '1' },
+        where: { userId: 'user-1' },
       });
     });
   });
