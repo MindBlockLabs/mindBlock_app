@@ -613,6 +613,14 @@ export class IQAssessmentService {
   public async submitQuiz(activeUser: ActiveUserData, dto: SubmitQuizDto) {
     let correctCount = 0;
 
+    const detailedBreakdown: {
+      questionId: string;
+      questionText: string;
+      selectedAnswer: string;
+      correctAnswer: string;
+      isCorrect: boolean;
+    }[] = [];
+
     for (const response of dto.responses) {
       const question = await this.questionRepository.findOne({
         where: { id: response.questionId },
