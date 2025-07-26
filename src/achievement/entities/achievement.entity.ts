@@ -1,4 +1,11 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { User } from 'src/users/user.entity';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('achievements')
 export class Achievement {
@@ -7,6 +14,9 @@ export class Achievement {
 
   @Column()
   title: string;
+
+  @ManyToOne(() => User, { eager: true })
+  user: User;
 
   @Column()
   description: string;

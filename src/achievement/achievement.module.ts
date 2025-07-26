@@ -8,11 +8,12 @@ import { Achievement } from './entities/achievement.entity';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 import { Badge } from 'src/badge/entities/badge.entity';
 import { User } from 'src/users/user.entity';
+import { FindByUserIdProvider } from './providers/find-by-user-id-provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Achievement, UserAchievement, LeaderboardEntry, Badge, User])],
   controllers: [AchievementController],
-  providers: [AchievementService, AchievementUnlockerProvider],
+  providers: [AchievementService, AchievementUnlockerProvider, FindByUserIdProvider],
   exports: [AchievementService]
 })
 export class AchievementModule {}
