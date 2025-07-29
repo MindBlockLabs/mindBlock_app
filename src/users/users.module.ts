@@ -13,11 +13,15 @@ import { CreateGoogleUserProvider } from './providers/googleUserProvider';
 import { PaginationModule } from 'src/common/pagination/pagination.module';
 import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
 import { UpdateUserService } from './providers/update-user.service';
+import { PuzzleActivityProvider } from './providers/PuzzleActivityProvider';
+import { UserActivityService } from './providers/UserActivityService';
+import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
+import { UserAchievement } from 'src/achievement/entities/user-achievement.entity';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, PuzzleSubmission, UserAchievement]),
     PaginationModule,
   ],
   controllers: [UsersController],
@@ -30,9 +34,10 @@ import { UpdateUserService } from './providers/update-user.service';
     DeleteUserService,
     FindOneByGoogleIdProvider,
     CreateGoogleUserProvider,
-    UpdateUserService
+    UpdateUserService,
+    PuzzleActivityProvider,
+    UserActivityService,
   ],
-  exports: [UsersService], // Make service reusable
+  exports: [UsersService, UserActivityService],
 })
-@Module({})
 export class UsersModule {}
