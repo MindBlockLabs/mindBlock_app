@@ -2,6 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -9,6 +11,7 @@ import {
 import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 import { Badge } from 'src/badge/entities/badge.entity';
+import { Achievement } from 'src/achievement/entities/achievement.entity';
 // import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
 // import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
 
@@ -86,6 +89,12 @@ export class User {
   @ApiProperty({ example: 100 })
   @Column({ type: 'int', default: 0 })
   tokens: number;
+
+  @ManyToMany(() => Achievement, (achievement) => achievement.user, {
+    cascade: true,
+  })
+  @JoinTable()
+  achievements: Achievement[];
 
   /**
    * One-to-many relation with puzzle progress records.
