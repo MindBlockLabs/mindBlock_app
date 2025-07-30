@@ -24,6 +24,9 @@ export class Achievement {
   @Column()
   iconUrl: string;
 
+  @Column({ nullable: true })
+  unlockCondition?: string;
+
   @CreateDateColumn()
   createdAt: Date;
 }
