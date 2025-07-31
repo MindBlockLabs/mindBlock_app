@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { RedisModule } from './redis/redis.module';
+
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
@@ -50,14 +50,13 @@ import { AchievementModule } from './achievement/achievement.module';
     UsersModule,
     LeaderboardModule,
     CommonModule,
-    RedisModule,
     BlockchainModule,
     BadgeModule,
     TimeFilterModule,
     IQAssessmentModule,
     PuzzleModule,
     GamificationModule,
-    AchievementModule,
+    AchievementModule
   ],
   controllers: [AppController],
   providers: [AppService],
