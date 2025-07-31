@@ -26,7 +26,7 @@
   "dependencies": {
     "@nestjs/axios": "^4.0.0",
     "@nestjs/common": "^11.0.12",
-    "@nestjs/config": "^4.0.2",
+    "@nestjs/config": "^4.0.1",
     "@nestjs/core": "^11.0.12",
     "@nestjs/event-emitter": "^3.0.1",
     "@nestjs/jwt": "^11.0.0",
@@ -42,7 +42,6 @@
     "class-validator": "^0.14.1",
     "fast-csv": "^5.0.2",
     "google-auth-library": "^9.15.1",
-    "ioredis": "^5.6.1",
     "oauth2client": "^1.0.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

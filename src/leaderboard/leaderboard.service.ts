@@ -1,7 +1,4 @@
-/* eslint-disable prettier/prettier */
-import { Inject, Injectable } from '@nestjs/common';
-import Redis from 'ioredis';
-import { REDIS_CLIENT } from 'src/redis/redis.constants';
+import { Injectable } from '@nestjs/common';
 import {
   LeaderboardQueryDto,
   SortBy,
@@ -18,30 +15,10 @@ export class LeaderboardService {
     private readonly getLeaderboardService: GetLeaderboardProvider,
     private readonly updatePlayerStatsService: UpdatePlayerStatsProvider,
     private readonly getUserRankService: GetUserRankProvider,
-    @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
-  async getLeaderboard(query: LeaderboardQueryDto): Promise<any[]> {
-    const cacheKey = `leaderboard:${query.sort}:${query.period}:${query.limit}:${query.offset}`;
-
-    try {
-      const cached = await this.redis.get(cacheKey);
-      if (cached) {
-        return JSON.parse(cached) as any[];
-      }
-    } catch (err) {
-      console.warn('Redis read error:', err);
-    }
-
-    const result = await this.getLeaderboardService.execute(query);
-
-    try {
-      await this.redis.set(cacheKey, JSON.stringify(result), 'EX', 60);
-    } catch (err) {
-      console.warn('Redis write error:', err);
-    }
-
-    return result;
+  getLeaderboard(query: LeaderboardQueryDto) {
+    return this.getLeaderboardService.execute(query);
   }
 
   updatePlayerStats(userId: string, dto: UpdateLeaderboardDto) {
