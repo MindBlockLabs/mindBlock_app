@@ -98,7 +98,7 @@ starknet-deploy
 
 ## 👥 Contributors & Contact
 
-📢 General Telegram Group: [Join here](https://t.me/+wwYz7R7azPRlODBk)
+📢 General Telegram Group: [Join here](https://t.me/+kjacdy68yfwwNTVk)
 
 📧 Owner Emails:
 
