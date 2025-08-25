@@ -5,10 +5,10 @@ import { AchievementUnlockerProvider } from './providers/achievement-unlocker.se
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserAchievement } from './entities/user-achievement.entity';
 import { Achievement } from './entities/achievement.entity';
+import { FindByUserIdProvider } from './providers/find-by-user-id-provider';
 import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
 import { Badge } from 'src/badge/entities/badge.entity';
 import { User } from 'src/users/user.entity';
-import { FindByUserIdProvider } from './providers/find-by-user-id-provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Achievement, UserAchievement, LeaderboardEntry, Badge, User])],
