@@ -8,7 +8,7 @@ import {
   Index,
 } from 'typeorm';
 import { Badge } from '../../badge/entities/badge.entity';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Entity('leaderboard_entries')
 @Index(['tokens', 'createdAt'])

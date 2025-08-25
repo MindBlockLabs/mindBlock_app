@@ -1,10 +1,26 @@
-import { Controller, Get, Query, UseGuards, Res, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiQuery, ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Query,
+  UseGuards,
+  Res,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
+import {
+  ApiQuery,
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Response } from 'express';
 import { GetAnalyticsQueryDto } from './dto/get-analytics-query.dto';
-import { ExportAnalyticsQueryDto, ExportFormat } from './dto/export-analytics-query.dto';
+import {
+  ExportAnalyticsQueryDto,
+  ExportFormat,
+} from './dto/export-analytics-query.dto';
 import { AnalyticsBreakdownResponse } from './dto/analytics-breakdown-response.dto';
-import { TimeFilter } from 'src/timefilter/timefilter.enum.ts/timefilter.enum';
 import { AnalyticsService } from './providers/analytics.service';
 import { AnalyticsExportService } from './providers/analytics-export.service';
 import { AnalyticsBreakdownService } from './providers/analytics-breakdown.service';
@@ -12,6 +28,7 @@ import { RoleDecorator } from '../auth/decorators/role-decorator';
 import { Role } from '../auth/enum/roles.enum';
 import { Auth } from '../auth/decorators/auth.decorator';
 import { authType } from '../auth/enum/auth-type.enum';
+import { TimeFilter } from '../timefilter/timefilter.enums/timefilter.enum';
 
 @ApiTags('Analytics')
 @Controller('analytics')
@@ -48,9 +65,10 @@ export class AnalyticsController {
 
   @Get('breakdown')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get analytics breakdown by event type',
-    description: 'Returns distribution of analytics events by type, suitable for pie charts and bar charts. Supports filtering by date range, user, and session.'
+    description:
+      'Returns distribution of analytics events by type, suitable for pie charts and bar charts. Supports filtering by date range, user, and session.',
   })
   @ApiQuery({
     name: 'timeFilter',
@@ -95,15 +113,18 @@ export class AnalyticsController {
     status: HttpStatus.UNAUTHORIZED,
     description: 'Unauthorized - Valid token required',
   })
-  async getBreakdown(@Query() query: GetAnalyticsQueryDto): Promise<AnalyticsBreakdownResponse> {
+  async getBreakdown(
+    @Query() query: GetAnalyticsQueryDto,
+  ): Promise<AnalyticsBreakdownResponse> {
     return this.analyticsBreakdownService.getBreakdown(query);
   }
 
   @Get('breakdown/top')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get top event types by count',
-    description: 'Returns the top N most frequent event types, ordered by count descending.'
+    description:
+      'Returns the top N most frequent event types, ordered by count descending.',
   })
   @ApiQuery({
     name: 'limit',
@@ -162,14 +183,18 @@ export class AnalyticsController {
     @Query() query?: GetAnalyticsQueryDto,
   ) {
     const safeLimit = Math.min(Math.max(limit || 10, 1), 50); // Clamp between 1 and 50
-    return this.analyticsBreakdownService.getTopEventTypes(safeLimit, query || {});
+    return this.analyticsBreakdownService.getTopEventTypes(
+      safeLimit,
+      query || {},
+    );
   }
 
   @Get('breakdown/event-types')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get available event types',
-    description: 'Returns a list of all available event types in the analytics system.'
+    description:
+      'Returns a list of all available event types in the analytics system.',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -186,9 +211,10 @@ export class AnalyticsController {
   @Get('export')
   @HttpCode(HttpStatus.OK)
   @RoleDecorator(Role.Admin)
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Export analytics data',
-    description: 'Export analytics data in CSV or PDF format. Admin only access.'
+    description:
+      'Export analytics data in CSV or PDF format. Admin only access.',
   })
   @ApiQuery({
     name: 'format',
@@ -249,7 +275,7 @@ export class AnalyticsController {
   ): Promise<void> {
     // Get filtered analytics data
     const data = await this.analyticsService.findAll(query);
-    
+
     // Export data in requested format
     await this.analyticsExportService.exportAnalytics(
       data,

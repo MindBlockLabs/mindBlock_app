@@ -6,8 +6,8 @@ import {
   CreateDateColumn,
   Unique,
 } from 'typeorm';
-import { User } from 'src/users/user.entity';
-import { Puzzle } from 'src/puzzle/entities/puzzle.entity';
+import { User } from '../../users/user.entity';
+import { Puzzle } from '../../puzzle/entities/puzzle.entity';
 
 @Entity('puzzle_submissions')
 @Unique(['user', 'puzzle'])

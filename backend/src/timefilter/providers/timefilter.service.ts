@@ -1,5 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { TimeFilter } from '../timefilter.enum.ts/timefilter.enum';
+import { TimeFilter } from '../timefilter.enums/timefilter.enum';
 
 @Injectable()
 export class TimeFilterService {
@@ -10,7 +10,9 @@ export class TimeFilterService {
       case TimeFilter.WEEKLY:
         return { from: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) };
       case TimeFilter.MONTHLY:
-        return { from: new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()) };
+        return {
+          from: new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()),
+        };
       case TimeFilter.ALL_TIME:
       default:
         return null;
@@ -30,7 +32,9 @@ export class TimeFilterService {
         throw new BadRequestException('Invalid date format');
       }
       if (from > to) {
-        throw new BadRequestException(`'from' date must be earlier than 'to' date`);
+        throw new BadRequestException(
+          `'from' date must be earlier than 'to' date`,
+        );
       }
 
       return { from, to };

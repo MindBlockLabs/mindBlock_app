@@ -2,7 +2,7 @@ import { Controller, Post, UseGuards, Delete, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from './roles.decorator';
 import { RolesGuard } from './roles.guard';
-import { userRole } from 'src/users/enums/userRole.enum';
+import { userRole } from '../users/enums/userRole.enum';
 
 @Controller('admin/iq-questions')
 export class IQAdminController {

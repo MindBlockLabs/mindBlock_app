@@ -1,4 +1,3 @@
-// src/puzzle/puzzle.controller.ts
 import {
   Controller,
   Get,

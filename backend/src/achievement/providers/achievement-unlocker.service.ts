@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserAchievement } from '../entities/user-achievement.entity';
 import { Achievement } from '../entities/achievement.entity';
-import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
-import { User } from 'src/users/user.entity';
-import { Badge } from 'src/badge/entities/badge.entity';
+import { LeaderboardEntry } from '../../leaderboard/entities/leaderboard.entity';
+import { User } from '../../users/user.entity';
+import { Badge } from '../../badge/entities/badge.entity';
 
 @Injectable()
 export class AchievementUnlockerProvider {

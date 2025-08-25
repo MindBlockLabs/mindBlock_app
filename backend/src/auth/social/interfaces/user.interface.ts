@@ -1,4 +1,3 @@
-
 /**Google interface */
 export interface GoogleInterface {
     /**email property of type string */

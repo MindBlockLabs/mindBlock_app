@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 import { PuzzleType } from '../enums/puzzle-type.enum';
 
 @Entity('puzzle_progress')

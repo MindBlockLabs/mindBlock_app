@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Inject, Injectable } from '@nestjs/common';
 import Redis from 'ioredis';
-import { REDIS_CLIENT } from 'src/redis/redis.constants';
+import { REDIS_CLIENT } from '../redis/redis.constants';
 import {
   LeaderboardQueryDto,
   SortBy,

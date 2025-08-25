@@ -5,7 +5,7 @@ import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { User } from '../user.entity';
 import { PaginationProvider } from '../../common/pagination/provider/pagination-provider';
 import { PaginatedInterface } from '../../common/pagination/paginatedInterfaces';
-import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 /**
  * Service for finding a user by email.
  */

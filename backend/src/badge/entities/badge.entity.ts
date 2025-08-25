@@ -1,5 +1,5 @@
-import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
-import { User } from 'src/users/user.entity';
+import { LeaderboardEntry } from '../../leaderboard/entities/leaderboard.entity';
+import { User } from '../../users/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

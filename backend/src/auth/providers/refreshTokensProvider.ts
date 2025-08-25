@@ -10,7 +10,7 @@ import { ConfigType } from '@nestjs/config';
 import jwtConfig from '../authConfig/jwt.config';
 import { GenerateTokensProvider } from './generate-tokens.provider';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { UsersService } from 'src/users/providers/users.service';
+import { UsersService } from '../../users/providers/users.service';
 
 /**
  * Refresh token provider class

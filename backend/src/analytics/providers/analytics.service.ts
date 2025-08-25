@@ -2,9 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
-import { TimeFilterService } from 'src/timefilter/providers/timefilter.service';
+import { TimeFilterService } from '../../timefilter/providers/timefilter.service';
 import { CreateAnalyticsEventDto } from '../dto/create-analytics-event.dto';
-import { TimeFilter } from 'src/timefilter/timefilter.enum.ts/timefilter.enum';
+import { TimeFilter } from '../../timefilter/timefilter.enums/timefilter.enum';
 import { GetAnalyticsQueryDto } from '../dto/get-analytics-query.dto';
 
 @Injectable()

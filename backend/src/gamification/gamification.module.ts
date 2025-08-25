@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GamificationService } from './gamification.service';
-import { PuzzleModule } from 'src/puzzle/puzzle.module';
+import { PuzzleModule } from '../puzzle/puzzle.module';
 import { GamificationController } from './gamification.controller';
 import { StreakController } from './controllers/streak.controller';
 import { DailyStreakService } from './providers/daily-streak.service';

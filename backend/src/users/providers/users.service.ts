@@ -1,5 +1,3 @@
-// src/users/providers/users.service.ts
-
 import { Injectable } from '@nestjs/common';
 import { FindOneByEmail } from './find-one-by-email.provider';
 import { FindAll } from './find-all.service';
@@ -9,10 +7,10 @@ import { User } from '../user.entity';
 import { FindOneByGoogleIdProvider } from './find-one-by-googleId';
 import { ApiOperation } from '@nestjs/swagger';
 import { CreateGoogleUserProvider } from './googleUserProvider';
-import { GoogleInterface } from 'src/auth/social/interfaces/user.interface';
+import { GoogleInterface } from '../../auth/social/interfaces/user.interface';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { PaginatedInterface } from '../../common/pagination/paginatedInterfaces';
-import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { FindOneByWallet } from './find-one-by-wallet.provider';
 import { UpdateUserService } from './update-user.service';
 import { EditUserDto } from '../dtos/editUserDto.dto';

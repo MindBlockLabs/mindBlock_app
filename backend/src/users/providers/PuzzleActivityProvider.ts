@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
-import { UserAchievement } from 'src/achievement/entities/user-achievement.entity';
+import { PuzzleSubmission } from '../../puzzle/entities/puzzle-submission.entity';
+import { UserAchievement } from '../../achievement/entities/user-achievement.entity';
 import { User } from '../user.entity';
 
 export interface UserActivityEvent {
