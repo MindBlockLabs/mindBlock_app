@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 import { HashingProvider } from './hashing.provider';
 
 @Injectable()
@@ -9,7 +9,7 @@ export class BcryptProvider implements HashingProvider {
         const saltRounds = 10
         const salt = await bcrypt.genSalt(saltRounds)
         
-        return await bcrypt.hash(inpPassword, salt) 
+        return await bcrypt.hash(inpPassword.toLocaleString(), salt) 
     }
 
     // compare
