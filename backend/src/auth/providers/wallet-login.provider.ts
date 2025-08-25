@@ -2,7 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ec, hash } from 'starknet';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
-import { UsersService } from 'src/users/providers/users.service';
+import { UsersService } from '../../users/providers/users.service';
 import jwtConfig from '../authConfig/jwt.config';
 import { WalletLoginDto } from '../dtos/walletLogin.dto';
 

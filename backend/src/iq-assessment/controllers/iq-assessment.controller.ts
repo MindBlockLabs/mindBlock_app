@@ -39,8 +39,8 @@ import { RandomQuestionsQueryDto } from '../dto/random-questions-query.dto';
 import { RandomQuestionResponseDto } from '../dto/random-question-response.dto';
 import { IQAssessmentService } from '../providers/iq-assessment.service';
 import { IqAttemptService } from '../providers/iq-attempt.service';
-import { ActiveUser } from 'src/auth/decorators/activeUser.decorator';
-import { ActiveUserData } from 'src/auth/interfaces/activeInterface';
+import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
+import { ActiveUserData } from '../../auth/interfaces/activeInterface';
 import { SubmitQuizDto } from '../dto/submit-quiz.dto';
 
 @ApiTags('IQ Assessment')

@@ -4,7 +4,8 @@ import { Repository } from 'typeorm';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
 import { GetAnalyticsQueryDto } from '../dto/get-analytics-query.dto';
 import { EventTypeBreakdown, AnalyticsBreakdownResponse } from '../dto/analytics-breakdown-response.dto';
-import { TimeFilterService } from 'src/timefilter/providers/timefilter.service';
+import { TimeFilterService } from '../../timefilter/providers/timefilter.service';
+// import { TimeFilterService } from '../../timefilter/timefilter.enums/timefilter.enum';
 
 @Injectable()
 export class AnalyticsBreakdownService {

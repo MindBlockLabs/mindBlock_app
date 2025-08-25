@@ -4,8 +4,8 @@ import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../authConfig/jwt.config';
 import { ConfigType } from '@nestjs/config';
-import { UsersService } from 'src/users/providers/users.service';
-import { User } from 'src/users/user.entity';
+import { UsersService } from '../../users/providers/users.service';
+import { User } from '../../users/user.entity';
 
 /**
  * Generate token provider

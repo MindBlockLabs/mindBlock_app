@@ -1,6 +1,6 @@
 import { CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Achievement } from "./achievement.entity";
-import { User } from "src/users/user.entity";
+import { User } from "../../users/user.entity";
 
 @Entity('user_achievements')
 export class UserAchievement {

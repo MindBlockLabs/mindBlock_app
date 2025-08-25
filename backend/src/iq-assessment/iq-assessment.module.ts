@@ -23,7 +23,7 @@ import { IQAnswer } from "./entities/iq-answer.entity";
 import { IqAttempt } from "./entities/iq-attempt.entity";
 import { User } from "../users/user.entity";
 
-import { AchievementModule } from "src/achievement/achievement.module";
+import { AchievementModule } from "../achievement/achievement.module";
 
 @Module({
   imports: [

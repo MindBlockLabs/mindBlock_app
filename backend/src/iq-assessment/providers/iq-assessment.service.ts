@@ -33,8 +33,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateAttemptDto } from '../dto/create-attempt.dto';
 import { SubmitQuizDto } from '../dto/submit-quiz.dto';
 import { StartQuizDto } from '../dto/start-quiz.dto';
-import { AchievementService } from 'src/achievement/providers/achievement.service';
-import { ActiveUserData } from 'src/auth/interfaces/activeInterface';
+import { AchievementService } from '../../achievement/providers/achievement.service';
+import { ActiveUserData } from '../../auth/interfaces/activeInterface';
 
 @Injectable()
 export class IQAssessmentService {

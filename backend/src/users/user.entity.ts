@@ -9,11 +9,9 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
-import { LeaderboardEntry } from 'src/leaderboard/entities/leaderboard.entity';
-import { Badge } from 'src/badge/entities/badge.entity';
-import { Achievement } from 'src/achievement/entities/achievement.entity';
-// import { PuzzleSubmission } from 'src/puzzle/entities/puzzle-submission.entity';
-// import { PuzzleProgress } from 'src/puzzle/entities/puzzle-progress.entity';
+import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
+import { Badge } from '../badge/entities/badge.entity';
+import { Achievement } from '../achievement/entities/achievement.entity';
 
 /** this is the structure of the users table */
 @Entity()

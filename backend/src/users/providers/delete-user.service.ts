@@ -1,5 +1,3 @@
-// src/users/providers/delete-user.service.ts
-
 import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { User } from '../user.entity';
 import { Repository } from 'typeorm';

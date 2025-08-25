@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AchievementUnlockerProvider } from './achievement-unlocker.service';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 import { FindByUserIdProvider } from './find-by-user-id-provider';
 
 @Injectable()

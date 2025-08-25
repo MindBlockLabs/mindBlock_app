@@ -3,7 +3,7 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { PuzzleSubmission } from "../entities/puzzle-submission.entity";
 import { Puzzle } from "../entities/puzzle.entity";
-import { User } from "src/users/user.entity";
+import { User } from "../../users/user.entity";
 import { SubmitPuzzleDto } from "../dto/puzzle.dto";
 import { PuzzleType } from "../enums/puzzle-type.enum";
 

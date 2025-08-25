@@ -1,5 +1,3 @@
-// src/users/controllers/users.controller.ts
-
 import {
   Controller,
   Get,
@@ -12,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { UsersService } from '../providers/users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { paginationQueryDto } from 'src/common/pagination/paginationQueryDto';
+import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { EditUserDto } from '../dtos/editUserDto.dto';
 import { UserActivityService } from '../providers/UserActivityService';
 import { UserActivityResponseDto } from '../dtos/user-activity-response.dto';

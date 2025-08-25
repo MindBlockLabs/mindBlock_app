@@ -19,7 +19,7 @@ import { AdminQuestionResponseDto, PaginatedQuestionsResponseDto } from "../dto/
 import { RoleDecorator } from "../../auth/decorators/role-decorator"
 import { Role } from "../../auth/enum/roles.enum"
 import { Auth } from "../../auth/decorators/auth.decorator"
-import { authType } from "src/auth/enum/auth-type.enum"
+import { authType } from "../../auth/enum/auth-type.enum"
 
 @ApiTags("Admin - IQ Questions")
 @Controller("admin/iq-questions")

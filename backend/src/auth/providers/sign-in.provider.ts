@@ -2,7 +2,7 @@
 import { forwardRef, Inject, Injectable, RequestTimeoutException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
-import { UsersService } from 'src/users/providers/users.service';
+import { UsersService } from '../../users/providers/users.service';
 import { HashingProvider } from './hashing.provider';
 import jwtConfig from '../authConfig/jwt.config';
 import { LoginDto } from '../dtos/login.dto';

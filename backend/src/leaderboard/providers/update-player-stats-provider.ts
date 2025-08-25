@@ -3,8 +3,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LeaderboardEntry } from '../entities/leaderboard.entity';
-import { User } from 'src/users/user.entity';
-import { Badge } from 'src/badge/entities/badge.entity';
+import { User } from '../../users/user.entity';
+import { Badge } from '../../badge/entities/badge.entity';
 import { UpdateLeaderboardDto } from '../dto/update-leaderboard.dto';
 
 @Injectable()

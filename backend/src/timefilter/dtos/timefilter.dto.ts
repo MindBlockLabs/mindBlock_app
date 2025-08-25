@@ -1,7 +1,5 @@
 import { IsEnum, IsOptional } from 'class-validator';
-import { TimeFilter } from '../timefilter.enum.ts/timefilter.enum';
-
-
+import { TimeFilter } from '../timefilter.enums/timefilter.enum';
 
 export class TimeFilterDto {
   @IsOptional()

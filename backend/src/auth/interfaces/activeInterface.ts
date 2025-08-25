@@ -1,4 +1,3 @@
-
 /**Active user data interface */
 export interface ActiveUserData {
 
