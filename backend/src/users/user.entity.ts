@@ -12,6 +12,7 @@ import { userRole } from './enums/userRole.enum';
 import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
 import { Badge } from '../badge/entities/badge.entity';
 import { Achievement } from '../achievement/entities/achievement.entity';
+import { Exclude } from 'class-transformer';
 
 /** this is the structure of the users table */
 @Entity()
@@ -28,6 +29,7 @@ export class User {
   @Column('varchar', { length: 150, nullable: true, unique: true })
   email?: string;
 
+  @Exclude()
   @Column('varchar', { length: 225, nullable: true })
   password?: string;
 
