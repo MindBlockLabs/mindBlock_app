@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from '../user.entity';
 import { isEmail } from 'class-validator';
 import { CreateUserDto } from '../dtos/createUserDto';
-import { HashingProvider } from 'src/auth/providers/hashing.provider';
+import { HashingProvider } from '../../auth/providers/hashing.provider';
 
 @Injectable()
 export class CreateUserService {
