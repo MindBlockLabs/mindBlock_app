@@ -5,7 +5,7 @@ import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { WalletLoginDto } from '../dtos/walletLogin.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@Controller('users')
+@Controller('auth')
 export class AuthController {
   constructor(
     // injecting auth service

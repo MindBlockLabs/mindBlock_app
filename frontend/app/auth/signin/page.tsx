@@ -34,7 +34,7 @@ const SignInPage = () => {
     setError('');
 
     try {
-      const response = await fetch('https://mindblock-webaapp.onrender.com/api/auth/signin', {
+      const response = await fetch('https://mindblock-webaapp.onrender.com/api#/auth/signIn', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
