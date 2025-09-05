@@ -56,7 +56,7 @@ export class SignInProvider {
       throw new UnauthorizedException('email or password is incorrect');
     }
 
-    const accssToken = await this.jwtService.signAsync(
+    const accessToken = await this.jwtService.signAsync(
       {
         sub: user.id,
         email: user.email,
@@ -69,6 +69,6 @@ export class SignInProvider {
     );
 
     // login
-    return { accssToken };
+    return { accessToken };
   }
 }

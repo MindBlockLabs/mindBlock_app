@@ -34,13 +34,13 @@ const SignInPage = () => {
     setError('');
 
     try {
-      const response = await fetch('https://mindblock-webaapp.onrender.com/api#/auth/signIn', {
+      const response = await fetch('https://mindblock-webaapp.onrender.com/auth/signIn', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          username: formData.username,
+          email: formData.username,
           password: formData.password
         }),
       });

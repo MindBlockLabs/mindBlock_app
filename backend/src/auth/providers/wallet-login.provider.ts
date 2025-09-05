@@ -40,7 +40,7 @@ export class WalletLoginProvider {
     // throw error if user doesnt exist
     const user = await this.userService.getOneByWallet(dto.walletAddress);
 
-    const accssToken = await this.jwtService.signAsync(
+    const accessToken = await this.jwtService.signAsync(
       {
         sub: user.id,
         walletAddress: user.starknetWallet,
@@ -53,6 +53,6 @@ export class WalletLoginProvider {
     );
 
     // login
-    return { accssToken };
+    return { accessToken };
   }
 }
