@@ -22,11 +22,14 @@ export class User {
   @Column('varchar', { length: 150, nullable: true })
   username?: string;
 
+  @Column('varchar', { length: 150 })
+  fullname: string;
+
   @Column('varchar', { length: 150, nullable: true, unique: true })
   email?: string;
 
   @Column('varchar', { length: 225, nullable: true })
-  password: string;
+  password?: string;
 
   /**
    * Role of the user.

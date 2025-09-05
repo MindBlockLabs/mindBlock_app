@@ -15,6 +15,8 @@ import { EditUserDto } from '../dtos/editUserDto.dto';
 import { UserActivityService } from '../providers/UserActivityService';
 import { UserActivityResponseDto } from '../dtos/user-activity-response.dto';
 import { ParseIntPipe, DefaultValuePipe, ValidationPipe } from '@nestjs/common';
+import { CreateUserDto } from '../dtos/createUserDto';
+import { User } from '../user.entity';
 
 @Controller('users')
 @ApiTags('users')
@@ -44,16 +46,23 @@ export class UsersController {
   }
 
   @Post()
-  async create(@Body() userData: any) {
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'User created successfully',
+    type: User,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid input' })
+  async create(@Body() userData: CreateUserDto) {
     return this.usersService.create(userData);
   }
 
   @Patch(':id')
-  @ApiOperation({summary: "Update user by ID"})
-  @ApiResponse({status: 200, description: "user successfully updated"})
-  @ApiResponse({status: 404, description: "User not found"})
+  @ApiOperation({ summary: 'Update user by ID' })
+  @ApiResponse({ status: 200, description: 'user successfully updated' })
+  @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() editUserDto: EditUserDto) {
-    return this.usersService.update(id,editUserDto);
+    return this.usersService.update(id, editUserDto);
   }
 
   @Get(':id/activity')
@@ -67,7 +76,11 @@ export class UsersController {
     if (page < 1 || limit < 1) {
       throw new Error('Page and limit must be positive integers');
     }
-    const activities = await this.userActivityService.getUserActivity(id, page, limit);
+    const activities = await this.userActivityService.getUserActivity(
+      id,
+      page,
+      limit,
+    );
     return { activities };
   }
 }
