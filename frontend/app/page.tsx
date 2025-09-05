@@ -64,6 +64,5 @@ export default function Home() {
           <span>Connect Wallet</span>
         </div>
       </Button>
-    </div>
   );
 }
