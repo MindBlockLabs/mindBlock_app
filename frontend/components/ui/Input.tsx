@@ -48,7 +48,7 @@ const Input = ({
             w-full h-[50px] px-[16px] py-[14px]
             bg-[#07101D] 
             border-[2px] rounded-[8px]
-            text-[#E6E6E6CC] text-base
+            text-[##E6E6E6/80] text-base
             placeholder:text-[#E6E6E666]
             transition-all duration-200 ease-in-out
             focus:outline-none
