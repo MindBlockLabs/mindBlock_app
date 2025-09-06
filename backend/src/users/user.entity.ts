@@ -24,7 +24,7 @@ export class User {
   username?: string;
 
   @Column('varchar', { length: 150 })
-  fullname: string;
+  fullname?: string;
 
   @Column('varchar', { length: 150, nullable: true, unique: true })
   email?: string;
