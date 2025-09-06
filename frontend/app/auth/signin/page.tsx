@@ -8,30 +8,57 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Wallet } from 'lucide-react';
 import Image from 'next/image';
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { useToast } from '@/components/ui/ToastProvider';
 
 const SignInPage = () => {
   const router = useRouter();
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  // Email validation function
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleInputChange = (field: string) => (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const value = e.target.value;
     setFormData(prev => ({
       ...prev,
-      [field]: e.target.value
+      [field]: value
     }));
-    if (error) setError(''); // Clear error on input change
   };
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+
+    // Validate email before submission
+    if (!validateEmail(formData.username)) {
+      showError('Invalid Email', 'Please enter a valid email address');
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if fields are empty
+    if (!formData.username.trim()) {
+      showError('Email Required', 'Please enter your email address');
+      setIsLoading(false);
+      return;
+    }
+
+    if (!formData.password.trim()) {
+      showError('Password Required', 'Please enter your password');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const response = await fetch('https://mindblock-webaapp.onrender.com/auth/signIn', {
@@ -45,30 +72,88 @@ const SignInPage = () => {
         }),
       });
 
+      // Checking if response is ok before trying to parse JSON
+      if (!response.ok) {
+        try {
+          const errorData = await response.json();
+          // Handle specific error messages from server
+          if (response.status === 401) {
+            const errorMsg = 'Invalid email or password.';
+            showError('Login Failed', errorMsg);
+            setIsLoading(false);
+          } else if (response.status === 404) {
+            const errorMsg = 'Account not found.';
+            showError('Account Not Found', errorMsg);
+            setIsLoading(false);
+          } else if (response.status === 400) {
+            const errorMsg = errorData.message || 'Invalid input.';
+            showError('Invalid Input', errorMsg);
+            setIsLoading(false);
+          } else if (response.status >= 500) {
+            const errorMsg = 'Server error. Please try again later.';
+            showError('Server Error', errorMsg);
+            setIsLoading(false);
+          } else {
+            const errorMsg = errorData.message || 'Login failed. Please try again.';
+            showError('Login Failed', errorMsg);
+            setIsLoading(false);
+          }
+        } catch {
+          // If response isn't JSON, use status text or default message
+          if (response.status === 401) {
+            const errorMsg = 'Invalid email or password.';
+            showError('Login Failed', errorMsg);
+            setIsLoading(false);
+          } else if (response.status === 404) {
+            const errorMsg = 'Account not found.';
+            showError('Account Not Found', errorMsg);
+            setIsLoading(false);
+          } else {
+            const errorMsg = `Login failed: ${response.statusText || 'Please try again.'}`;
+            showError('Login Failed', errorMsg);
+            setIsLoading(false);
+          }
+        }
+        setIsLoading(false);
+        return;
+      }
+
+      // Parse JSON only if response is ok
       const data = await response.json();
 
-      if (response.ok && data.accessToken) {
+      if (data.accessToken) {
         // Store token in localStorage
         localStorage.setItem('accessToken', data.accessToken);
+        
+        // Show success toast
+        showSuccess('Login Successful', 'Welcome back!');
+        setIsLoading(false);
         
         // Redirect to dashboard
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Invalid credentials. Please try again.');
+        const errorMsg = 'Invalid response from server. Please try again.';
+        showError('Invalid Response', errorMsg);
+        setIsLoading(false);
       }
     } catch (error) {
-      setError('Something went wrong. Please try again.');
+      console.error('Sign in error:', error);
+      const errorMsg = 'Network error.';
+      showError('Network Error', errorMsg);
+      setIsLoading(false);
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
+    showInfo('Google Sign-In', 'Redirecting to Google authentication...');
     signIn('google', { callbackUrl: '/dashboard' });
   };
 
   return (
-    <div className="min-h-screen bg-[#050C16] text-white">
+    <ErrorBoundary>
+      <div className="min-h-screen bg-[#050C16] text-white">
       {/* Header */}
       <div className="flex items-center p-4 md:p-6">
       </div>
@@ -94,8 +179,8 @@ const SignInPage = () => {
           {/* Sign-in Form */}
           <form onSubmit={handleSignIn} className="space-y-6">
             <Input
-              type="text"
-              placeholder="Email or username"
+              type="email"
+              placeholder="Email"
               value={formData.username}
               onChange={handleInputChange('username')}
             />
@@ -116,13 +201,6 @@ const SignInPage = () => {
                 Forgot Password?
               </Link>
             </div>
-
-            {/* Error Message */}
-            {error && (
-              <div className="text-red-400 text-sm text-center bg-red-400/10 p-3 rounded-lg">
-                {error}
-              </div>
-            )}
 
             {/* Sign In Button */}
             <Button
@@ -185,6 +263,7 @@ const SignInPage = () => {
         </div>
       </div>
     </div>
+    </ErrorBoundary>
   );
 };
 
