@@ -14,7 +14,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Column } from 'typeorm';
 import { Transform, Type } from 'class-transformer';
 import { userRole } from '../enums/userRole.enum';
-import { AuthProvider } from 'src/auth/enum/authProvider.enum';
+import { AuthProvider } from '../../auth/enum/authProvider.enum';
 
 export class CreateUserDto {
   /**
