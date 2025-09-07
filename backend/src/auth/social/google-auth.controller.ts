@@ -1,26 +1,20 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import { AuthService } from '../providers/auth.service';
+import { Controller, Post, Body } from '@nestjs/common';
+import { GoogleTokenDto } from './dtos/google-token.dto';
+import { GoogleAuthenticationService } from './providers/google-authentication.service';
 
-@Controller('auth/social')
-export class SocialController {
-  constructor(private readonly authService: AuthService) {}
+/**Google authentication controller class */
+@Controller('auth/google-authentication')
+export class GoogleAuthenticationController {
+    constructor(
+        /* 
+         * inject googleAuthenticationService 
+         */
+        private readonly googleAuthenticationService: GoogleAuthenticationService
+    ) {}
 
-  @Get('google')
-  @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-    // This endpoint initiates the Google OAuth flow
-    // The actual implementation is handled by the GoogleStrategy
-  }
-
-  @Get('google/callback')
-  @UseGuards(AuthGuard('google'))
-  async googleAuthCallback(@Req() req) {
-    // This endpoint handles the callback from Google
-    // The user object and token are attached to the request by the GoogleStrategy
-    return {
-      user: req.user.user,
-      token: req.user.token,
-    };
-  }
+    /**Authenticate class with body parameter of type googletokendto */
+    @Post()
+    public authenticate(@Body() googlTokenDto: GoogleTokenDto) {
+        return this.googleAuthenticationService.authenticate(googlTokenDto)
+    }
 }

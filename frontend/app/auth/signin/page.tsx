@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { signIn } from 'next-auth/react';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Wallet } from 'lucide-react';
@@ -148,7 +147,7 @@ const SignInPage = () => {
 
   const handleGoogleSignIn = () => {
     showInfo('Google Sign-In', 'Redirecting to Google authentication...');
-    signIn('google', { callbackUrl: '/dashboard' });
+    window.location.href = "https://mindblock-webaapp.onrender.com/auth/google";
   };
 
   return (
