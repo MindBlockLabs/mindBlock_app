@@ -11,25 +11,40 @@ import { AuthController } from './controllers/auth.controller';
 import { RefreshTokensProvider } from './providers/refreshTokensProvider';
 import { GenerateTokensProvider } from './providers/generate-tokens.provider';
 import { WalletLoginProvider } from './providers/wallet-login.provider';
+import { GoogleAuthenticationService } from './social/providers/google-authentication.service';
+import { GoogleAuthenticationController } from './social/google-auth.controller';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
     forwardRef(() => UsersModule),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000, // 1 minute
+        limit: 10, // 10 requests per minute globally
+      },
+    ]),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, GoogleAuthenticationController],
   providers: [
     AuthService,
-    {
-      provide: HashingProvider, // Use the abstract class as a token
-      useClass: BcryptProvider, // Bind it to the concrete implementation
-    },
     SignInProvider,
     WalletLoginProvider,
     RefreshTokensProvider,
     GenerateTokensProvider,
+    GoogleAuthenticationService,
+    {
+      provide: HashingProvider, // Use the abstract class as a token
+      useClass: BcryptProvider, // Bind it to the concrete implementation
+    },
+    {
+      provide: APP_GUARD,
+      useClass: ThrottlerGuard,
+    },
   ],
-  exports: [AuthService, HashingProvider],
+  exports: [AuthService, HashingProvider, GoogleAuthenticationService],
 })
 export class AuthModule {}

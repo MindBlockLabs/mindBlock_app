@@ -147,7 +147,7 @@ const SignInPage = () => {
 
   const handleGoogleSignIn = () => {
     showInfo('Google Sign-In', 'Redirecting to Google authentication...');
-    window.location.href = "https://mindblock-webaapp.onrender.com/auth/google";
+    window.location.href = "https://mindblock-webaapp.onrender.com/auth/google-authentication";
   };
 
   return (
