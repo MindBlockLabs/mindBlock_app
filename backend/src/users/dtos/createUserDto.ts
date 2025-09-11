@@ -3,16 +3,11 @@ import {
   IsEmail,
   IsEnum,
   IsOptional,
-  Validate,
   MaxLength,
   Matches,
-  ValidatorConstraint,
-  ValidatorConstraintInterface,
-  ValidationArguments,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
-import { Column } from 'typeorm';
-import { Transform, Type } from 'class-transformer';
+import { ApiProperty } from '@nestjs/swagger'
+import { Transform } from 'class-transformer';
 import { userRole } from '../enums/userRole.enum';
 import { AuthProvider } from '../../auth/enum/authProvider.enum';
 
