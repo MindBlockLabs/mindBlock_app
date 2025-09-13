@@ -6,7 +6,7 @@
 **Mind Block** is a puzzle and coding challenge game that offers **adaptive, rewarding gameplay** tailored to users' IQ and preferences.  
 Players solve **logic-based tasks** across categories like **coding, puzzles, blockchain, and logic** to:
 
-- 🎮 Earn on-chain tokens  
+- 🎮 Earn in-game recognition (xp)  
 - 🚀 Boost problem-solving skills  
 - 🏆 Compete socially with friends  
 
