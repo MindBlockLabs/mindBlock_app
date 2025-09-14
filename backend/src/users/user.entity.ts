@@ -9,6 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
+import { ChallengeLevel } from './enums/challengeLevel.enum';
 import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
 import { Badge } from '../badge/entities/badge.entity';
 import { Achievement } from '../achievement/entities/achievement.entity';
@@ -98,6 +99,44 @@ export class User {
   })
   @JoinTable()
   achievements: Achievement[];
+
+
+
+  @ApiProperty({
+    enum: ChallengeLevel,
+    example: ChallengeLevel.INTERMEDIATE,
+    description: 'Challenge level of the user',
+    required: false
+  })
+  @Column({
+    type: 'enum', enum: ChallengeLevel, nullable: true
+  })
+  challengeLevel?: ChallengeLevel;
+
+  @ApiProperty({
+    example: ['Coding Challenges', 'Logic Puzzle'],
+    description: 'Selected challenge types',
+    required: false,
+    isArray: true,
+  })
+  @Column('simple-array', { nullable: true })
+  challengeTypes?: string[];
+
+  @ApiProperty({
+    example: 'Google Search',
+    description: 'Where the user heard about us',
+    required: false,
+  })
+  @Column('varchar', { length: 100, nullable: true })
+  referralSource?: string;
+
+  @ApiProperty({
+    example: '18 to 24 years old',
+    description: 'Age group of the user',
+    required: false,
+  })
+  @Column('varchar', { length: 50, nullable: true })
+  ageGroup?: string;
 
   /**
    * One-to-many relation with puzzle progress records.

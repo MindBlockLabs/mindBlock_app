@@ -5,10 +5,16 @@ import {
   IsOptional,
   MaxLength,
   Matches,
+  IsArray,
+  ArrayNotEmpty,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger'
 import { Transform } from 'class-transformer';
 import { userRole } from '../enums/userRole.enum';
+import { ChallengeLevel } from '../enums/challengeLevel.enum';
+import { ChallengeType } from '../enums/challengeType.enum';
+import { ReferralSource } from '../enums/referralSource.enum';
+import { AgeGroup } from '../enums/ageGroup.enum';
 import { AuthProvider } from '../../auth/enum/authProvider.enum';
 
 export class CreateUserDto {
@@ -120,4 +126,37 @@ export class CreateUserDto {
   @IsOptional()
   @MaxLength(225)
   googleId?: string;
+
+  @ApiProperty({
+    enum: ChallengeLevel,
+    example: ChallengeLevel.INTERMEDIATE,
+  })
+  @IsEnum(ChallengeLevel)
+  challengeLevel: ChallengeLevel;
+
+  @ApiProperty({
+    enum: ChallengeType,
+    isArray: true,
+    example: [ChallengeType.CODING, ChallengeType.LOGIC],
+  })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(ChallengeType, { each: true })
+  challengeTypes: ChallengeType[];
+
+  @ApiProperty({
+    enum: ReferralSource,
+    example: ReferralSource.GOOGLE,
+    required: false,
+  })
+  @IsOptional()
+  @IsEnum(ReferralSource)
+  referralSource?: ReferralSource;
+
+  @ApiProperty({
+    enum: AgeGroup,
+    example: AgeGroup.YOUNG_ADULT,
+  })
+  @IsEnum(AgeGroup)
+  ageGroup: AgeGroup;
 }
