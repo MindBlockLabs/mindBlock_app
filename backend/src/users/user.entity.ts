@@ -10,6 +10,7 @@ import {
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
 import { ChallengeLevel } from './enums/challengeLevel.enum';
+import { ChallengeType } from './enums/challengeType.enum';
 import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
 import { Badge } from '../badge/entities/badge.entity';
 import { Achievement } from '../achievement/entities/achievement.entity';
@@ -101,40 +102,17 @@ export class User {
   achievements: Achievement[];
 
 
-
-  @ApiProperty({
-    enum: ChallengeLevel,
-    example: ChallengeLevel.INTERMEDIATE,
-    description: 'Challenge level of the user',
-    required: false
-  })
   @Column({
-    type: 'enum', enum: ChallengeLevel, nullable: true
+    type: 'enum', enum: ChallengeLevel, nullable: true, default: ChallengeLevel.BEGINNER
   })
   challengeLevel?: ChallengeLevel;
 
-  @ApiProperty({
-    example: ['Coding Challenges', 'Logic Puzzle'],
-    description: 'Selected challenge types',
-    required: false,
-    isArray: true,
-  })
-  @Column('simple-array', { nullable: true })
+  @Column('simple-array', { nullable: true, default: ChallengeType.CODING })
   challengeTypes?: string[];
 
-  @ApiProperty({
-    example: 'Google Search',
-    description: 'Where the user heard about us',
-    required: false,
-  })
   @Column('varchar', { length: 100, nullable: true })
   referralSource?: string;
 
-  @ApiProperty({
-    example: '18 to 24 years old',
-    description: 'Age group of the user',
-    required: false,
-  })
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
 
