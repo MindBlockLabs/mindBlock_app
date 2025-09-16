@@ -9,6 +9,8 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
+import { ChallengeLevel } from './enums/challengeLevel.enum';
+import { ChallengeType } from './enums/challengeType.enum';
 import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
 import { Badge } from '../badge/entities/badge.entity';
 import { Achievement } from '../achievement/entities/achievement.entity';
@@ -98,6 +100,21 @@ export class User {
   })
   @JoinTable()
   achievements: Achievement[];
+
+
+  @Column({
+    type: 'enum', enum: ChallengeLevel, nullable: true, default: ChallengeLevel.BEGINNER
+  })
+  challengeLevel?: ChallengeLevel;
+
+  @Column('simple-array', { nullable: true, default: ChallengeType.CODING })
+  challengeTypes?: string[];
+
+  @Column('varchar', { length: 100, nullable: true })
+  referralSource?: string;
+
+  @Column('varchar', { length: 50, nullable: true })
+  ageGroup?: string;
 
   /**
    * One-to-many relation with puzzle progress records.
