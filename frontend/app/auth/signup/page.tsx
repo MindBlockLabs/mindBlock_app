@@ -10,6 +10,23 @@ import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
 
+// TypeScript interface for Web3 wallet
+interface Window {
+  ethereum?: {
+    request: (args: { method: string; params?: any[] }) => Promise<any>;
+    isMetaMask?: boolean;
+  };
+}
+
+declare global {
+  interface Window {
+    ethereum?: {
+      request: (args: { method: string; params?: any[] }) => Promise<any>;
+      isMetaMask?: boolean;
+    };
+  }
+}
+
 const SignUpPage = () => {
   const router = useRouter();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
@@ -99,7 +116,7 @@ const SignUpPage = () => {
     }
 
     try {
-      const response = await fetch('https://mindblock-webaapp.onrender.com/auth/signUp', {
+      const response = await fetch('https://mindblock-webaapp.onrender.com/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -180,11 +197,65 @@ const SignUpPage = () => {
     window.location.href = "https://mindblock-webaapp.onrender.com/auth/google-authentication";
   };
 
-  const handleWalletConnect = () => {
-    showInfo('Wallet Connection', 'Redirecting to wallet connection...');
-    // You might want to implement wallet connection logic here
-    // For now, we'll use a placeholder endpoint
-    window.location.href = "https://mindblock-webaapp.onrender.com/auth/wallet-signup";
+  const handleWalletConnect = async () => {
+    try {
+      showInfo('Wallet Connection', 'Connecting to your wallet...');
+      
+      // Check if Web3 is available (MetaMask or similar)
+      if (typeof window.ethereum !== 'undefined') {
+        // Request account access
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        const walletAddress = accounts[0];
+        
+        if (walletAddress) {
+          // Create a message for signing
+          const message = `Sign this message to authenticate with Mind Block: ${Date.now()}`;
+          
+          // Request signature
+          const signature = await window.ethereum.request({
+            method: 'personal_sign',
+            params: [message, walletAddress],
+          });
+          
+          // Since there's no wallet endpoint yet, we'll create a user with wallet info
+          // This could be modified when the wallet endpoint is added to the backend
+          const response = await fetch('https://mindblock-webaapp.onrender.com/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              username: `wallet_${walletAddress.slice(0, 8)}`, // Generate username from wallet
+              fullName: 'Wallet User', // Placeholder name
+              email: `${walletAddress.toLowerCase()}@wallet.mindblock`, // Generate email from wallet
+              password: signature.slice(0, 16), // Use part of signature as password
+              walletAddress: walletAddress,
+              authType: 'wallet'
+            }),
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            showSuccess('Wallet Connected', 'Successfully registered with wallet!');
+            // Redirect to signin since we don't get a token directly
+            router.push('/auth/signin');
+          } else {
+            const errorData = await response.json();
+            showError('Wallet Registration Failed', errorData.message || 'This wallet may already be registered');
+          }
+        }
+      } else {
+        // No Web3 wallet detected
+        showWarning('Wallet Not Found', 'Please install MetaMask or another Web3 wallet to continue');
+      }
+    } catch (error: any) {
+      console.error('Wallet connection error:', error);
+      if (error?.code === 4001) {
+        showWarning('Connection Cancelled', 'Wallet connection was cancelled by user');
+      } else {
+        showError('Wallet Error', 'Failed to connect wallet. Please try again.');
+      }
+    }
   };
 
   return (
