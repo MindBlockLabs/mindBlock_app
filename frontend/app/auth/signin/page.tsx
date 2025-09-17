@@ -215,7 +215,7 @@ const SignInPage = () => {
           <div className="text-center mt-5">
             <span className="text-[#E6E6E6]">Don't have an account? </span>
             <Link 
-              href="/auth/register"
+              href="/auth/signup"
               className="text-[#3B82F6] transition-colors"
             >
               Sign up

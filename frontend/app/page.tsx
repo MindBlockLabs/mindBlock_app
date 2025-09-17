@@ -34,7 +34,7 @@ const MindBlockLanding = () => {
         <div className="w-full space-y-4 pt-8 ">
           <button
             className="w-full bg-blue-500 border-b-4 border-blue-700 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-colors duration-200 shadow-lg"
-            onClick={() => router.push("auth/register")}
+            onClick={() => router.push("auth/signup")}
           >
             Register & Play
           </button>
