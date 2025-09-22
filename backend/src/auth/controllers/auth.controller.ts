@@ -11,9 +11,9 @@ import { Throttle } from '@nestjs/throttler';
 import { LoginDto } from '../dtos/login.dto';
 import { AuthService } from '../providers/auth.service';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
-import { WalletLoginDto } from '../dtos/walletLogin.dto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { NonceResponseDto } from '../dtos/nonceResponse.dto';
+import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -42,25 +42,41 @@ export class AuthController {
     return await this.authservice.refreshToken(refreshToken);
   }
 
-  @Post('/wallet-login')
+  @Post('/stellar-wallet-login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login with Starknet wallet' })
+  @ApiOperation({ summary: 'Login with Stellar wallet' })
   @ApiResponse({
     status: 200,
-    description: 'Successfully logged in with wallet',
+    description: 'Successfully logged in with Stellar wallet',
+    schema: {
+      type: 'object',
+      properties: {
+        accessToken: {
+          type: 'string',
+          description: 'JWT access token for authenticated user'
+        }
+      }
+    }
   })
-  @ApiResponse({ status: 401, description: 'Invalid wallet or signature' })
-  public async WalletLogin(@Body() dto: WalletLoginDto) {
-    return await this.authservice.WalletLogin(dto);
+  @ApiResponse({ 
+    status: 401, 
+    description: 'Invalid wallet signature or authentication failed' 
+  })
+  @ApiResponse({ 
+    status: 400, 
+    description: 'Invalid request format or expired nonce' 
+  })
+  public async stellarWalletLogin(@Body() dto: StellarWalletLoginDto) {
+    return await this.authservice.StellarWalletLogin(dto);
   }
 
-  @Get('/wallet-nonce')
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Get('/stellar-wallet-nonce')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 requests per minute
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Generate nonce for wallet authentication',
+    summary: 'Generate nonce for Stellar wallet authentication',
     description:
-      'Generates a unique nonce that must be signed by the wallet for authentication',
+      'Generates a unique nonce that must be signed by the Stellar wallet for authentication. The nonce expires in 5 minutes.',
   })
   @ApiResponse({
     status: 200,
@@ -69,23 +85,44 @@ export class AuthController {
   })
   @ApiResponse({
     status: 400,
-    description: 'Invalid wallet address',
+    description: 'Invalid Stellar wallet address format',
   })
-  public async generateWalletNonce(
+  public async generateStellarWalletNonce(
     @Query('walletAddress') walletAddress: string,
   ): Promise<NonceResponseDto> {
     return await this.authservice.generateNonce(walletAddress);
   }
 
-  @Get('/wallet-nonce/status')
+  @Get('/stellar-wallet-nonce/status')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Check nonce status',
-    description: 'Check if a nonce is valid and not expired',
+    description: 'Check if a nonce is valid, not expired, and not already used',
   })
   @ApiResponse({
     status: 200,
     description: 'Nonce status retrieved',
+    schema: {
+      type: 'object',
+      properties: {
+        valid: {
+          type: 'boolean',
+          description: 'Whether the nonce is valid'
+        },
+        reason: {
+          type: 'string',
+          description: 'Reason if nonce is invalid'
+        },
+        walletAddress: {
+          type: 'string',
+          description: 'Associated wallet address (only if valid)'
+        },
+        expiresAt: {
+          type: 'number',
+          description: 'Expiration timestamp (only if valid)'
+        }
+      }
+    }
   })
   public async checkNonceStatus(@Query('nonce') nonce: string) {
     return await this.authservice.checkNonceStatus(nonce);

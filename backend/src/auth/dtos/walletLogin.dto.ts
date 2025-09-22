@@ -1,42 +1,38 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsString, Matches } from 'class-validator';
+import { IsString, Matches } from 'class-validator';
 
-export class WalletLoginDto {
+export class StellarWalletLoginDto {
   @ApiProperty({
-    example: '0x1234567890abcdef1234567890abcdef12345678',
-    description: 'Starknet wallet address',
+    example: 'GAHK7EEG2WWHVKDNT4CEQFZGKF2LGDSW2IVM4S5DP42RBW3K6BTODB4A',
+    description: 'Stellar wallet address (public key)',
   })
   @IsString()
-  @Matches(/^0x[0-9a-fA-F]{1,64}$/, {
-    message: 'Invalid Starknet wallet address format',
+  @Matches(/^[GM][A-Z2-7]{55}$/, {
+    message: 'Invalid Stellar wallet address format',
   })
   walletAddress: string;
 
   @ApiProperty({ 
-    example: ['0x123abc...', '0x456def...'],
-    description: 'Starknet signature array [r, s]',
-    type: [String]
+    example: 'base64SignatureString==',
+    description: 'Base64 encoded ed25519 signature',
   })
-  @IsArray()
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  @IsString({ each: true })
-  signature: [string, string];
+  @IsString()
+  signature: string;
 
   @ApiProperty({ 
-    example: 'nonce_1693123456789_abc123_456789',
+    example: 'stellar_nonce_1693123456789_abc123_BTODB4A',
     description: 'Server-generated nonce for this authentication attempt'
   })
   @IsString()
   nonce: string;
 
-   @ApiProperty({ 
-    example: '0x789def1234567890abcdef1234567890abcdef1234567890abcdef1234567890ab',
-    description: 'Public key associated with the wallet'
+  @ApiProperty({ 
+    example: 'GAHK7EEG2WWHVKDNT4CEQFZGKF2LGDSW2IVM4S5DP42RBW3K6BTODB4A',
+    description: 'Stellar public key (same as wallet address for account-based wallets)'
   })
   @IsString()
-  @Matches(/^0x[0-9a-fA-F]{64}$/, { 
-    message: 'Invalid public key format - must be 64 hex characters with 0x prefix' 
+  @Matches(/^[GM][A-Z2-7]{55}$/, { 
+    message: 'Invalid Stellar public key format' 
   })
   publicKey: string;
 }
