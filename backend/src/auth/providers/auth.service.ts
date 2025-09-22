@@ -4,8 +4,8 @@ import { SignInProvider } from './sign-in.provider';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { RefreshTokensProvider } from './refreshTokensProvider';
-import { WalletLoginDto } from '../dtos/walletLogin.dto';
-import { WalletLoginProvider } from './wallet-login.provider';
+import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
+import { StellarWalletLoginProvider } from './wallet-login.provider';
 import { NonceResponseDto } from '../dtos/nonceResponse.dto';
 
 interface OAuthUser {
@@ -29,9 +29,9 @@ export class AuthService {
     private readonly signInProvider: SignInProvider,
 
     /**
-     *  inject walletLoginProvider
+     *  inject stellarWalletLoginProvider
      */
-    private readonly walletLoginProvider: WalletLoginProvider,
+    private readonly stellarWalletLoginProvider: StellarWalletLoginProvider,
 
     /**
      * Injecting RefreshTokensProvider for token management
@@ -43,15 +43,15 @@ export class AuthService {
     return await this.signInProvider.SignIn(signInDto);
   }
 
-  public async WalletLogin(dto: WalletLoginDto) {
-    return await this.walletLoginProvider.WalletLogin(dto);
+  public async StellarWalletLogin(dto: StellarWalletLoginDto) {
+    return await this.stellarWalletLoginProvider.StellarWalletLogin(dto);
   }
 
   // Generate nonce for wallet authentication
   public async generateNonce(walletAddress: string): Promise<NonceResponseDto> {
     // Validate wallet address format
-    if (!walletAddress || !this.isValidStarknetAddress(walletAddress)) {
-      throw new BadRequestException('Invalid Starknet wallet address');
+    if (!walletAddress || !this.isValidStellarAddress(walletAddress)) {
+      throw new BadRequestException('Invalid Stellar wallet address');
     }
 
     // Generate secure nonce
@@ -94,7 +94,7 @@ export class AuthService {
     };
   }
 
-  // Verify and mark nonce as used (called by WalletLoginProvider)
+  // Verify and mark nonce as used (called by StellarWalletLoginProvider)
   public async verifyAndUseNonce(
     nonce: string,
     walletAddress: string,
@@ -126,12 +126,13 @@ export class AuthService {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 15);
     const addressSuffix = walletAddress.slice(-6);
-    return `nonce_${timestamp}_${random}_${addressSuffix}`;
+    return `stellar_nonce_${timestamp}_${random}_${addressSuffix}`;
   }
 
-  private isValidStarknetAddress(address: string): boolean {
-    // Basic Starknet address validation
-    return /^0x[0-9a-fA-F]{1,64}$/.test(address);
+  private isValidStellarAddress(address: string): boolean {
+    // Stellar address validation - starts with G for public key or M for muxed account
+    // and is 56 characters long (base32 encoded)
+    return /^[GM][A-Z2-7]{55}$/.test(address);
   }
 
   private cleanupExpiredNonces(): void {

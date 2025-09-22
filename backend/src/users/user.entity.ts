@@ -65,7 +65,7 @@ export class User {
    */
   @ApiProperty({ example: '0xabc...', required: false })
   @Column('varchar', { length: 150, nullable: true, unique: true })
-  starknetWallet?: string;
+  stellarWallet?: string;
 
   @ManyToOne(() => Badge, (badge) => badge.user, {
     nullable: true,

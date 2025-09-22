@@ -7,7 +7,7 @@ This project is a modular, scalable, and AI-powered backend built with **NestJS*
 - **Backend Framework**: NestJS (TypeScript)
 - **Database**: PostgreSQL (via TypeORM)
 - **Authentication**: Wallet, Email, Google OAuth
-- **Blockchain**: StarkNet smart contract interactions
+- **Blockchain**: Stellar smart contract interactions
 - **AI Integration**: Challenge generation & solution explanations
 - **Caching & Performance**: Redis (for caching)
 - **Security & Error Handling**: Robust security mechanisms and centralized error handling
@@ -17,7 +17,7 @@ This project is a modular, scalable, and AI-powered backend built with **NestJS*
 ## 🎯 Features
 
 ### ✅ Authentication & User Management
-- Wallet authentication
+- Strllar wallet authentication
 - Email/password authentication
 - Google OAuth integration
 
@@ -27,7 +27,7 @@ This project is a modular, scalable, and AI-powered backend built with **NestJS*
 - AI-assisted solution explanations
 
 ### ⛓️ Blockchain & Smart Contracts
-- Interaction with **StarkNet** smart contracts
+- Interaction with **Stellar** smart contracts
 - Token rewards system for challenge completion
 
 ### 📊 Progress Tracking & Leaderboards
