@@ -11,9 +11,6 @@ import {
 import { userRole } from './enums/userRole.enum';
 import { ChallengeLevel } from './enums/challengeLevel.enum';
 import { ChallengeType } from './enums/challengeType.enum';
-import { LeaderboardEntry } from '../leaderboard/entities/leaderboard.entity';
-import { Badge } from '../badge/entities/badge.entity';
-import { Achievement } from '../achievement/entities/achievement.entity';
 import { Exclude } from 'class-transformer';
 
 /** this is the structure of the users table */
@@ -57,21 +54,12 @@ export class User {
   @Column('varchar', { length: 225, nullable: true })
   googleId?: string;
 
-  @OneToMany(() => LeaderboardEntry, (entry) => entry.user)
-  leaderboardEntries: LeaderboardEntry[];
-
   /**
-   * Starknet Wallet (optional).
+   * Stellar Wallet (optional).
    */
   @ApiProperty({ example: '0xabc...', required: false })
   @Column('varchar', { length: 150, nullable: true, unique: true })
   stellarWallet?: string;
-
-  @ManyToOne(() => Badge, (badge) => badge.user, {
-    nullable: true,
-    cascade: ['insert', 'update'],
-  })
-  badge: Badge;
 
   /**
    * User XP points for puzzle solving.
@@ -95,13 +83,6 @@ export class User {
   @Column({ type: 'int', default: 0 })
   tokens: number;
 
-  @ManyToMany(() => Achievement, (achievement) => achievement.user, {
-    cascade: true,
-  })
-  @JoinTable()
-  achievements: Achievement[];
-
-
   @Column({
     type: 'enum', enum: ChallengeLevel, nullable: true, default: ChallengeLevel.BEGINNER
   })
@@ -115,16 +96,4 @@ export class User {
 
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
-
-  /**
-   * One-to-many relation with puzzle progress records.
-   */
-  // @OneToMany(() => PuzzleProgress, (progress) => progress.user)
-  // puzzleProgress: PuzzleProgress[];
-
-  /**
-   * One-to-many relation with puzzle submissions.
-   */
-  // @OneToMany(() => PuzzleSubmission, (submission) => submission.user)
-  // puzzleSubmissions: PuzzleSubmission[];
 }

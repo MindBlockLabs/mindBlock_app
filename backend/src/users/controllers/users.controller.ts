@@ -12,9 +12,6 @@ import { UsersService } from '../providers/users.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { EditUserDto } from '../dtos/editUserDto.dto';
-import { UserActivityService } from '../providers/UserActivityService';
-import { UserActivityResponseDto } from '../dtos/user-activity-response.dto';
-import { ParseIntPipe, DefaultValuePipe, ValidationPipe } from '@nestjs/common';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { User } from '../user.entity';
 
@@ -23,7 +20,6 @@ import { User } from '../user.entity';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
-    private readonly userActivityService: UserActivityService,
   ) {}
 
   @Delete(':id')
@@ -63,24 +59,5 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() editUserDto: EditUserDto) {
     return this.usersService.update(id, editUserDto);
-  }
-
-  @Get(':id/activity')
-  @ApiOperation({ summary: 'Get recent activity for a user' })
-  @ApiResponse({ status: 200, type: UserActivityResponseDto })
-  async getUserActivity(
-    @Param('id') id: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(5), ParseIntPipe) limit: number,
-  ): Promise<UserActivityResponseDto> {
-    if (page < 1 || limit < 1) {
-      throw new Error('Page and limit must be positive integers');
-    }
-    const activities = await this.userActivityService.getUserActivity(
-      id,
-      page,
-      limit,
-    );
-    return { activities };
   }
 }

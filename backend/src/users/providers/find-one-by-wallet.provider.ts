@@ -43,7 +43,7 @@ export class FindOneByWallet {
     let user: User | null;
 
     try {
-      user = await this.userRepository.findOneBy({ starknetWallet: wallet });
+      user = await this.userRepository.findOneBy({ stellarWallet: wallet });
     } catch (error) {
       throw new RequestTimeoutException('Could not fetch user', {
         description: 'Error connecting to database',

@@ -27,12 +27,12 @@ This is a **monorepo** containing three main components:
 
 - **Backend (NestJS)** – API & game logic  
 - **Frontend (NextJS)** – User interface  
-- **Smart Contracts (Cairo)** – Stellar testnet deployment  
+- **Smart Contracts (Soroban)** – Stellar testnet deployment  
 
 ### 🌍 Hosting
 - **Backend (NestJS)** → [Render](https://mindblock-webaapp.onrender.com)  
 - **Frontend (NextJS)** → (Coming soon on Vercel)  
-- **Contracts (Cairo)** → Stellar testnet  
+- **Contracts (Rust)** → Stellar testnet  
 
 ---
 
@@ -59,7 +59,7 @@ Frontend (NextJS)
 cd frontend
 npm install
 
-Contracts (Cairo)
+Contracts (Soroban)
 
 Make sure you have Scarb
  and Stellar CLI installed, then:
@@ -92,7 +92,7 @@ npm run dev
 
 Contracts
 
-Deploy your Cairo contracts on Stellar testnet:
+Deploy your Soroban contracts on Stellar testnet:
 
 cd contracts
 stellar-compile

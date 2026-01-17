@@ -10,11 +10,11 @@ import jwtConfig from './authConfig/jwt.config';
 import { AuthController } from './controllers/auth.controller';
 import { RefreshTokensProvider } from './providers/refreshTokensProvider';
 import { GenerateTokensProvider } from './providers/generate-tokens.provider';
-import { WalletLoginProvider } from './providers/wallet-login.provider';
 import { GoogleAuthenticationService } from './social/providers/google-authentication.service';
 import { GoogleAuthenticationController } from './social/google-auth.controller';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { StellarWalletLoginProvider } from './providers/wallet-login.provider';
 
 @Module({
   imports: [
@@ -32,10 +32,10 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
   providers: [
     AuthService,
     SignInProvider,
-    WalletLoginProvider,
     RefreshTokensProvider,
     GenerateTokensProvider,
     GoogleAuthenticationService,
+    StellarWalletLoginProvider,
     {
       provide: HashingProvider, // Use the abstract class as a token
       useClass: BcryptProvider, // Bind it to the concrete implementation

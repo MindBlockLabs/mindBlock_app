@@ -10,15 +10,8 @@ import databaseConfig from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
-import { LeaderboardModule } from './leaderboard/leaderboard.module';
-import { BadgeModule } from './badge/badge.module';
-import { TimeFilterModule } from './timefilter/timefilter.module';
-import { IQAssessmentModule } from './iq-assessment/iq-assessment.module';
-import { PuzzleModule } from './puzzle/puzzle.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
-import { GamificationModule } from './gamification/gamification.module';
-import { AchievementModule } from './achievement/achievement.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -63,16 +56,9 @@ import { AchievementModule } from './achievement/achievement.module';
     }),
     AuthModule,
     UsersModule,
-    LeaderboardModule,
     CommonModule,
     RedisModule,
     BlockchainModule,
-    BadgeModule,
-    TimeFilterModule,
-    IQAssessmentModule,
-    PuzzleModule,
-    GamificationModule,
-    AchievementModule,
   ],
   controllers: [AppController],
   providers: [AppService],
