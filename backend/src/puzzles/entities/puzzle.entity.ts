@@ -1,0 +1,51 @@
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
+import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
+
+@Entity('puzzles')
+export class Puzzle {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column({ type: 'text', nullable: false })
+  question: string;
+
+  @Column({ type: 'text', array: true, nullable: false })
+  options: string[];
+
+  @Column({ type: 'text', nullable: false })
+  correctAnswer: string;
+
+  @Column({
+    type: 'enum',
+    enum: PuzzleDifficulty,
+    nullable: false,
+  })
+  @Index()
+  difficulty: PuzzleDifficulty;
+
+  @Column({ type: 'uuid', nullable: false })
+  @Index()
+  categoryId: string;
+
+  @Column({ type: 'integer', nullable: false })
+  points: number;
+
+  @Column({ name: 'time_limit', type: 'integer', nullable: false })
+  timeLimit: number; // in seconds
+
+  @Column({ type: 'text', nullable: true })
+  explanation?: string;
+
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
+}
