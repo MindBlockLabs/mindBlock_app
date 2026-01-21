@@ -5,8 +5,11 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity('puzzles')
 export class Puzzle {
@@ -33,6 +36,10 @@ export class Puzzle {
   @Column({ type: 'uuid', nullable: false })
   @Index()
   categoryId: string;
+
+  @ManyToOne(() => Category, { onDelete: 'RESTRICT' })
+  @JoinColumn({ name: 'categoryId' })
+  category: Category;
 
   @Column({ type: 'integer', nullable: false })
   points: number;
