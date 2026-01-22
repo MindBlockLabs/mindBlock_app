@@ -18,12 +18,12 @@ export function AnswerOption({
 
   if (state === "green") {
     borderClass = "border-emerald-500";
-    bgClass = "bg-white";
+    bgClass = "bg-[#D8FFFB]";
     textClass = "text-emerald-500";
     shadowColor = "#10B981"; 
   } else if (state === "red") {
     borderClass = "border-rose-500";
-    bgClass = "bg-white";
+    bgClass = "bg-[#FFE0E6]";
     textClass = "text-rose-500";
     shadowColor = "#F43F5E";
   }
