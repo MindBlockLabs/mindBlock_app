@@ -13,11 +13,14 @@ import { CreateGoogleUserProvider } from './providers/googleUserProvider';
 import { PaginationModule } from '../common/pagination/pagination.module';
 import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
 import { UpdateUserService } from './providers/update-user.service';
+import { UserProgress } from 'src/progress/entities/progress.entity';
+import { Streak } from 'src/streak/entities/streak.entity';
+import { DailyQuest } from 'src/quests/entities/daily-quest.entity';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, UserProgress, Streak, DailyQuest]),
     PaginationModule,
   ],
   controllers: [UsersController],
