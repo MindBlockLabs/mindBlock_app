@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToMany,
 } from 'typeorm';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
+import { UserProgress } from '../../progress/entities/progress.entity';
 
 @Entity('puzzles')
 export class Puzzle {
@@ -48,4 +50,8 @@ export class Puzzle {
 
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
+
+  // Relationships
+  @OneToMany(() => UserProgress, (progress) => progress.puzzle)
+  progressRecords: UserProgress[];
 }

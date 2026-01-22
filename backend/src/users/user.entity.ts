@@ -2,16 +2,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { userRole } from './enums/userRole.enum';
 import { ChallengeLevel } from './enums/challengeLevel.enum';
 import { ChallengeType } from './enums/challengeType.enum';
 import { Exclude } from 'class-transformer';
+import { UserProgress } from '../progress/entities/progress.entity';
+import { DailyQuest } from '../quests/entities/daily-quest.entity';
+import { Streak } from '../streak/entities/streak.entity';
 
 /** this is the structure of the users table */
 @Entity()
@@ -84,7 +85,10 @@ export class User {
   tokens: number;
 
   @Column({
-    type: 'enum', enum: ChallengeLevel, nullable: true, default: ChallengeLevel.BEGINNER
+    type: 'enum',
+    enum: ChallengeLevel,
+    nullable: true,
+    default: ChallengeLevel.BEGINNER,
   })
   challengeLevel?: ChallengeLevel;
 
@@ -96,4 +100,14 @@ export class User {
 
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
+
+  // Relationships
+  @OneToMany(() => UserProgress, (progress) => progress.puzzle)
+  progressRecords: UserProgress[];
+
+  @OneToMany(() => DailyQuest, (quest) => quest.user)
+  dailyQuests: DailyQuest[];
+
+  @OneToOne(() => Streak, (streak) => streak.user)
+  streak: Streak;
 }
