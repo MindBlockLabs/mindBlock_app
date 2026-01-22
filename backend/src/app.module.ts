@@ -10,6 +10,7 @@ import databaseConfig from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { ProgressModule } from './progress/progress.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 
@@ -59,6 +60,7 @@ import { AppController } from './app.controller';
     CommonModule,
     RedisModule,
     BlockchainModule,
+    ProgressModule,
   ],
   controllers: [AppController],
   providers: [AppService],
