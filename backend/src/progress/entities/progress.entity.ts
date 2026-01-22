@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   Entity,
@@ -44,24 +43,19 @@ export class UserProgress {
   @JoinColumn({ name: 'categoryId' })
   category: Category;
 
-  @ApiProperty({ example: true })
   @Column({ type: 'boolean', default: false })
   isCorrect: boolean;
 
-  @ApiProperty({ example: 'B' })
   @Column('varchar', { length: 50, nullable: true })
   userAnswer?: string;
 
-  @ApiProperty({ example: 10 })
   @Column('int', { default: 0 })
   pointsEarned: number;
 
   // seconds
-  @ApiProperty({ example: 18 })
   @Column('int', { default: 0 })
   timeSpent: number;
 
-  @ApiProperty({ example: '2026-01-22T10:20:30.000Z' })
   @Column({ type: 'timestamptz' })
   attemptedAt: Date;
 }

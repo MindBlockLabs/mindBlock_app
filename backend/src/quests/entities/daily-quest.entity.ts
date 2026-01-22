@@ -1,4 +1,3 @@
-import { ApiProperty } from '@nestjs/swagger';
 import {
   Column,
   CreateDateColumn,
@@ -26,23 +25,18 @@ export class DailyQuest {
   user: User;
 
   // store date-only string to avoid timezone bugs ("YYYY-MM-DD")
-  @ApiProperty({ example: '2026-01-22' })
   @Column('date')
   questDate: string;
 
-  @ApiProperty({ example: 10 })
   @Column('int', { default: 10 })
   totalQuestions: number;
 
-  @ApiProperty({ example: 3 })
   @Column('int', { default: 0 })
   completedQuestions: number;
 
-  @ApiProperty({ example: false })
   @Column({ type: 'boolean', default: false })
   isCompleted: boolean;
 
-  @ApiProperty({ example: 25 })
   @Column('int', { default: 0 })
   pointsEarned: number;
 
