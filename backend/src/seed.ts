@@ -1,11 +1,11 @@
-import { NestFactory } from "@nestjs/core"
-import { AppModule } from "./app.module"
-import { DataSource } from "typeorm"
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { DataSource } from 'typeorm';
 
 async function bootstrap() {
-  const app = await NestFactory.createApplicationContext(AppModule)
-  const dataSource = app.get(DataSource)
+  const app = await NestFactory.createApplicationContext(AppModule);
+  const dataSource = app.get(DataSource);
 
-  await app.close()
+  await app.close();
 }
-bootstrap()
+bootstrap();

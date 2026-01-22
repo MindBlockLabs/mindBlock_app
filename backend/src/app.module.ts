@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -13,6 +12,10 @@ import { BlockchainModule } from './blockchain/blockchain.module';
 import { ProgressModule } from './progress/progress.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
+import { PuzzlesModule } from './puzzles/puzzles.module';
+import { ProgressModule } from './progress/progress.module';
+import { QuestsModule } from './quests/quests.module';
+import { StreakModule } from './streak/strerak.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -57,6 +60,10 @@ import { AppController } from './app.controller';
     }),
     AuthModule,
     UsersModule,
+    PuzzlesModule,
+    ProgressModule,
+    QuestsModule,
+    StreakModule,
     CommonModule,
     RedisModule,
     BlockchainModule,
