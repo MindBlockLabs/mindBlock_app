@@ -28,7 +28,7 @@ Implemented the User Progress domain model with answer validation and point calc
 - **Integration Tests**: Implemented (SQLite enum issue unrelated to our implementation)
 - **Demo Script**: `node src/progress/demo.js` for live demonstration
 
-### 📁 Files Added
+### 📁 Files that Added
 ```
 src/progress/
 ├── entities/user-progress.entity.ts
@@ -47,6 +47,8 @@ All acceptance criteria met:
 - ✅ Validation logic reusable across providers  
 - ✅ Points calculated deterministically
 - ✅ No controller-level business logic
+
+You can ask for further clarification
 
 ### How to Verify
 ```bash
