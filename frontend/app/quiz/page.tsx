@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Nunito } from "next/font/google";
 import { MOCK_QUIZ } from "@/lib/Quiz_data";
 import { QuizHeader } from "@/components/quiz/QuizHeader";
@@ -15,23 +15,42 @@ const nunito = Nunito({
 export default function QuizPage() {
   const [step, setStep] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
+  const actionBtnRef = useRef<HTMLButtonElement>(null);
+
   const question = MOCK_QUIZ[step];
 
-  const handleSelectOption = (optionId: string, isCorrect: boolean) => {
-    if (selectedId) return;
+  const handleSelectOption = (optionId: string) => {
+    if (isSubmitted) return;
     setSelectedId(optionId);
-    if (isCorrect) setScore((prev) => prev + 1);
   };
 
-  const handleNext = () => {
-    if (step < MOCK_QUIZ.length - 1) {
-      setStep(step + 1);
-      setSelectedId(null);
+  useEffect(() => {
+    if (selectedId && actionBtnRef.current) {
+      actionBtnRef.current.focus();
+    }
+  }, [selectedId]);
+
+  const handleAction = () => {
+    if (!isSubmitted) {
+      setIsSubmitted(true);
+      const selectedOption = question.options.find(
+        (opt) => opt.id === selectedId,
+      );
+      if (selectedOption?.isCorrect) {
+        setScore((prev) => prev + 1);
+      }
     } else {
-      setIsFinished(true);
+      if (step < MOCK_QUIZ.length - 1) {
+        setStep(step + 1);
+        setSelectedId(null);
+        setIsSubmitted(false);
+      } else {
+        setIsFinished(true);
+      }
     }
   };
 
@@ -60,33 +79,42 @@ export default function QuizPage() {
             <div className="space-y-7">
               {question.options.map((opt) => {
                 const isSelected = selectedId === opt.id;
-                const hasPicked = selectedId !== null;
-                const state = isSelected
-                  ? opt.isCorrect
-                    ? "green"
-                    : "red"
-                  : hasPicked && opt.isCorrect
-                    ? "green"
-                    : "default";
+                let state: "default" | "red" | "green" | "teal" = "default";
+
+                if (isSubmitted) {
+                  if (isSelected) {
+                    state = opt.isCorrect ? "green" : "red";
+                  } else if (opt.isCorrect) {
+                    state = "green";
+                  }
+                } else if (isSelected) {
+                  state = "teal";
+                }
 
                 return (
                   <AnswerOption
                     key={opt.id}
                     text={opt.text}
                     state={state}
-                    disabled={hasPicked}
-                    onSelect={() => handleSelectOption(opt.id, opt.isCorrect)}
+                    disabled={isSubmitted}
+                    onSelect={() => handleSelectOption(opt.id)}
                   />
                 );
               })}
             </div>
+
             <button
-              onClick={handleNext}
+              ref={actionBtnRef}
+              onClick={handleAction}
               disabled={selectedId === null}
               style={{ boxShadow: `0 4px 0 0 #2663C7` }}
-              className={`w-full h-[50px] bg-[#3B82F6] rounded-[8px] font-bold ${selectedId ? "cursor-pointer" : "opacity-50 cursor-not-allowed"}`}
+              className={`w-full h-[50px] bg-[#3B82F6] rounded-[8px] font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
+                selectedId
+                  ? "cursor-pointer opacity-100"
+                  : "opacity-50 cursor-not-allowed"
+              }`}
             >
-              Continue
+              {isSubmitted ? "Continue" : "Submit Answer"}
             </button>
           </div>
         )}
