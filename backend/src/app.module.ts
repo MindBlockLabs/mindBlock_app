@@ -13,7 +13,6 @@ import { ProgressModule } from './progress/progress.module';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { PuzzlesModule } from './puzzles/puzzles.module';
-import { ProgressModule } from './progress/progress.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
 

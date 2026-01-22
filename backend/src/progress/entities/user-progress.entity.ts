@@ -7,19 +7,18 @@ import {
 } from 'typeorm';
 
 @Entity('user_progress')
+@Index(['userId', 'categoryId', 'attemptedAt'])
 export class UserProgress {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column({ type: 'uuid', nullable: false })
-  @Index()
   userId: string;
 
   @Column({ type: 'uuid', nullable: false })
   puzzleId: string;
 
   @Column({ type: 'uuid', nullable: false })
-  @Index()
   categoryId: string;
 
   @Column({ type: 'boolean', nullable: false })
@@ -30,11 +29,10 @@ export class UserProgress {
 
   @Column({ type: 'integer', nullable: false })
   pointsEarned: number;
-
+ 
   @Column({ name: 'time_spent', type: 'integer', nullable: false })
   timeSpent: number; // seconds
 
   @CreateDateColumn({ name: 'attempted_at' })
-  @Index()
   attemptedAt: Date;
 }

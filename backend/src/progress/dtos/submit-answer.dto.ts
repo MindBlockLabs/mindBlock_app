@@ -9,7 +9,7 @@ export class SubmitAnswerDto {
   @IsUUID()
   @IsNotEmpty()
   userId: string;
-
+ 
   @ApiProperty({
     description: 'Unique identifier of the puzzle being answered',
     example: '456e7890-e12b-34d5-a678-526614174111',

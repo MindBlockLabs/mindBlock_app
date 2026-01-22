@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/user-progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
@@ -29,12 +29,15 @@ export class ProgressCalculationProvider {
    * Validates user answer against puzzle correct answer
    * Trims whitespace and performs case-insensitive comparison
    */
-  validateAnswer(userAnswer: string, correctAnswer: string): AnswerValidationResult {
+  validateAnswer(
+    userAnswer: string,
+    correctAnswer: string,
+  ): AnswerValidationResult {
     const normalizedUserAnswer = userAnswer.trim().toLowerCase();
     const normalizedCorrectAnswer = correctAnswer.trim().toLowerCase();
-    
+
     const isCorrect = normalizedUserAnswer === normalizedCorrectAnswer;
-    
+
     return {
       isCorrect,
       pointsEarned: 0, // Will be calculated separately
@@ -46,18 +49,22 @@ export class ProgressCalculationProvider {
    * Calculates points based on puzzle difficulty and time spent
    * Base points from puzzle difficulty with optional time bonus/penalty
    */
-  calculatePoints(puzzle: Puzzle, timeSpent: number, isCorrect: boolean): number {
+  calculatePoints(
+    puzzle: Puzzle,
+    timeSpent: number,
+    isCorrect: boolean,
+  ): number {
     if (!isCorrect) {
       return 0;
     }
 
     const basePoints = puzzle.points;
     const timeLimit = puzzle.timeLimit;
-    
+
     // Time bonus: up to 20% extra points for fast completion
     // Time penalty: up to 10% reduction for slow completion
     let timeMultiplier = 1.0;
-    
+
     if (timeSpent <= timeLimit * 0.5) {
       // Completed in half the time or less - 20% bonus
       timeMultiplier = 1.2;
@@ -68,7 +75,7 @@ export class ProgressCalculationProvider {
       // Exceeded time limit - 10% penalty
       timeMultiplier = 0.9;
     }
-    
+
     return Math.round(basePoints * timeMultiplier);
   }
 
@@ -83,15 +90,35 @@ export class ProgressCalculationProvider {
       where: { id: submitAnswerDto.puzzleId },
     });
 
+    // In processAnswerSubmission, check for recent duplicate:
+    const recentAttempt = await this.userProgressRepository.findOne({
+      where: {
+        userId: submitAnswerDto.userId,
+        puzzleId: submitAnswerDto.puzzleId,
+        attemptedAt: MoreThan(new Date(Date.now() - 5000)), // 5 second window
+      },
+    });
+
     if (!puzzle) {
-      throw new Error(`Puzzle with ID ${submitAnswerDto.puzzleId} not found`);
+      throw new NotFoundException(`Puzzle with ID ${submitAnswerDto.puzzleId} not found`);
+    }
+
+    if (recentAttempt) {
+      throw new Error('Duplicate submission detected');
     }
 
     // Validate answer
-    const validation = this.validateAnswer(submitAnswerDto.userAnswer, puzzle.correctAnswer);
-    
+    const validation = this.validateAnswer(
+      submitAnswerDto.userAnswer,
+      puzzle.correctAnswer,
+    );
+
     // Calculate points
-    const pointsEarned = this.calculatePoints(puzzle, submitAnswerDto.timeSpent, validation.isCorrect);
+    const pointsEarned = this.calculatePoints(
+      puzzle,
+      submitAnswerDto.timeSpent,
+      validation.isCorrect,
+    );
     validation.pointsEarned = pointsEarned;
 
     // Create user progress record
@@ -122,7 +149,10 @@ export class ProgressCalculationProvider {
     const stats = await this.userProgressRepository
       .createQueryBuilder('progress')
       .select('COUNT(*)', 'totalAttempts')
-      .addSelect('SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)', 'correctAttempts')
+      .addSelect(
+        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
+        'correctAttempts',
+      )
       .addSelect('SUM(progress.pointsEarned)', 'totalPoints')
       .addSelect('AVG(progress.timeSpent)', 'averageTimeSpent')
       .where('progress.userId = :userId', { userId })
@@ -130,13 +160,15 @@ export class ProgressCalculationProvider {
       .getRawOne();
 
     return {
-      totalAttempts: parseInt(stats.totalAttempts) || 0,
+      totalAttempts: Number(stats.totalAttempts) || 0,
       correctAttempts: parseInt(stats.correctAttempts) || 0,
       totalPoints: parseInt(stats.totalPoints) || 0,
       averageTimeSpent: parseFloat(stats.averageTimeSpent) || 0,
-      accuracy: stats.totalAttempts > 0 
-        ? (parseInt(stats.correctAttempts) / parseInt(stats.totalAttempts)) * 100 
-        : 0,
+      accuracy:
+        stats.totalAttempts > 0
+          ? (parseInt(stats.correctAttempts) / parseInt(stats.totalAttempts)) *
+            100
+          : 0,
     };
   }
 }
