@@ -96,7 +96,7 @@ export function StatCard({ label, value, color, icon, delay = 0 }: StatCardProps
       style={{ backgroundColor: color, animationDelay: `${delay}ms` }}
     >
       <div className="py-1 text-center">
-        <span className="text-[12px] md:text-[14px] font-bold text-white tracking-widest">
+        <span className="text-[12px] md:text-[14px] font-black text-white tracking-widest">
           {label}
         </span>
       </div>
