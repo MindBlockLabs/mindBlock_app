@@ -42,8 +42,8 @@ export function LevelComplete({
         <StatCard
           label="NICE"
           value={`${correctAnswers}/${totalQuestions}`}
-          color="#10B981"
-          icon={<CircleCheck className="h-10 w-10" stroke="white" fill="#10B981" />}
+          color="#14B8A6"
+          icon={<CircleCheck className="h-10 w-10" stroke="white" fill="#14B8A6" />}
           delay={100}
         />
         <StatCard
@@ -101,8 +101,8 @@ export function StatCard({ label, value, color, icon, delay = 0 }: StatCardProps
         </span>
       </div>
       <div className="bg-white flex items-center w-[96%] mx-auto rounded-3xl justify-center gap-1 md:gap-2 h-[68px] md:h-[85px]">
-        <div className="text-xl md:text-[24px]">{icon}</div>
-        <span style={{ color: color}} className="text-lg md:text-xl font-black">{value}</span>
+        <div>{icon}</div>
+        <span style={{ color: color}} className="text-lg md:text-2xl font-black">{value}</span>
       </div>
     </div>
   );
