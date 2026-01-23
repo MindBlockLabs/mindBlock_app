@@ -80,28 +80,42 @@ const ForgotPassword = () => {
 
   return ( 
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#050C16] text-white">
-      {/* Header */}
-      <div className="flex items-center p-4 md:p-6">
+      <div className="min-h-screen bg-[#050C16] text-white md:flex md:flex-col">
+      {/* Back Arrow - stays at top on desktop, within main content */}
+      <div className="hidden md:flex md:items-start md:p-6">
+        <Link href="/auth/signin">
+          <Image
+            src="/Vector.png"
+            alt="Home"
+            width={20}
+            height={20}
+          />
+        </Link>
       </div>
       {/* Main Content */}
-      <div className="flex flex-col items-center px-4 md:px-6 -mt-2">
+      <div className="flex flex-col items-center px-4 md:px-6 pt-4 md:pt-0 md:justify-center md:flex-1">
         <div className="w-full max-w-sm md:max-w-[408px]">
-          <div className='flex flex-row mb-12 gap-[40px] h-[33px]'>
+          {/* Mobile header with back arrow */}
+          <div className='flex flex-row mb-12 gap-20 h-[33px] md:hidden'>
             <div className='flex items-center'>
               <Link href="/auth/signin" className="mr-2">
                 <Image
                   src="/Vector.png"
                   alt="Home"
-                  width={20}       // set width
-                  height={20}      // set height
+                  width={20}
+                  height={20}
                 />
               </Link>
             </div>
             <h1 className="text-xl md:text-2xl font-semibold text-center text-[#E6E6E6]">
-              Forgot Password
+              Forgot Password?
             </h1>
           </div>
+
+          {/* Desktop title */}
+          <h1 className="hidden md:block text-xl md:text-2xl font-semibold text-center text-[#E6E6E6] mb-12">
+            Forgot Password?
+          </h1>
 
           {/* Sign-in Form */}
           <form onSubmit={handleForgotPassword} className="space-y-6">
@@ -124,12 +138,11 @@ const ForgotPassword = () => {
 
           {/* Sign Up Link */}
           <div className="text-center mt-5">
-            <span className="text-[#E6E6E6]">Don't have an account? </span>
             <Link 
-              href="/auth/signup"
+              href="/auth/signin"
               className="text-[#3B82F6] transition-colors"
             >
-              Sign up
+              Back to Sign in
             </Link>
           </div>
         </div>
