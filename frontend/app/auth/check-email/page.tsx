@@ -49,43 +49,20 @@ const CheckEmail = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#050C16] text-white">
-        {/* Header */}
-        <div className="flex items-center p-4 md:p-6">
-        </div>
+      <div className="min-h-screen bg-[#050C16] text-white flex flex-col">
         {/* Main Content */}
-        <div className="flex flex-col items-center px-4 md:px-6 -mt-2">
+        <div className="flex flex-col items-center justify-center flex-1 px-4 md:px-6">
           <div className="w-full max-w-sm md:max-w-[408px]">
-            <div className='flex flex-row mb-12 gap-[40px] h-[33px]'>
-              <div className='flex items-center'>
-                <Link href="/auth/forgot-password" className="mr-2">
-                  <Image
-                    src="/Vector.png"
-                    alt="Back"
-                    width={20}
-                    height={20}
-                  />
-                </Link>
-              </div>
+            <div className='flex flex-row mb-4 justify-center h-[33px]'>
               <h1 className="text-xl md:text-2xl font-semibold text-center text-[#E6E6E6]">
-                Check Email
+                Check your Email
               </h1>
-            </div>
-
-            {/* Email Icon */}
-            <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 bg-[#3B82F6]/10 rounded-full flex items-center justify-center">
-                <Mail size={40} className="text-[#3B82F6]" />
-              </div>
             </div>
 
             {/* Message */}
             <div className="text-center mb-8 space-y-3">
-              <h2 className="text-lg font-medium text-[#E6E6E6]">
-                Check your email
-              </h2>
               <p className="text-[#E6E6E6CC] text-sm leading-relaxed">
-                We've sent you a password reset link. Please check your email.
+                We've sent you a link to your email address to reset your password. Click the link in your inbox to continue.
               </p>
             </div>
 
@@ -98,16 +75,6 @@ const CheckEmail = () => {
             >
               {isLoading ? 'Resending...' : 'Resend Link'}
             </Button>
-
-            {/* Back to Sign In */}
-            <div className="text-center mt-6">
-              <Link 
-                href="/auth/signin"
-                className="text-[#3B82F6] transition-colors text-sm"
-              >
-                Back to Sign In
-              </Link>
-            </div>
           </div>
         </div>
       </div>
