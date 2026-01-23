@@ -3,8 +3,8 @@ import { useState, useRef, useEffect } from "react";
 import { Nunito } from "next/font/google";
 import { MOCK_QUIZ } from "@/lib/Quiz_data";
 import { QuizHeader } from "@/components/quiz/QuizHeader";
-import { LevelComplete } from "@/components/quiz/LevelComplete";
 import { AnswerOption } from "@/components/quiz/AnswerOption";
+import { LevelComplete } from "@/components/quiz/LevelComplete";
 
 const nunito = Nunito({
   subsets: ["latin"],
