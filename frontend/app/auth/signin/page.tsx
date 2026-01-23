@@ -9,10 +9,20 @@ import { Wallet } from 'lucide-react';
 import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useWalletLogin } from '@/hooks/useWalletLogin';
 
 const SignInPage = () => {
   const router = useRouter();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const {
+    step: walletStep,
+    statusText: walletStatusText,
+    isLoading: isWalletLoading,
+    error: walletError,
+    walletAddress,
+    loginWithWallet,
+    reset: resetWalletLogin,
+  } = useWalletLogin();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -150,6 +160,24 @@ const SignInPage = () => {
     window.location.href = "https://mindblock-webaapp.onrender.com/auth/google-authentication";
   };
 
+  const handleStellarWalletLogin = async () => {
+    // Clear previous wallet attempt state so the UI reflects the new run.
+    resetWalletLogin();
+
+    const { accessToken } = await loginWithWallet();
+    if (accessToken) {
+      showSuccess('Login Successful', 'Welcome back!');
+      router.push('/dashboard');
+    } else if (walletError) {
+      // Show toast for all errors including user cancellations
+      if (walletError.code === 'USER_REJECTED') {
+        showWarning('Cancelled', walletError.message);
+      } else {
+        showError('Wallet Login Failed', walletError.message);
+      }
+    }
+  };
+
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-[#050C16] text-white">
@@ -229,6 +257,7 @@ const SignInPage = () => {
           <div className="space-y-4">
             <button
               onClick={handleGoogleSignIn}
+              type="button"
               className="w-full h-12 border-2 border-blue-500 text-white rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -241,11 +270,42 @@ const SignInPage = () => {
             </button>
 
             <button
+              type="button"
+              onClick={handleStellarWalletLogin}
+              disabled={isWalletLoading || isLoading}
               className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors"
             >
               <Wallet size={20} />
-              Connect Wallet
+              {isWalletLoading
+                ? walletStatusText || 'Connecting...'
+                : 'Connect Stellar Wallet'}
             </button>
+
+            {/* Wallet info / errors (progress is shown on the button label) */}
+            {(walletError || walletAddress) && (
+              <div className="text-sm">
+                {walletAddress && (
+                  <div className="text-[#E6E6E6]">
+                    Connected wallet:{' '}
+                    <span className="font-mono">
+                      {walletAddress.slice(0, 6)}...{walletAddress.slice(-6)}
+                    </span>
+                  </div>
+                )}
+                {walletError && (
+                  <div className="text-red-400 mt-1">
+                    {walletError.message}
+                    {walletStep === 'error' &&
+                      walletError.code === 'WALLET_NOT_INSTALLED' && (
+                        <span className="block text-red-300 mt-1">
+                          Install a Stellar wallet extension (Freighter or xBull),
+                          then refresh this page.
+                        </span>
+                      )}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Terms and Privacy */}

@@ -43,15 +43,15 @@ const ToastComponent: React.FC<ToastProps> = ({ toast, onRemove }) => {
   const getBackgroundColor = () => {
     switch (toast.type) {
       case 'success':
-        return 'bg-green-500/10 border-green-500/20';
+        return 'bg-[#0F2027] border-green-500/50';
       case 'error':
-        return 'bg-red-500/10 border-red-500/20';
+        return 'bg-[#0F2027] border-red-500/50';
       case 'warning':
-        return 'bg-yellow-500/10 border-yellow-500/20';
+        return 'bg-[#0F2027] border-yellow-500/50';
       case 'info':
-        return 'bg-blue-500/10 border-blue-500/20';
+        return 'bg-[#0F2027] border-blue-500/50';
       default:
-        return 'bg-blue-500/10 border-blue-500/20';
+        return 'bg-[#0F2027] border-blue-500/50';
     }
   };
 
@@ -73,9 +73,9 @@ const ToastComponent: React.FC<ToastProps> = ({ toast, onRemove }) => {
   return (
     <div
       className={`
-        fixed bottom-4 right-4 z-50 max-w-sm w-full
+        max-w-sm w-full
         ${getBackgroundColor()}
-        border rounded-lg p-4 shadow-lg
+        border rounded-lg p-4 shadow-xl backdrop-blur-sm
         transform transition-all duration-300 ease-in-out
         animate-in slide-in-from-right-full
       `}

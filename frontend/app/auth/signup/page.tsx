@@ -9,6 +9,7 @@ import { Wallet } from 'lucide-react';
 import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useWalletLogin } from '@/hooks/useWalletLogin';
 
 // TypeScript interface for Web3 wallet
 interface Window {
@@ -30,6 +31,15 @@ declare global {
 const SignUpPage = () => {
   const router = useRouter();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const {
+    step: walletStep,
+    statusText: walletStatusText,
+    isLoading: isWalletLoading,
+    error: walletError,
+    walletAddress,
+    loginWithWallet,
+    reset: resetWalletLogin,
+  } = useWalletLogin();
   const [formData, setFormData] = useState({
     username: '',
     fullName: '',
@@ -230,170 +240,18 @@ const SignUpPage = () => {
   };
 
   const handleWalletConnect = async () => {
-    try {
-      showInfo('Wallet Connection', 'Connecting to your wallet...');
-      
-      // Check if Web3 is available (MetaMask or similar)
-      if (typeof window.ethereum !== 'undefined') {
-        // Request account access
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        const walletAddress = accounts[0];
-        
-        if (walletAddress) {
-          // Generate a nonce for authentication
-          const timestamp = Date.now();
-          const randomString = Math.random().toString(36).substring(2, 15);
-          const nonce = `nonce_${timestamp}_${randomString}_${Math.random().toString(36).substring(2, 8)}`;
-          
-          // Create a message for signing that includes the nonce
-          const message = `Sign this message to authenticate with Mind Block. Nonce: ${nonce}`;
-          
-          try {
-            // Request signature using personal_sign
-            const signature = await window.ethereum.request({
-              method: 'personal_sign',
-              params: [message, walletAddress],
-            });
-            
-            // Get the public key (this might not be directly available from MetaMask)
-            // For now, we'll use a placeholder or try to derive it
-            let publicKey = '';
-            try {
-              // Try to get public key - this might not work with all wallets
-              const encryptionKey = await window.ethereum.request({
-                method: 'eth_getEncryptionPublicKey',
-                params: [walletAddress],
-              });
-              // Convert base64 to hex format if needed
-              if (encryptionKey && !encryptionKey.startsWith('0x')) {
-                try {
-                  // Convert base64 to hex using browser's atob
-                  const binaryString = atob(encryptionKey);
-                  const bytes = new Uint8Array(binaryString.length);
-                  for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                  }
-                  publicKey = '0x' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
-                } catch (convError) {
-                  console.warn('Could not convert public key format:', convError);
-                  publicKey = encryptionKey; // Use as-is if conversion fails
-                }
-              } else {
-                publicKey = encryptionKey || '';
-              }
-            } catch (pkError) {
-              console.warn('Could not get public key:', pkError);
-              // Generate a placeholder public key in correct hex format
-              publicKey = '0x' + Array(128).fill(0).map(() => Math.floor(Math.random() * 16).toString(16)).join('');
-            }
-            
-            // Format the request body to match the expected wallet login format
-            const requestBody = {
-              walletAddress: walletAddress,
-              signature: [signature], // Single signature in array format
-              nonce: nonce,
-              publicKey: publicKey
-            };
-            
-            console.log('Wallet login request:', requestBody); // Debug log
-            
-            // Use the wallet login endpoint
-            const response = await fetch('https://mindblock-webaapp.onrender.com/auth/wallet-login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(requestBody),
-            });
-            
-            console.log('Wallet login response status:', response.status);
-            
-            if (response.ok) {
-              const data = await response.json();
-              console.log('Wallet login response data:', data);
-              
-              // Store token if provided
-              if (data.accessToken || data.token) {
-                try {
-                  localStorage.setItem('accessToken', data.accessToken || data.token);
-                } catch (storageError) {
-                  console.warn('Could not save token to localStorage:', storageError);
-                }
-              }
-              
-              showSuccess('Wallet Connected', 'Successfully authenticated with wallet!');
-              
-              // Redirect based on response
-              setTimeout(() => {
-                if (data.accessToken || data.token) {
-                  router.push('/dashboard');
-                } else {
-                  router.push('/auth/signin');
-                }
-              }, 1000);
-              
-            } else {
-              // Handle wallet login errors
-              try {
-                const errorData = await response.json();
-                console.log('Wallet login error data:', errorData);
-                
-                let errorMessage = 'Wallet authentication failed';
-                
-                // Handle nested message object
-                if (errorData.message) {
-                  if (typeof errorData.message === 'string') {
-                    errorMessage = errorData.message;
-                  } else if (typeof errorData.message === 'object') {
-                    // If message is an object, try to extract meaningful info
-                    if (errorData.message.error) {
-                      errorMessage = errorData.message.error;
-                    } else if (errorData.message.details) {
-                      errorMessage = errorData.message.details;
-                    } else {
-                      // Convert object to string for debugging
-                      errorMessage = JSON.stringify(errorData.message);
-                    }
-                  }
-                } else if (typeof errorData.error === 'string') {
-                  errorMessage = errorData.error;
-                }
-                
-                if (response.status === 404) {
-                  // Wallet not registered, suggest registration
-                  showError('Wallet Not Registered', 'This wallet is not registered. Please sign up first.');
-                } else if (response.status === 401) {
-                  showError('Authentication Failed', 'Invalid signature. Please try again.');
-                } else if (response.status === 400) {
-                  showError('Invalid Request', `Bad request: ${errorMessage}`);
-                } else {
-                  showError('Wallet Login Failed', errorMessage);
-                }
-              } catch (parseError) {
-                console.error('Error parsing wallet login response:', parseError);
-                showError('Wallet Login Failed', `Error ${response.status}: Please try again.`);
-              }
-            }
-            
-          } catch (signError: any) {
-            console.error('Signature error:', signError);
-            if (signError?.code === 4001) {
-              showWarning('Signature Cancelled', 'Message signing was cancelled by user');
-            } else {
-              showError('Signature Error', 'Failed to sign message. Please try again.');
-            }
-          }
-        }
+    // Use Stellar wallet login hook instead of Ethereum
+    resetWalletLogin();
+    
+    const { accessToken } = await loginWithWallet();
+    if (accessToken) {
+      showSuccess('Registration Successful', 'Welcome to Mind Block!');
+      router.push('/dashboard');
+    } else if (walletError) {
+      if (walletError.code === 'USER_REJECTED') {
+        showWarning('Cancelled', walletError.message);
       } else {
-        // No Web3 wallet detected
-        showWarning('Wallet Not Found', 'Please install MetaMask or another Web3 wallet to continue');
-      }
-    } catch (error: any) {
-      console.error('Wallet connection error:', error);
-      if (error?.code === 4001) {
-        showWarning('Connection Cancelled', 'Wallet connection was cancelled by user');
-      } else {
-        showError('Wallet Error', 'Failed to connect wallet. Please try again.');
+        showError('Wallet Connection Failed', walletError.message);
       }
     }
   };
@@ -498,12 +356,38 @@ const SignUpPage = () => {
               <button
                 onClick={handleWalletConnect}
                 type="button"
-                disabled={isLoading}
+                disabled={isLoading || isWalletLoading}
                 className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Wallet size={20} />
-                Connect Wallet
+                {isWalletLoading ? walletStatusText || 'Connecting...' : 'Connect Stellar Wallet'}
               </button>
+
+              {/* Wallet info / errors (progress is shown on the button label) */}
+              {(walletError || walletAddress) && (
+                <div className="text-sm">
+                  {walletAddress && (
+                    <div className="text-[#E6E6E6]">
+                      Connected wallet:{' '}
+                      <span className="font-mono">
+                        {walletAddress.slice(0, 6)}...{walletAddress.slice(-6)}
+                      </span>
+                    </div>
+                  )}
+                  {walletError && (
+                    <div className="text-red-400 mt-1">
+                      {walletError.message}
+                      {walletStep === 'error' &&
+                        walletError.code === 'WALLET_NOT_INSTALLED' && (
+                          <span className="block text-red-300 mt-1">
+                            Install a Stellar wallet extension (Freighter or xBull),
+                            then refresh this page.
+                          </span>
+                        )}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Terms and Privacy */}
