@@ -56,6 +56,6 @@ export class UserProgress {
   @Column('int', { default: 0 })
   timeSpent: number;
 
-  @Column({ type: 'timestamptz' })
+  @Column({ type: 'datetime' })
   attemptedAt: Date;
 }

@@ -15,6 +15,7 @@ import { AppController } from './app.controller';
 import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
+import { CategoriesModule } from './categories/categories.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -28,34 +29,11 @@ import { StreakModule } from './streak/strerak.module';
       load: [appConfig, databaseConfig],
     }),
     EventEmitterModule.forRoot(),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const dbConfig = configService.get('database');
-
-        // If DATABASE_URL is set, use connection string (production)
-        if (dbConfig.url) {
-          return {
-            type: 'postgres',
-            url: dbConfig.url,
-            autoLoadEntities: dbConfig.autoload,
-            synchronize: dbConfig.synchronize,
-          };
-        }
-
-        // Otherwise fall back to normal config (development)
-        return {
-          type: 'postgres',
-          host: dbConfig.host,
-          port: dbConfig.port,
-          username: dbConfig.user,
-          password: dbConfig.password,
-          database: dbConfig.name,
-          autoLoadEntities: dbConfig.autoload,
-          synchronize: dbConfig.synchronize,
-        };
-      },
+    TypeOrmModule.forRoot({
+      type: 'sqlite',
+      database: 'database.sqlite',
+      autoLoadEntities: true,
+      synchronize: true, // Set to false in production
     }),
     AuthModule,
     UsersModule,
@@ -67,6 +45,7 @@ import { StreakModule } from './streak/strerak.module';
     RedisModule,
     BlockchainModule,
     ProgressModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

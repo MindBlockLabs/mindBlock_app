@@ -41,7 +41,7 @@ export class User {
     example: userRole.USER,
     description: 'Role of the user',
   })
-  @Column({ type: 'enum', enum: userRole, default: userRole.USER })
+  @Column({ type: 'varchar', default: userRole.USER })
   userRole?: userRole;
 
   /**
@@ -85,14 +85,13 @@ export class User {
   tokens: number;
 
   @Column({
-    type: 'enum',
-    enum: ChallengeLevel,
+    type: 'varchar',
     nullable: true,
     default: ChallengeLevel.BEGINNER,
   })
   challengeLevel?: ChallengeLevel;
 
-  @Column('simple-array', { nullable: true, default: ChallengeType.CODING })
+  @Column('text', { nullable: true, default: ChallengeType.CODING })
   challengeTypes?: string[];
 
   @Column('varchar', { length: 100, nullable: true })

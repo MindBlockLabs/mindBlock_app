@@ -3,6 +3,6 @@ import { userRole } from '../users/enums/userRole.enum';
 
 @Entity('users')
 export class User {
-  @Column({ type: 'enum', enum: userRole, default: userRole.USER })
+  @Column({ type: 'varchar', default: userRole.USER })
   role: userRole;
 }

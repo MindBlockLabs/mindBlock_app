@@ -25,9 +25,9 @@ export class Puzzle {
   correctAnswer: string;
 
   @Column({
-    type: 'enum',
-    enum: PuzzleDifficulty,
+    type: 'varchar',
     nullable: false,
+    enum: PuzzleDifficulty,
   })
   @Index()
   difficulty: PuzzleDifficulty;
