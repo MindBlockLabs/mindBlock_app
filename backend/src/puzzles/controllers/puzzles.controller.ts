@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
@@ -7,9 +7,7 @@ import { Puzzle } from '../entities/puzzle.entity';
 @Controller('puzzles')
 @ApiTags('puzzles')
 export class PuzzlesController {
-  constructor(
-    private readonly puzzlesService: PuzzlesService,
-  ) {}
+  constructor(private readonly puzzlesService: PuzzlesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new puzzle' })
@@ -28,5 +26,27 @@ export class PuzzlesController {
   })
   async create(@Body() createPuzzleDto: CreatePuzzleDto): Promise<Puzzle> {
     return this.puzzlesService.create(createPuzzleDto);
+  }
+
+  @ApiOperation({ summary: 'Get a puzzle by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Puzzle retrieved successfully',
+    type: Puzzle,
+  })
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.puzzlesService.getPuzzleById(id);
+  }
+
+  @ApiOperation({ summary: 'Get daily quest puzzles' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daily quest puzzles retrieved successfully',
+    type: Puzzle,
+  })
+  @Get('daily-quest')
+  getDailyQuest() {
+    return this.puzzlesService.getDailyQuestPuzzles();
   }
 }
