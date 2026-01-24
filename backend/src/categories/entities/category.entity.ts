@@ -11,8 +11,8 @@ import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 @Entity()
 @Index(['name'], { unique: true })
 export class Category {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column('varchar', { length: 120 })
   name: string;

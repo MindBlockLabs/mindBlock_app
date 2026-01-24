@@ -2,9 +2,14 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Puzzle } from './entities/puzzle.entity';
 import { Category } from '../categories/entities/category.entity';
+import { PuzzlesController } from './controllers/puzzles.controller';
+import { PuzzlesService } from './providers/puzzles.service';
+import { CreatePuzzleProvider } from './providers/create-puzzle.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Puzzle, Category])],
-  exports: [TypeOrmModule],
+  controllers: [PuzzlesController],
+  providers: [PuzzlesService, CreatePuzzleProvider],
+  exports: [TypeOrmModule, PuzzlesService],
 })
 export class PuzzlesModule {}
