@@ -5,9 +5,12 @@ import {
   Index,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../../users/user.entity';
+import { DailyQuestPuzzle } from './daily-quest-puzzle.entity';
+import { UserProgress } from '../../progress/entities/progress.entity';
 
 @Entity()
 @Index(['userId', 'questDate'], { unique: true }) // 1 quest/day/user
@@ -45,4 +48,10 @@ export class DailyQuest {
 
   @Column({ type: 'timestamptz', nullable: true })
   completedAt?: Date;
+
+  @OneToMany(() => DailyQuestPuzzle, (questPuzzle) => questPuzzle.dailyQuest)
+  questPuzzles: DailyQuestPuzzle[];
+
+  @OneToMany(() => UserProgress, (progress) => progress.dailyQuest)
+  progressRecords: UserProgress[];
 }

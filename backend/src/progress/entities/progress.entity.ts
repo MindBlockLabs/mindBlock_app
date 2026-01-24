@@ -9,11 +9,13 @@ import {
 import { User } from '../../users/user.entity';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { Category } from '../../categories/entities/category.entity';
+import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 
 @Entity()
 @Index(['userId', 'attemptedAt'])
 @Index(['userId', 'puzzleId'])
 @Index(['categoryId'])
+@Index(['dailyQuestId'])
 export class UserProgress {
   @PrimaryGeneratedColumn()
   id: number;
@@ -42,6 +44,15 @@ export class UserProgress {
   @ManyToOne(() => Category, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
+
+  @Column({ nullable: true })
+  dailyQuestId?: number;
+
+  @ManyToOne(() => DailyQuest, (quest) => quest.progressRecords, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn({ name: 'dailyQuestId' })
+  dailyQuest?: DailyQuest;
 
   @Column({ type: 'boolean', default: false })
   isCorrect: boolean;

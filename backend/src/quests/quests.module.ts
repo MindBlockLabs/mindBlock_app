@@ -1,9 +1,22 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DailyQuest } from './entities/daily-quest.entity';
+import { DailyQuestPuzzle } from './entities/daily-quest-puzzle.entity';
+import { DailyQuestController } from './controllers/daily-quest.controller';
+import { DailyQuestService } from './providers/daily-quest.service';
+import { PuzzlesModule } from '../puzzles/puzzles.module';
+import { ProgressModule } from '../progress/progress.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([DailyQuest])],
-  exports: [TypeOrmModule],
+  imports: [
+    TypeOrmModule.forFeature([DailyQuest, DailyQuestPuzzle]),
+    PuzzlesModule,
+    ProgressModule,
+    UsersModule,
+  ],
+  controllers: [DailyQuestController],
+  providers: [DailyQuestService],
+  exports: [TypeOrmModule, DailyQuestService],
 })
 export class QuestsModule {}
