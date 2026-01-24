@@ -15,6 +15,7 @@ import { AppController } from './app.controller';
 import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
+import { CategoriesModule } from './categories/categories.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -67,6 +68,7 @@ import { StreakModule } from './streak/strerak.module';
     RedisModule,
     BlockchainModule,
     ProgressModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
