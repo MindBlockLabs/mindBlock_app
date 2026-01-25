@@ -25,5 +25,8 @@
     "backend",
     "contracts"
   ],
-  "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme"
+  "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme",
+  "devDependencies": {
+    "tsc-alias": "^1.8.16"
+  }
 }
