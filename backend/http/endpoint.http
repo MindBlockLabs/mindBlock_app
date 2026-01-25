@@ -25,4 +25,23 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 GET http://localhost:3000/users?limit=10&page=1
 
+POST http://localhost:3000/users
 
+# create a puzzle (category ID here is not in the database. You will have to seed it to get one)
+POST http://localhost:3000/puzzles
+
+{
+  "question": "What has keys but cannot open locks?",
+  "options": ["A piano", "A map", "A keyboard", "A code"],
+  "correctAnswer": "A piano",
+  "difficulty": "INTERMEDIATE",
+  "categoryId": "550e8400-e29b-41d4-a716-446655440000",
+  "timeLimit": 60,
+  "explanation": "A piano has keys but cannot open locks."
+}
+
+
+# Sample account to test and navigate around the app
+Username: phertyameen
+email: phertymahmohd@gmail.com
+password: phertyAmeen@1

@@ -74,7 +74,8 @@ For backend:
 
 ```bash
 REDIS_URL=redis://127.0.0.1:6379
-DATABASE_URL='postgresql://neondb_owner:npg_qIXD8TJNmxS6@ep-weathered-fog-ae2k8pwv-pooler.c-2.us-east-2.aws.neon.tech/MindBlock?sslmode=require&channel_binding=require'
+DATABASE_API='https://mindblock-webaapp.onrender.com/api'
+
 ```
 
 For frontend:
