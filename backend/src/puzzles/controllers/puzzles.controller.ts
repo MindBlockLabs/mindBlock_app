@@ -1,15 +1,14 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
 import { Puzzle } from '../entities/puzzle.entity';
+import { PuzzleQueryDto } from '../dtos/puzzle-query.dto';
 
 @Controller('puzzles')
 @ApiTags('puzzles')
 export class PuzzlesController {
-  constructor(
-    private readonly puzzlesService: PuzzlesService,
-  ) {}
+  constructor(private readonly puzzlesService: PuzzlesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new puzzle' })
@@ -28,5 +27,16 @@ export class PuzzlesController {
   })
   async create(@Body() createPuzzleDto: CreatePuzzleDto): Promise<Puzzle> {
     return this.puzzlesService.create(createPuzzleDto);
+  }
+
+  @ApiOperation({ summary: 'Get all puzzles' })
+  @ApiResponse({
+    status: 201,
+    description: 'Puzzle retrieved successfully',
+    type: Puzzle,
+  })
+  @Get()
+  findAll(@Query() query: PuzzleQueryDto) {
+    return this.puzzlesService.findAll(query);
   }
 }
