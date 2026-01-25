@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
 import { UserProgress } from '../../progress/entities/progress.entity';
-import { Category } from 'src/categories/entities/category.entity';
+import { Category } from '../../categories/entities/category.entity';
 
 @Entity('puzzles')
 export class Puzzle {

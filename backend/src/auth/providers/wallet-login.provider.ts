@@ -7,8 +7,8 @@ import { AuthService } from './auth.service';
 import * as StellarSdk from 'stellar-sdk';
 import * as crypto from 'crypto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
-import { ChallengeLevel } from 'src/users/enums/challengeLevel.enum';
-import { AgeGroup } from 'src/users/enums/ageGroup.enum';
+import { ChallengeLevel } from '../../users/enums/challengeLevel.enum';
+import { AgeGroup } from '../../users/enums/ageGroup.enum';
 
 @Injectable()
 export class StellarWalletLoginProvider {
