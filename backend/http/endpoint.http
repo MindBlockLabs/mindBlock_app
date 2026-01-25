@@ -5,7 +5,7 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "username": "Fatee",
     "fullname": "Fatima Aminu",
     "email": "aminufatima@gmail.com",
-    "password": "PhertymahBaba@95"
+    "password": "FatimaAminu@123"
 }
 
  
@@ -13,7 +13,7 @@ POST http://localhost:3000/auth/signIn
 Content-Type: application/json
 {
     "email": "aminufatima@gmail.com",
-    "password": "PhertymahBaba@95"
+    "password": "FatimaAminu@123"
 }
 
 
@@ -25,7 +25,6 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 GET http://localhost:3000/users?limit=10&page=1
 
-POST http://localhost:3000/users
 
 # create a puzzle (category ID here is not in the database. You will have to seed it to get one)
 POST http://localhost:3000/puzzles
