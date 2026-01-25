@@ -29,6 +29,26 @@ export class PuzzlesController {
     return this.puzzlesService.create(createPuzzleDto);
   }
 
+  @ApiOperation({ summary: 'Get a puzzle by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Puzzle retrieved successfully',
+    type: Puzzle,
+  })
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.puzzlesService.getPuzzleById(id);
+  }
+
+  @ApiOperation({ summary: 'Get daily quest puzzles' })
+  @ApiResponse({
+    status: 200,
+    description: 'Daily quest puzzles retrieved successfully',
+    type: Puzzle,
+  })
+  @Get('daily-quest')
+  getDailyQuest() {
+    return this.puzzlesService.getDailyQuestPuzzles();
   @ApiOperation({ summary: 'Get all puzzles' })
   @ApiResponse({
     status: 201,
