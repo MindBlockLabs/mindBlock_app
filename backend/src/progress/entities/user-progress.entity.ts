@@ -29,7 +29,7 @@ export class UserProgress {
 
   @Column({ type: 'integer', nullable: false })
   pointsEarned: number;
- 
+
   @Column({ name: 'time_spent', type: 'integer', nullable: false })
   timeSpent: number; // seconds
 

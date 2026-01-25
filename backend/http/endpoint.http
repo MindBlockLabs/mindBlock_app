@@ -1,6 +1,30 @@
+POST http://localhost:3000/users
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI0Mjk0LCJleHAiOjE3NjkzMjc4OTQsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.vqjgnN33AMD0j1wxX6e6912PDB2VMW23eVJUQYBZRAA
+{
+    "username": "Fatee",
+    "fullname": "Fatima Aminu",
+    "email": "aminufatima@gmail.com",
+    "password": "FatimaAminu@123"
+}
+
+ 
+POST http://localhost:3000/auth/signIn
+Content-Type: application/json
+{
+    "email": "aminufatima@gmail.com",
+    "password": "FatimaAminu@123"
+}
+
+
+GET http://localhost:3000/daily-quest 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI2NTA3LCJleHAiOjE3NjkzMzAxMDcsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.YnrXEo1yns77DQgzHR0XO8m5MfTxT_ic9U_2je9nB6M
+
+
+
+
 GET http://localhost:3000/users?limit=10&page=1
 
-POST http://localhost:3000/users
 
 # create a puzzle (category ID here is not in the database. You will have to seed it to get one)
 POST http://localhost:3000/puzzles

@@ -15,6 +15,7 @@ import { GoogleAuthenticationController } from './social/google-auth.controller'
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { StellarWalletLoginProvider } from './providers/wallet-login.provider';
+import { JwtStrategy } from './strategies/jwt.strategy';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { StellarWalletLoginProvider } from './providers/wallet-login.provider';
   controllers: [AuthController, GoogleAuthenticationController],
   providers: [
     AuthService,
+    JwtStrategy,
     SignInProvider,
     RefreshTokensProvider,
     GenerateTokensProvider,
@@ -45,6 +47,6 @@ import { StellarWalletLoginProvider } from './providers/wallet-login.provider';
       useClass: ThrottlerGuard,
     },
   ],
-  exports: [AuthService, HashingProvider, GoogleAuthenticationService],
+  exports: [JwtStrategy, AuthService, HashingProvider, GoogleAuthenticationService],
 })
 export class AuthModule {}

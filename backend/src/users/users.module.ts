@@ -35,6 +35,6 @@ import { DailyQuest } from '../quests/entities/daily-quest.entity';
     CreateGoogleUserProvider,
     UpdateUserService,
   ],
-  exports: [UsersService],
+  exports: [UsersService, TypeOrmModule],
 })
 export class UsersModule {}
