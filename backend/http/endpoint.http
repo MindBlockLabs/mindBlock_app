@@ -15,6 +15,17 @@ POST http://localhost:3000/puzzles
   "explanation": "A piano has keys but cannot open locks."
 }
 
+POST http://localhost:3000/categories
+Content-Type: application/json
+
+{
+  "name": "Logic",
+  "description": "Logic and reasoning puzzles",
+  "isActive": true
+}
+
+// get category endpoints
+GET http://localhost:3000/categories
 
 # Sample account to test and navigate around the app
 Username: phertyameen
