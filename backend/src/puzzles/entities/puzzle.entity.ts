@@ -6,8 +6,8 @@ import {
   UpdateDateColumn,
   Index,
   OneToMany,
-  ManyToOne,
   JoinColumn,
+  ManyToOne,
 } from 'typeorm';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
 import { UserProgress } from '../../progress/entities/progress.entity';
@@ -42,6 +42,10 @@ export class Puzzle {
   @Column({ type: 'uuid', nullable: false })
   @Index()
   categoryId: string;
+
+  @ManyToOne(() => Category, { nullable: true })
+  @JoinColumn({ name: 'categoryId' })
+  category?: Category;
 
   @Column({ type: 'integer', nullable: false })
   points: number;
