@@ -51,6 +51,8 @@ export class PuzzlesService {
       .getMany();
 
     return puzzles;
+  }
+  
   public async findAll(query: PuzzleQueryDto) {
     return this.AllPuzzlesProvider.findAll(query);
   }

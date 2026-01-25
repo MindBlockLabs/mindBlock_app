@@ -43,10 +43,6 @@ export class Puzzle {
   @Index()
   categoryId: string;
 
-  @ManyToOne(() => Category, { nullable: true })
-  @JoinColumn({ name: 'categoryId' })
-  category?: Category;
-
   @Column({ type: 'integer', nullable: false })
   points: number;
 

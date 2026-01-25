@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
@@ -49,6 +49,7 @@ export class PuzzlesController {
   @Get('daily-quest')
   getDailyQuest() {
     return this.puzzlesService.getDailyQuestPuzzles();
+  }
   @ApiOperation({ summary: 'Get all puzzles' })
   @ApiResponse({
     status: 201,
