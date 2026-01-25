@@ -30,7 +30,7 @@ describe('User Activity (e2e)', () => {
     // Create a test user
     const user = userRepo.create({ username: 'testuser', email: 'test@example.com', password: 'testpass' });
     await userRepo.save(user);
-    userId = user.id;
+     = user.id;
 
     // Create a correct puzzle submission
     await puzzleSubmissionRepo.save({

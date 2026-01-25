@@ -9,6 +9,10 @@ export const ActiveUser = createParamDecorator(
     const request = ctx.switchToHttp().getRequest();
 
     const user: ActiveUserData = request[REQUEST_USER_KEY]
+
+    console.log('ActiveUser decorator - user:', user);
+    console.log('ActiveUser decorator - field:', field);
+    console.log('ActiveUser decorator - value:', field ? user?.[field] : user);
     return field ? user?.[field] : user 
   },
 );

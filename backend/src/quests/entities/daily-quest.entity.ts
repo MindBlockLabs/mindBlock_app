@@ -21,7 +21,7 @@ export class DailyQuest {
   id: number;
 
   @Column()
-  userId: number;
+  userId: string;
 
   @ManyToOne(() => User, (user) => user.dailyQuests, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'userId' })

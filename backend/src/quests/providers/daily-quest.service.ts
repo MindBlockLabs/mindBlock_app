@@ -56,7 +56,7 @@ export class DailyQuestService {
     questDate: string,
   ): Promise<DailyQuest | null> {
     return this.dailyQuestRepository.findOne({
-      where: { userId: Number(userId), questDate },
+      where: { userId: userId, questDate },
       relations: ['questPuzzles', 'questPuzzles.puzzle'],
     });
   }
@@ -98,7 +98,7 @@ export class DailyQuestService {
     }
 
     const dailyQuest = this.dailyQuestRepository.create({
-      userId: Number(userId),
+      userId: userId,
       questDate,
       totalQuestions: selectedPuzzles.length,
       completedQuestions: 0,
