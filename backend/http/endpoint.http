@@ -10,7 +10,7 @@ POST http://localhost:3000/puzzles
   "options": ["A piano", "A map", "A keyboard", "A code"],
   "correctAnswer": "A piano",
   "difficulty": "INTERMEDIATE",
-  "categoryId": "550e8400-e29b-41d4-a716-446655440000",
+  "categoryId": "4f506168-29bc-4b42-b198-dd9f4667d442",
   "timeLimit": 60,
   "explanation": "A piano has keys but cannot open locks."
 }
