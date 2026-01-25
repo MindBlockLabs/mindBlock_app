@@ -27,6 +27,6 @@
   ],
   "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme",
   "dependencies": {
-    "tsc-alias": "^1.8.16"
+    "tsconfig-paths": "^4.2.0"
   }
 }
