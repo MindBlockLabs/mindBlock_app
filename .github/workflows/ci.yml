@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  lint-imports:
+    name: lint-imports
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Lint absolute imports
+        shell: bash
+        run: |
+          set -euo pipefail
+          pattern="^[[:space:]]*(import|export)[^;]*from[[:space:]]+['\"]src/|^[[:space:]]*import[[:space:]]+['\"]src/"
+          if command -v rg >/dev/null 2>&1; then
+            matches=$(rg -n \
+              --glob '!**/node_modules/**' \
+              --glob '!**/dist/**' \
+              --glob '!**/build/**' \
+              --glob '!**/.next/**' \
+              --glob '!**/coverage/**' \
+              --glob '!**/out/**' \
+              --glob '!**/tmp/**' \
+              --glob '!**/.turbo/**' \
+              --glob '!**/.cache/**' \
+              --glob '*.ts' \
+              --glob '*.tsx' \
+              "$pattern" . || true)
+          else
+            matches=$(grep -RIn \
+              --include='*.ts' \
+              --include='*.tsx' \
+              --exclude-dir=node_modules \
+              --exclude-dir=dist \
+              --exclude-dir=build \
+              --exclude-dir=.next \
+              --exclude-dir=coverage \
+              --exclude-dir=out \
+              --exclude-dir=tmp \
+              --exclude-dir=.turbo \
+              --exclude-dir=.cache \
+              -E "$pattern" . || true)
+          fi
+          if [ -n "$matches" ]; then
+            echo "ERROR: Absolute imports from \"src/\" are not allowed. Use relative paths instead."
+            echo "$matches"
+            exit 1
+          fi
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Build frontend
+        run: npm --workspace frontend run build
+      - name: Build backend
+        run: npm --workspace backend run build
+
+  type-check:
+    name: type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Type-check frontend
+        run: npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
+      - name: Type-check backend
+        run: npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
