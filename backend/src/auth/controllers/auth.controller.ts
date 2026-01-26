@@ -6,6 +6,7 @@ import {
   Body,
   Get,
   Query,
+  Param,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { LoginDto } from '../dtos/login.dto';
@@ -14,6 +15,8 @@ import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { NonceResponseDto } from '../dtos/nonceResponse.dto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
+import { ResetPasswordDto } from '../dtos/reset-password.dto';
+import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -53,18 +56,18 @@ export class AuthController {
       properties: {
         accessToken: {
           type: 'string',
-          description: 'JWT access token for authenticated user'
-        }
-      }
-    }
+          description: 'JWT access token for authenticated user',
+        },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Invalid wallet signature or authentication failed' 
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid wallet signature or authentication failed',
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Invalid request format or expired nonce' 
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request format or expired nonce',
   })
   public async stellarWalletLogin(@Body() dto: StellarWalletLoginDto) {
     return await this.authservice.StellarWalletLogin(dto);
@@ -107,24 +110,83 @@ export class AuthController {
       properties: {
         valid: {
           type: 'boolean',
-          description: 'Whether the nonce is valid'
+          description: 'Whether the nonce is valid',
         },
         reason: {
           type: 'string',
-          description: 'Reason if nonce is invalid'
+          description: 'Reason if nonce is invalid',
         },
         walletAddress: {
           type: 'string',
-          description: 'Associated wallet address (only if valid)'
+          description: 'Associated wallet address (only if valid)',
         },
         expiresAt: {
           type: 'number',
-          description: 'Expiration timestamp (only if valid)'
-        }
-      }
-    }
+          description: 'Expiration timestamp (only if valid)',
+        },
+      },
+    },
   })
   public async checkNonceStatus(@Query('nonce') nonce: string) {
     return await this.authservice.checkNonceStatus(nonce);
+  }
+
+  @Post('/forgot-password')
+  @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Request password reset',
+    description: 'Sends a password reset email if the account exists',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset email sent (or message returned for security)',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example:
+            'If an account with that email exists, a password reset link has been sent.',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email format',
+  })
+  public async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return await this.authservice.forgotPassword(forgotPasswordDto);
+  }
+
+  @Post('/reset-password/:token')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset password with token',
+    description: 'Resets user password using the token from email',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Password reset successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Password has been reset successfully',
+        },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired token',
+  })
+  public async resetPassword(
+    @Param('token') token: string,
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ) {
+    return await this.authservice.resetPassword(token, resetPasswordDto);
   }
 }
