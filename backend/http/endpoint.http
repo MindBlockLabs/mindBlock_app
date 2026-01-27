@@ -25,6 +25,20 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "password": "Password@123"
 }
 
+# forgot password
+POST http://localhost:3000/auth/forgot-password
+Content-Type: application/json
+{
+    "email": "aminubabafatima8@gmail.com"
+}
+
+// reset passwors
+POST http://localhost:3000/auth/reset-password/:token
+Content-Type: application/json
+{
+    "password": "FatimaAminu@123"
+}
+
 
 GET http://localhost:3000/daily-quest 
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI2NTA3LCJleHAiOjE3NjkzMzAxMDcsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.YnrXEo1yns77DQgzHR0XO8m5MfTxT_ic9U_2je9nB6M
