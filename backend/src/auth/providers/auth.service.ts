@@ -12,12 +12,12 @@ import { ResetPasswordProvider } from './reset-password.provider';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 
-interface OAuthUser {
-  email: string;
-  username: string;
-  picture: string;
-  accessToken: string;
-}
+// interface OAuthUser {
+//   email: string;
+//   username: string;
+//   picture: string;
+//   accessToken: string;
+// }
 
 @Injectable()
 export class AuthService {
