@@ -4,6 +4,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/user-progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
+import { XpLevelService } from '../../users/providers/xp-level.service';
 
 export interface AnswerValidationResult {
   isCorrect: boolean;
@@ -23,6 +24,7 @@ export class ProgressCalculationProvider {
     private readonly puzzleRepository: Repository<Puzzle>,
     @InjectRepository(UserProgress)
     private readonly userProgressRepository: Repository<UserProgress>,
+    private readonly xpLevelService: XpLevelService,
   ) {}
 
   /**
@@ -135,6 +137,10 @@ export class ProgressCalculationProvider {
 
     // Save to database
     await this.userProgressRepository.save(userProgress);
+
+    if (validation.isCorrect && pointsEarned > 0) {
+      await this.xpLevelService.addXp(submitAnswerDto.userId, pointsEarned);
+    }
 
     return {
       userProgress,

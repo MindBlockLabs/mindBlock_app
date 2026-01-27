@@ -67,7 +67,6 @@ import { CategoriesModule } from './categories/categories.module';
     CommonModule,
     RedisModule,
     BlockchainModule,
-    ProgressModule,
     CategoriesModule,
   ],
   controllers: [AppController],

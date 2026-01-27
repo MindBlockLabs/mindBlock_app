@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from '../providers/users.service';
+import { XpLevelService } from '../providers/xp-level.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { EditUserDto } from '../dtos/editUserDto.dto';
@@ -20,6 +21,7 @@ import { User } from '../user.entity';
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
+    private readonly xpLevelService: XpLevelService,
   ) {}
 
   @Delete(':id')
@@ -29,6 +31,23 @@ export class UsersController {
   async deleteUser(@Param('id') id: string): Promise<{ message: string }> {
     await this.usersService.delete(id);
     return { message: `User with ID ${id} successfully deleted.` };
+  }
+
+  @Get(':id/xp-level')
+  @ApiOperation({ summary: 'Get user XP and level' })
+  @ApiResponse({
+    status: 200,
+    description: 'User XP and level retrieved successfully',
+    schema: {
+      example: {
+        level: 12,
+        xp: 2450,
+        nextLevel: 3000,
+      },
+    },
+  })
+  async getUserXpLevel(@Param('id') id: string) {
+    return this.xpLevelService.getUserXpLevel(id);
   }
 
   @Get()

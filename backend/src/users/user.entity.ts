@@ -102,7 +102,7 @@ export class User {
   ageGroup?: string;
 
   // Relationships
-  @OneToMany(() => UserProgress, (progress) => progress.puzzle)
+  @OneToMany(() => UserProgress, (progress) => progress.user)
   progressRecords: UserProgress[];
 
   @OneToMany(() => DailyQuest, (quest) => quest.user)
