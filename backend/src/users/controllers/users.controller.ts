@@ -18,9 +18,7 @@ import { User } from '../user.entity';
 @Controller('users')
 @ApiTags('users')
 export class UsersController {
-  constructor(
-    private readonly usersService: UsersService,
-  ) {}
+  constructor(private readonly usersService: UsersService) {}
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete user by ID' })
@@ -38,7 +36,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return null;
+    return id;
   }
 
   @Post()

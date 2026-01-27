@@ -62,7 +62,7 @@ const CheckEmail = () => {
             {/* Message */}
             <div className="text-center mb-8 space-y-3">
               <p className="text-[#E6E6E6CC] text-sm leading-relaxed">
-                We've sent you a link to your email address to reset your password. Click the link in your inbox to continue.
+                We&apos;ve sent you a link to your email address to reset your password. Click the link in your inbox to continue.
               </p>
             </div>
 

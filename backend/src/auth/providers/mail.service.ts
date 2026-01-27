@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
+import { createTransport, Transporter } from 'nodemailer';
 
 @Injectable()
 export class MailService {
-  private transporter: nodemailer.Transporter;
+  private transporter: Transporter;
 
   constructor(private readonly configService: ConfigService) {
     // Configure email transporter
-    this.transporter = nodemailer.createTransport({
+    this.transporter = createTransport({
       host: this.configService.get<string>('MAIL_HOST'),
       port: this.configService.get<number>('MAIL_PORT'),
       secure: this.configService.get<boolean>('MAIL_SECURE'), // true for 465, false for other ports

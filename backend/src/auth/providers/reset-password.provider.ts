@@ -1,7 +1,6 @@
 import {
   Injectable,
   BadRequestException,
-  NotFoundException,
   InternalServerErrorException,
   Logger,
 } from '@nestjs/common';
@@ -10,7 +9,7 @@ import { Repository, MoreThan } from 'typeorm';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcryptjs';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Injectable()
 export class ResetPasswordProvider {

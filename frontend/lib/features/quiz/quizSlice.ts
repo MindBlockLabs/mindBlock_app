@@ -53,6 +53,7 @@ export const fetchQuestions = createAsyncThunk(
         points: 20,
       },
     ] as Question[];
+    console.log(category)
   },
 );
 
