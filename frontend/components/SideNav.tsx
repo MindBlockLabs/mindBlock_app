@@ -11,31 +11,47 @@ const navItems = [
   { label: "Feeds", href: "/feeds", icon: Bell },
 ];
 
-const SideNav = () => {
+
+const SideNav = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const pathname = usePathname();
 
   return (
-    <aside className="w-full md:w-72 md:min-h-screen bg-[#0B1321] border-b md:border-b-0 md:border-r border-slate-800/80 px-4 py-4 sm:px-6 sm:py-6 flex md:flex-col items-center md:items-stretch gap-4 sm:gap-6">
-      <nav className="flex w-full flex-row md:flex-col justify-around md:justify-start gap-2">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center justify-center md:justify-start gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
-                isActive
-                  ? "bg-blue-600/20 text-blue-200 shadow-inner"
-                  : "text-slate-300 hover:bg-slate-800/70 hover:text-slate-100"
-              }`}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="hidden md:inline">{item.label}</span>
-            </Link>
-          );
-        })}
-      </nav>
+    <aside
+      className={`
+    fixed inset-y-0 left-0 z-50 w-72 bg-[#0B1321]
+    transform transition-transform
+    ${open ? "translate-x-0" : "-translate-x-full"}
+    md:static md:translate-x-0
+  `}
+    >
+      <div className="p-4 md:p-6">
+        <button
+          onClick={onClose}
+          className="md:hidden self-end p-2 text-slate-300 mb-4"
+        >
+          ✕
+        </button>
+        <nav className="flex w-full flex-col justify-start gap-2">
+          {navItems.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center justify-start gap-3 rounded-xl px-3 py-3 text-sm font-medium transition ${
+                  isActive
+                    ? "bg-blue-600/20 text-blue-200 shadow-inner"
+                    : "text-slate-300 hover:bg-slate-800/70 hover:text-slate-100"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
     </aside>
   );
 };

@@ -16,20 +16,24 @@ const DailyQuestCard = ({
 }: DailyQuestCardProps) => {
   const progressPercent = Math.min(
     100,
-    Math.round((progressCurrent / progressTotal) * 100)
+    Math.round((progressCurrent / progressTotal) * 100),
   );
 
   return (
-    <div className="w-full max-w-xl rounded-2xl border border-blue-500/30 bg-[#101B30] p-5 shadow-[0_0_30px_rgba(37,99,235,0.15)]">
+    <div className="w-full max-w-xl md:max-w-xl rounded-2xl border border-blue-500/30 bg-[#101B30] p-5 shadow-[0_0_30px_rgba(37,99,235,0.15)]">
       <div className="flex items-center gap-4">
         <div className="h-20 w-20 rounded-xl bg-[#1C335B]" />
         <div className="flex-1">
           <p className="text-sm font-semibold text-slate-200">{title}</p>
-          <p className="mt-1 text-xs text-slate-400">{questionCount} Questions</p>
+          <p className="mt-1 text-xs text-slate-400">
+            {questionCount} Questions
+          </p>
           <div className="mt-3">
             <div className="flex items-center justify-between text-[11px] text-slate-400">
               <span>Progress</span>
-              <span>{progressCurrent}/{progressTotal}</span>
+              <span>
+                {progressCurrent}/{progressTotal}
+              </span>
             </div>
             <div className="mt-2 h-2 w-full rounded-full bg-slate-700/60">
               <div
@@ -41,7 +45,18 @@ const DailyQuestCard = ({
         </div>
         <button
           type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-500 text-white"
+          className="flex
+    h-11 w-11 md:h-9 md:w-9
+    items-center justify-center
+    rounded-full
+    bg-blue-500
+    text-white
+    transition-all duration-200
+    shadow-lg
+    focus-visible:outline-none
+    focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[#101B30]
+    active:scale-[0.95] active:bg-blue-600
+    touch-manipulation"
         >
           <ArrowRight className="h-4 w-4" />
         </button>

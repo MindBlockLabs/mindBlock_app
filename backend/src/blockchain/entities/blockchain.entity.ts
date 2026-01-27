@@ -1,3 +1,1 @@
-export class BlockchainEntity {
-   
-  }
+export class BlockchainEntity {}

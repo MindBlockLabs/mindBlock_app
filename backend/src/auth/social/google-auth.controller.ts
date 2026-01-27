@@ -5,16 +5,16 @@ import { GoogleAuthenticationService } from './providers/google-authentication.s
 /**Google authentication controller class */
 @Controller('auth/google-authentication')
 export class GoogleAuthenticationController {
-    constructor(
-        /* 
-         * inject googleAuthenticationService 
-         */
-        private readonly googleAuthenticationService: GoogleAuthenticationService
-    ) {}
+  constructor(
+    /*
+     * inject googleAuthenticationService
+     */
+    private readonly googleAuthenticationService: GoogleAuthenticationService,
+  ) {}
 
-    /**Authenticate class with body parameter of type googletokendto */
-    @Post()
-    public authenticate(@Body() googlTokenDto: GoogleTokenDto) {
-        return this.googleAuthenticationService.authenticate(googlTokenDto)
-    }
+  /**Authenticate class with body parameter of type googletokendto */
+  @Post()
+  public authenticate(@Body() googlTokenDto: GoogleTokenDto) {
+    return this.googleAuthenticationService.authenticate(googlTokenDto);
+  }
 }

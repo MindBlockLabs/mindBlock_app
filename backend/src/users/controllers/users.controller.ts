@@ -57,7 +57,7 @@ export class UsersController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return null;
+    return id;
   }
 
   @Post()

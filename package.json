@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:frontend": "npm --workspace frontend run dev",
     "dev:backend": "npm --workspace backend run start:dev",
-    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\""
+    "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "lint:frontend": "npm --workspace frontend run lint",
+    "lint:backend": "npm --workspace backend run lint"
   },
   "repository": {
     "type": "git",
@@ -28,5 +30,8 @@
   "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme",
   "dependencies": {
     "tsconfig-paths": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^7.0.9"
   }
 }
