@@ -6,7 +6,6 @@ import {
   IsNumber,
   IsOptional,
   Min,
-  ArrayMinSize,
   MinLength,
   Validate,
 } from 'class-validator';
@@ -23,7 +22,7 @@ import {
 export class UpdatePuzzleDto extends PartialType(CreatePuzzleDto) {
   @ApiPropertyOptional({
     description: 'The puzzle question text',
-    example: 'What has keys but can\'t open locks?',
+    example: "What has keys but can't open locks?",
     minLength: 10,
     nullable: true,
   })

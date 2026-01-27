@@ -10,7 +10,7 @@ import { Repository } from 'typeorm';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { MailService } from './mail.service';
 import * as crypto from 'crypto';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Injectable()
 export class ForgotPasswordProvider {

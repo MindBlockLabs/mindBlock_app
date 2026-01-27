@@ -12,7 +12,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 
 const SignInPage = () => {
   const router = useRouter();
-  const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const { showSuccess, showError, showInfo } = useToast();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -213,7 +213,7 @@ const SignInPage = () => {
 
           {/* Sign Up Link */}
           <div className="text-center mt-5">
-            <span className="text-[#E6E6E6]">Don't have an account? </span>
+            <span className="text-[#E6E6E6]">Don&apos;t have an account? </span>
             <Link 
               href="/auth/signup"
               className="text-[#3B82F6] transition-colors"
