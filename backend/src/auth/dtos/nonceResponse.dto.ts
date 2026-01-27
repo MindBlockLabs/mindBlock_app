@@ -1,15 +1,15 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
 
 export class NonceResponseDto {
-  @ApiProperty({ 
+  @ApiProperty({
     example: 'nonce_1693123456789_abc123_456789',
-    description: 'Unique nonce to be signed by the wallet' 
+    description: 'Unique nonce to be signed by the wallet',
   })
   nonce: string;
 
-  @ApiProperty({ 
+  @ApiProperty({
     example: 1693123456789,
-    description: 'Unix timestamp when the nonce expires' 
+    description: 'Unix timestamp when the nonce expires',
   })
   expiresAt: number;
 }

@@ -9,12 +9,21 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "password": "FatimaAminu@123"
 }
 
+
  
 POST http://localhost:3000/auth/signIn
 Content-Type: application/json
 {
     "email": "aminufatima@gmail.com",
     "password": "FatimaAminu@123"
+}
+
+POST http://localhost:3000/auth/signIn
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI0Mjk0LCJleHAiOjE3NjkzMjc4OTQsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.vqjgnN33AMD0j1wxX6e6912PDB2VMW23eVJUQYBZRAA
+{
+    "email": "bibikudibrahim@gmail.com",
+    "password": "Password@123"
 }
 
 
@@ -56,3 +65,18 @@ GET http://localhost:3000/categories
 Username: phertyameen
 email: phertymahmohd@gmail.com
 password: phertyAmeen@1
+
+
+POST http://localhost:3000/auth/forgot-password
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI0Mjk0LCJleHAiOjE3NjkzMjc4OTQsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.vqjgnN33AMD0j1wxX6e6912PDB2VMW23eVJUQYBZRAA
+{
+    "email": "bibikudibrahim@gmail.com"
+}
+
+POST http://localhost:3000/auth/reset-password/TOKEN_FROM_LOG
+Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI0Mjk0LCJleHAiOjE3NjkzMjc4OTQsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.vqjgnN33AMD0j1wxX6e6912PDB2VMW23eVJUQYBZRAA
+{
+    "email": "bibikudibrahim@gmail.com"
+}

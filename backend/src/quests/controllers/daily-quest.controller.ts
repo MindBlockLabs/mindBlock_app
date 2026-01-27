@@ -12,7 +12,7 @@ import { DailyQuestStatusDto } from '../dtos/daily-quest-status.dto';
 import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
 import { Auth } from '../../auth/decorators/auth.decorator';
 import { authType } from '../../auth/enum/auth-type.enum';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 import { request } from 'express';
 
 @Controller('daily-quest')

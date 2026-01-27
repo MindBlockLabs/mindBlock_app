@@ -74,7 +74,7 @@ export function CompletionHeader({ level }: CompletionHeaderProps) {
           level complete!
         </h1>
         <p className="text-[#E6E6E6] text-sm md:text-base">
-          Great job! You've cleared Level {level}.
+          Great job! You&apos;ve cleared Level {level}.
         </p>
       </div>
     </div>

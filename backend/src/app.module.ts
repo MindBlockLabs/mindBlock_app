@@ -32,8 +32,22 @@ import { CategoriesModule } from './categories/categories.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const dbConfig = configService.get('database');
+      useFactory: (configService: ConfigService) => {
+        interface DatabaseConfig {
+          url?: string;
+          host?: string;
+          port?: number;
+          user?: string;
+          password?: string;
+          name?: string;
+          autoload?: boolean;
+          synchronize?: boolean;
+        }
+        const dbConfig = configService.get<DatabaseConfig>('database');
+
+        if (!dbConfig) {
+          throw new Error('Database configuration not found');
+        }
 
         // If DATABASE_URL is set, use connection string (production)
         if (dbConfig.url) {
