@@ -27,7 +27,10 @@ export class CreateGoogleUserProvider {
    */
   @ApiOperation({ summary: 'Create a new Google user' })
   @ApiResponse({ status: 201, description: 'User successfully created.' })
-  @ApiResponse({ status: 409, description: 'Conflict: Could not create a new user.' })
+  @ApiResponse({
+    status: 409,
+    description: 'Conflict: Could not create a new user.',
+  })
   public async createGoogleUser(googleUser: GoogleInterface): Promise<User> {
     try {
       const user = this.userRepository.create(googleUser);

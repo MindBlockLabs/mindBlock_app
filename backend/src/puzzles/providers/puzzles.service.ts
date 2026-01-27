@@ -52,7 +52,7 @@ export class PuzzlesService {
 
     return puzzles;
   }
-  
+
   public async findAll(query: PuzzleQueryDto) {
     return this.AllPuzzlesProvider.findAll(query);
   }

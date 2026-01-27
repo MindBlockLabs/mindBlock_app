@@ -2,7 +2,6 @@
 import { StreakScreen } from "@/components/StreakScreen";
 import { DayData } from "@/components/WeeklyCalendar";
 import { useRouter } from "next/navigation";
-import StreakNavbar from "@/components/StreakNavbar";
 
 export default function StreakPage() {
     const router = useRouter();

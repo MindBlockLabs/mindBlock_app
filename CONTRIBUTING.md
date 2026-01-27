@@ -17,9 +17,17 @@ CI will reject PRs containing src/* imports.
 
 Issue/PR: https://github.com/MindBlockLabs/mindBlock_app/pull/0000 (placeholder)
 
-Local check:
-```
-grep -r "from ['\"]src/" --include="*.ts" --include="*.tsx" .
+**MUST RUN** Local check to before submitting a pr:
+```bash
+npm ci
+npm --workspace frontend run build
+npm --workspace backend run build
+
+npm --workspace frontend run lint
+npm --workspace backend run lint
+
+npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
+npm --workspace backend exec -- tsc --noEmit -p tsconfig.json.
 ```
 
 ## Branch Protection

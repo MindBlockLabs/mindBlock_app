@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class CreateDailyStreaksTable20250601204323 implements MigrationInterface {
+export class CreateDailyStreaksTable20250601204323
+  implements MigrationInterface
+{
   name = 'CreateDailyStreaksTable20250601204323';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -40,4 +42,4 @@ export class CreateDailyStreaksTable20250601204323 implements MigrationInterface
       DROP TABLE "daily_streaks";
     `);
   }
-} 
+}

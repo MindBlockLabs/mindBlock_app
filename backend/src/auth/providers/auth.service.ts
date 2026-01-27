@@ -12,13 +12,6 @@ import { ResetPasswordProvider } from './reset-password.provider';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 
-interface OAuthUser {
-  email: string;
-  username: string;
-  picture: string;
-  accessToken: string;
-}
-
 @Injectable()
 export class AuthService {
   private nonces = new Map<
@@ -62,7 +55,7 @@ export class AuthService {
   }
 
   // Generate nonce for wallet authentication
-  public async generateNonce(walletAddress: string): Promise<NonceResponseDto> {
+  public generateNonce(walletAddress: string): NonceResponseDto {
     // Validate wallet address format
     if (!walletAddress || !this.isValidStellarAddress(walletAddress)) {
       throw new BadRequestException('Invalid Stellar wallet address');
@@ -86,7 +79,7 @@ export class AuthService {
   }
 
   // Check nonce status (useful for debugging)
-  public async checkNonceStatus(nonce: string) {
+  public checkNonceStatus(nonce: string) {
     const nonceData = this.nonces.get(nonce);
 
     if (!nonceData) {
@@ -109,10 +102,7 @@ export class AuthService {
   }
 
   // Verify and mark nonce as used (called by StellarWalletLoginProvider)
-  public async verifyAndUseNonce(
-    nonce: string,
-    walletAddress: string,
-  ): Promise<void> {
+  public verifyAndUseNonce(nonce: string, walletAddress: string): void {
     const nonceData = this.nonces.get(nonce);
 
     if (!nonceData) {

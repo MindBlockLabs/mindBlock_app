@@ -34,7 +34,7 @@ export class Puzzle {
   })
   @Index()
   difficulty: PuzzleDifficulty;
-  
+
   @ManyToOne(() => Category, { eager: false })
   @JoinColumn({ name: 'categoryId' })
   category: Category;
