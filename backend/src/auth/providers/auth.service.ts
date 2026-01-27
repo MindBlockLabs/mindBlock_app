@@ -7,6 +7,10 @@ import { RefreshTokensProvider } from './refreshTokensProvider';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { StellarWalletLoginProvider } from './wallet-login.provider';
 import { NonceResponseDto } from '../dtos/nonceResponse.dto';
+import { ForgotPasswordProvider } from './forgot-password.provider';
+import { ResetPasswordProvider } from './reset-password.provider';
+import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
+import { ResetPasswordDto } from '../dtos/reset-password.dto';
 
 interface OAuthUser {
   email: string;
@@ -37,6 +41,16 @@ export class AuthService {
      * Injecting RefreshTokensProvider for token management
      */
     private readonly refreshTokensProvider: RefreshTokensProvider,
+
+    /**
+     *  inject forgotPasswordProvider
+     */
+    private readonly forgotPasswordProvider: ForgotPasswordProvider,
+
+    /**
+     *  inject resetPasswordProvider
+     */
+    private readonly resetPasswordProvider: ResetPasswordProvider,
   ) {}
 
   public async SignIn(signInDto: LoginDto) {
@@ -153,5 +167,19 @@ export class AuthService {
   @ApiBody({ type: RefreshTokenDto })
   public refreshToken(refreshTokenDto: RefreshTokenDto) {
     return this.refreshTokensProvider.refreshTokens(refreshTokenDto);
+  }
+
+  public async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    return await this.forgotPasswordProvider.forgotPassword(forgotPasswordDto);
+  }
+
+  public async resetPassword(
+    token: string,
+    resetPasswordDto: ResetPasswordDto,
+  ) {
+    return await this.resetPasswordProvider.resetPassword(
+      token,
+      resetPasswordDto,
+    );
   }
 }
