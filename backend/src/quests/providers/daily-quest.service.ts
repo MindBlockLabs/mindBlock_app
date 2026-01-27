@@ -18,7 +18,9 @@ export class DailyQuestService {
   /**
    * Returns the status of today's Daily Quest (read-only, lightweight)
    */
-  async getTodaysDailyQuestStatus(userId: string): Promise<DailyQuestStatusDto> {
+  async getTodaysDailyQuestStatus(
+    userId: string,
+  ): Promise<DailyQuestStatusDto> {
     return this.getTodaysDailyQuestStatusProvider.execute(userId);
   }
 }

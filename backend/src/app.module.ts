@@ -79,7 +79,7 @@ import { CategoriesModule } from './categories/categories.module';
     QuestsModule,
     StreakModule,
     CommonModule,
-   RedisModule,
+    RedisModule,
     BlockchainModule,
     ProgressModule,
     CategoriesModule,

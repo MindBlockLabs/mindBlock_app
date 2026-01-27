@@ -57,7 +57,7 @@ export class DailyQuestController {
   @ApiOperation({
     summary: "Get today's daily quest progress status",
     description:
-      'Returns the current progress state of today\'s Daily Quest. This is a lightweight, read-only endpoint suitable for dashboard polling and UI consumption. If no quest exists yet, one is automatically generated.',
+      "Returns the current progress state of today's Daily Quest. This is a lightweight, read-only endpoint suitable for dashboard polling and UI consumption. If no quest exists yet, one is automatically generated.",
   })
   @ApiResponse({
     status: 200,

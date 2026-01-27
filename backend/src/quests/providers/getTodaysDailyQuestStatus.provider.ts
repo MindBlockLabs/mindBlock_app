@@ -8,7 +8,7 @@ import { GetTodaysDailyQuestProvider } from './getTodaysDailyQuest.provider';
 /**
  * Provider for fetching the status of today's Daily Quest.
  * Returns minimal data (totalQuestions, completedQuestions, isCompleted) for fast, cache-friendly lookups.
- * 
+ *
  * This is read-only and does not mutate state.
  * If no quest exists, it auto-generates one using the existing generation logic.
  */
@@ -25,7 +25,7 @@ export class GetTodaysDailyQuestStatusProvider {
   /**
    * Fetches the status of today's Daily Quest.
    * Auto-generates a quest if one doesn't exist.
-   * 
+   *
    * @param userId - The user's ID
    * @returns DailyQuestStatusDto with totalQuestions, completedQuestions, isCompleted
    */
@@ -48,8 +48,8 @@ export class GetTodaysDailyQuestStatusProvider {
       );
       // Use the existing provider to generate the full quest
       // This ensures consistency with the main getTodaysDailyQuest endpoint
-      const fullQuest = await this.getTodaysDailyQuestProvider.execute(userId);
-      
+      // const fullQuest = await this.getTodaysDailyQuestProvider.execute(userId);
+
       // Fetch the newly created quest with status fields
       dailyQuest = await this.dailyQuestRepository.findOne({
         where: { userId, questDate: todayDate },

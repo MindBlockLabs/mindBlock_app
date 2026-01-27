@@ -6,7 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
  */
 export class DailyQuestStatusDto {
   @ApiProperty({
-    description: 'Total number of questions in today\'s daily quest',
+    description: "Total number of questions in today's daily quest",
     example: 5,
   })
   totalQuestions: number;

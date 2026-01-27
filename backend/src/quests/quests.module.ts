@@ -18,7 +18,11 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   controllers: [DailyQuestController],
-  providers: [DailyQuestService, GetTodaysDailyQuestProvider, GetTodaysDailyQuestStatusProvider],
+  providers: [
+    DailyQuestService,
+    GetTodaysDailyQuestProvider,
+    GetTodaysDailyQuestStatusProvider,
+  ],
   exports: [TypeOrmModule, DailyQuestService],
 })
 export class QuestsModule {}
