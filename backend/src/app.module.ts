@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { RedisModule } from './redis/redis.module';
+//import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
@@ -65,7 +65,7 @@ import { CategoriesModule } from './categories/categories.module';
     QuestsModule,
     StreakModule,
     CommonModule,
-    RedisModule,
+   // RedisModule,
     BlockchainModule,
     ProgressModule,
     CategoriesModule,
