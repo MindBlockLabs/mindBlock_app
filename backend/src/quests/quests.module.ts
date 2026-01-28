@@ -5,6 +5,7 @@ import { DailyQuestPuzzle } from './entities/daily-quest-puzzle.entity';
 import { DailyQuestController } from './controllers/daily-quest.controller';
 import { DailyQuestService } from './providers/daily-quest.service';
 import { GetTodaysDailyQuestProvider } from './providers/getTodaysDailyQuest.provider';
+import { GetTodaysDailyQuestStatusProvider } from './providers/getTodaysDailyQuestStatus.provider';
 import { PuzzlesModule } from '../puzzles/puzzles.module';
 import { ProgressModule } from '../progress/progress.module';
 import { UsersModule } from '../users/users.module';
@@ -17,7 +18,11 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
   ],
   controllers: [DailyQuestController],
-  providers: [DailyQuestService, GetTodaysDailyQuestProvider],
+  providers: [
+    DailyQuestService,
+    GetTodaysDailyQuestProvider,
+    GetTodaysDailyQuestStatusProvider,
+  ],
   exports: [TypeOrmModule, DailyQuestService],
 })
 export class QuestsModule {}
