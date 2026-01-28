@@ -26,6 +26,12 @@ export class UpdateUserService {
     user.username = editUserDto.username ?? user.username;
     user.email = editUserDto.email ?? user.email;
     user.password = editUserDto.password ?? user.password;
+    user.country = editUserDto.country ?? user.country;
+    user.interests = editUserDto.interests ?? user.interests;
+    user.occupation = editUserDto.occupation ?? user.occupation;
+    user.goals = editUserDto.goals ?? user.goals;
+    user.availableHours = editUserDto.availableHours ?? user.availableHours;
+    user.bio = editUserDto.bio ?? user.bio;
 
     try {
       return await this.userRepository.save(user);
