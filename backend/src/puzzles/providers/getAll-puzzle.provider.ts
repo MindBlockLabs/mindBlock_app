@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Puzzle } from '../entities/puzzle.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm/repository/Repository';
-import { paginate } from 'src/common/pagination/paginate';
+import { paginate } from '../../common/pagination/paginate';
 import { PuzzleQueryDto } from '../dtos/puzzle-query.dto';
 
 @Injectable()

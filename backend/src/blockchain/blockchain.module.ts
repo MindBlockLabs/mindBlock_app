@@ -5,6 +5,6 @@ import { BlockchainService } from './provider/blockchain.service';
 @Module({
   controllers: [BlockchainController],
   providers: [BlockchainService],
-  exports: [BlockchainService]
+  exports: [BlockchainService],
 })
 export class BlockchainModule {}
