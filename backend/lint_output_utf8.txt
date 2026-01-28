@@ -1,0 +1,51 @@
+﻿
+> mindBlock_app@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --fix
+
+
+C:\Users\HomePC\Desktop\DevChant\mindBlock_app\backend\src\auth\providers\mail.service.ts
+  11:5   error  Unsafe assignment of an error typed value                 @typescript-eslint/no-unsafe-assignment
+  11:24  error  Unsafe call of a(n) `error` type typed value              @typescript-eslint/no-unsafe-call
+  86:11  error  Unsafe call of a(n) `error` type typed value              @typescript-eslint/no-unsafe-call
+  86:28  error  Unsafe member access .sendMail on an `error` typed value  @typescript-eslint/no-unsafe-member-access
+
+Γ£û 4 problems (4 errors, 0 warnings)
+
+npm : npm error 
+Lifecycle script 
+`lint` failed with 
+error:
+At line:1 char:1
++ npm run lint > 
+lint_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (npm err   
+ or Lifec...led w    
+ith error::Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+npm error code 1
+npm error path C:\Use
+rs\HomePC\Desktop\Dev
+Chant\mindBlock_app\b
+ackend
+npm error workspace 
+mindBlock_app@0.0.1
+npm error location C:
+\Users\HomePC\Desktop
+\DevChant\mindBlock_a
+pp\backend
+npm error command 
+failed
+npm error command C:\
+Windows\system32\cmd.
+exe /d /s /c eslint "
+{src,apps,libs,test}/
+**/*.ts" --fix
