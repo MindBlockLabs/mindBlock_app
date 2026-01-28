@@ -21,7 +21,8 @@ export default function QuizPage() {
 
   const actionBtnRef = useRef<HTMLButtonElement>(null);
 
-  const question = MOCK_QUIZ[step];
+  const QUIZ = MOCK_QUIZ.slice(0, 2);
+  const question = QUIZ[step];
 
   const handleSelectOption = (optionId: string) => {
     if (isSubmitted) return;
@@ -36,15 +37,17 @@ export default function QuizPage() {
 
   const handleAction = () => {
     if (!isSubmitted) {
-      setIsSubmitted(true);
-      const selectedOption = question.options.find(
-        (opt) => opt.id === selectedId,
-      );
-      if (selectedOption?.isCorrect) {
-        setScore((prev) => prev + 1);
-      }
+      setTimeout(() => {
+        setIsSubmitted(true);
+        const selectedOption = question.options.find(
+          (opt) => opt.id === selectedId,
+        );
+        if (selectedOption?.isCorrect) {
+          setScore((prev) => prev + 1);
+        }
+      }, 150);
     } else {
-      if (step < MOCK_QUIZ.length - 1) {
+      if (step < QUIZ.length - 1) {
         setStep(step + 1);
         setSelectedId(null);
         setIsSubmitted(false);
@@ -58,16 +61,14 @@ export default function QuizPage() {
     <div
       className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col p-6`}
     >
-      {!isFinished && (
-        <QuizHeader current={step + 1} total={MOCK_QUIZ.length} />
-      )}
+      {!isFinished && <QuizHeader current={step + 1} total={QUIZ.length} />}
 
       <main className="flex-grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
           <LevelComplete
             totalPts={score * 10}
             correctAnswers={score}
-            totalQuestions={MOCK_QUIZ.length}
+            totalQuestions={QUIZ.length}
             timeTaken="3:10"
             onClaim={() => alert("Points Claimed!")}
           />
@@ -76,6 +77,9 @@ export default function QuizPage() {
             <h2 className="text-[28px] mt-10 font-semibold text-center">
               {question.question}
             </h2>
+            <p className="text-center text-sm text-[#E6E6E6]">
+              Points: {score * 10}
+            </p>
             <div className="space-y-7">
               {question.options.map((opt) => {
                 const isSelected = selectedId === opt.id;
@@ -83,9 +87,9 @@ export default function QuizPage() {
 
                 if (isSubmitted) {
                   if (isSelected) {
-                    state = opt.isCorrect ? "green" : "red";
+                    state = opt.isCorrect ? "teal" : "red";
                   } else if (opt.isCorrect) {
-                    state = "green";
+                    state = "teal";
                   }
                 } else if (isSelected) {
                   state = "teal";
@@ -102,6 +106,33 @@ export default function QuizPage() {
                 );
               })}
             </div>
+            {isSubmitted && (
+              <div className="mt-4 space-y-2">
+                {(() => {
+                  const selectedOption = question.options.find(
+                    (o) => o.id === selectedId,
+                  );
+                  const correctOption = question.options.find(
+                    (o) => o.isCorrect,
+                  );
+                  const wasCorrect = !!selectedOption?.isCorrect;
+                  return (
+                    <>
+                      {!wasCorrect && correctOption && (
+                        <div className="text-sm font-semibold text-[#14B8A6] text-center">
+                          Correct answer: {correctOption.text}
+                        </div>
+                      )}
+                      {question.explanation && (
+                        <p className="text-xs text-[#E6E6E6] text-center">
+                          {question.explanation}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            )}
 
             <button
               ref={actionBtnRef}
