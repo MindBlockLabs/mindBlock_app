@@ -12,11 +12,13 @@ describe('RolesGuard', () => {
     guard = new RolesGuard(reflector);
   });
 
-  const createMockExecutionContext = (roles: string[] = [], user?: any): ExecutionContext => {
+  const createMockExecutionContext = (user?: {
+    role: string;
+  }): ExecutionContext => {
     return {
       switchToHttp: () => ({
         getRequest: () => ({
-          user,
+          user: user as Record<string, any>,
         }),
       }),
       getHandler: () => jest.fn(),
@@ -32,19 +34,19 @@ describe('RolesGuard', () => {
 
   it('should allow access if user has required role', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['admin']);
-    const context = createMockExecutionContext(['admin'], { role: 'admin' });
+    const context = createMockExecutionContext({ role: 'admin' });
     expect(guard.canActivate(context)).toBe(true);
   });
 
   it('should throw ForbiddenException if user lacks role', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['admin']);
-    const context = createMockExecutionContext(['admin'], { role: 'user' });
+    const context = createMockExecutionContext({ role: 'user' });
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });
 
   it('should throw ForbiddenException if user is not authenticated', () => {
     jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(['admin']);
-    const context = createMockExecutionContext(['admin']);
+    const context = createMockExecutionContext();
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });
 });

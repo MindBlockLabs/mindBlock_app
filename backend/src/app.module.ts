@@ -32,16 +32,30 @@ import { CategoriesModule } from './categories/categories.module';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => {
-        const dbConfig = configService.get('database');
+      useFactory: (configService: ConfigService) => {
+        const dbConfig =
+          configService.get<{
+            url?: string;
+            autoload?: string;
+            synchronize?: string;
+            host?: string;
+            port?: number;
+            user?: string;
+            password?: string;
+            name?: string;
+          }>('database') ?? {};
+
+        if (!dbConfig) {
+          throw new Error('Database configuration is missing');
+        }
 
         // If DATABASE_URL is set, use connection string (production)
         if (dbConfig.url) {
           return {
             type: 'postgres',
             url: dbConfig.url,
-            autoLoadEntities: dbConfig.autoload,
-            synchronize: dbConfig.synchronize,
+            autoLoadEntities: dbConfig.autoload === 'true',
+            synchronize: dbConfig.synchronize === 'true',
           };
         }
 
@@ -53,8 +67,8 @@ import { CategoriesModule } from './categories/categories.module';
           username: dbConfig.user,
           password: dbConfig.password,
           database: dbConfig.name,
-          autoLoadEntities: dbConfig.autoload,
-          synchronize: dbConfig.synchronize,
+          autoLoadEntities: dbConfig.autoload === 'true',
+          synchronize: dbConfig.synchronize === 'true',
         };
       },
     }),

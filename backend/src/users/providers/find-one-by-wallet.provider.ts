@@ -44,7 +44,7 @@ export class FindOneByWallet {
 
     try {
       user = await this.userRepository.findOneBy({ stellarWallet: wallet });
-    } catch (error) {
+    } catch {
       throw new RequestTimeoutException('Could not fetch user', {
         description: 'Error connecting to database',
       });

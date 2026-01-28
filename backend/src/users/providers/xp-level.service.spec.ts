@@ -5,7 +5,10 @@ import { User } from '../user.entity';
 
 describe('XpLevelService', () => {
   let service: XpLevelService;
-  let mockUserRepository;
+  let mockUserRepository: {
+    findOne: jest.Mock;
+    save: jest.Mock;
+  };
 
   const mockUser = {
     id: '123',
@@ -44,7 +47,7 @@ describe('XpLevelService', () => {
     mockUser.xp = 0;
     mockUser.level = 1;
     const result = await service.addXp('123', 100);
-    
+
     expect(result.currentXp).toBe(100);
     expect(result.currentLevel).toBe(1);
     expect(result.levelUp).toBe(false);
@@ -55,7 +58,7 @@ describe('XpLevelService', () => {
     mockUser.xp = 450;
     mockUser.level = 1;
     const result = await service.addXp('123', 60); // Total 510 -> Level 2
-    
+
     expect(result.currentXp).toBe(510);
     expect(result.currentLevel).toBe(2);
     expect(result.levelUp).toBe(true);

@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user.entity';
@@ -25,7 +29,7 @@ export class UpdateUserService {
 
     try {
       return await this.userRepository.save(user);
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to update user');
     }
   }

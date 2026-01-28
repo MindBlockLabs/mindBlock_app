@@ -47,6 +47,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
       useClass: ThrottlerGuard,
     },
   ],
-  exports: [JwtStrategy, AuthService, HashingProvider, GoogleAuthenticationService],
+  exports: [
+    JwtStrategy,
+    AuthService,
+    HashingProvider,
+    GoogleAuthenticationService,
+  ],
 })
 export class AuthModule {}

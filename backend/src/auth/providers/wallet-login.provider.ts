@@ -1,4 +1,9 @@
-import { forwardRef, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import { UsersService } from '../../users/providers/users.service';
@@ -30,16 +35,16 @@ export class StellarWalletLoginProvider {
   public async StellarWalletLogin(dto: StellarWalletLoginDto) {
     try {
       // 1. Verify nonce hasn't been used and use it
-      await this.authService.verifyAndUseNonce(dto.nonce, dto.walletAddress);
+      this.authService.verifyAndUseNonce(dto.nonce, dto.walletAddress);
 
       // 2. Create proper message to sign
       const message = this.createLoginMessage(dto.walletAddress, dto.nonce);
 
       // 3. Verify the signature using Stellar's ed25519 verification
-      const isValid = await this.verifySignature(
-        message, 
-        dto.signature, 
-        dto.publicKey
+      const isValid = this.verifySignature(
+        message,
+        dto.signature,
+        dto.publicKey,
       );
 
       if (!isValid) {
@@ -47,10 +52,10 @@ export class StellarWalletLoginProvider {
       }
 
       // 4. Verify the public key belongs to the wallet address
-      await this.verifyPublicKeyOwnership(dto.walletAddress, dto.publicKey);
-
-    } catch (err) {
-      throw new UnauthorizedException('Authentication failed: ' + err.message);
+      this.verifyPublicKeyOwnership(dto.walletAddress, dto.publicKey);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new UnauthorizedException('Authentication failed: ' + message);
     }
 
     // Check if user exists in db
@@ -65,7 +70,7 @@ export class StellarWalletLoginProvider {
         provider: 'stellar_wallet',
         challengeLevel: ChallengeLevel.BEGINNER,
         challengeTypes: [],
-        ageGroup: AgeGroup.TEENS
+        ageGroup: AgeGroup.TEENS,
       });
     }
 
@@ -89,18 +94,18 @@ export class StellarWalletLoginProvider {
     return `Login to MyApp\nWallet: ${walletAddress}\nNonce: ${nonce}\nTimestamp: ${Date.now()}`;
   }
 
-  private async verifySignature(
-    message: string, 
-    signature: string, 
-    publicKey: string
-  ): Promise<boolean> {
+  private verifySignature(
+    message: string,
+    signature: string,
+    publicKey: string,
+  ): boolean {
     try {
       // Convert message to buffer
       const messageBuffer = Buffer.from(message, 'utf8');
-      
+
       // Convert signature from base64 to buffer
       const signatureBuffer = Buffer.from(signature, 'base64');
-      
+
       // Convert public key from Stellar format to PEM encoded ed25519 public key
       const stellarKeypair = StellarSdk.Keypair.fromPublicKey(publicKey);
       const publicKeyBuffer = stellarKeypair.rawPublicKey();
@@ -108,7 +113,10 @@ export class StellarWalletLoginProvider {
       // Convert raw public key to PEM format
       const publicKeyPem =
         '-----BEGIN PUBLIC KEY-----\n' +
-        Buffer.from(publicKeyBuffer).toString('base64').match(/.{1,64}/g)?.join('\n') +
+        Buffer.from(publicKeyBuffer)
+          .toString('base64')
+          .match(/.{1,64}/g)
+          ?.join('\n') +
         '\n-----END PUBLIC KEY-----\n';
 
       // Verify signature using ed25519
@@ -118,9 +126,9 @@ export class StellarWalletLoginProvider {
         {
           key: publicKeyPem,
           format: 'pem',
-          type: 'spki'
+          type: 'spki',
         },
-        signatureBuffer
+        signatureBuffer,
       );
 
       return isValid;
@@ -130,10 +138,10 @@ export class StellarWalletLoginProvider {
     }
   }
 
-  private async verifyPublicKeyOwnership(
+  private verifyPublicKeyOwnership(
     walletAddress: string,
     publicKey: string,
-  ): Promise<void> {
+  ): void {
     try {
       // Verify that the public key matches the wallet address
       const keypair = StellarSdk.Keypair.fromPublicKey(publicKey);
@@ -156,9 +164,10 @@ export class StellarWalletLoginProvider {
       console.log(
         `Public key ownership verification for ${walletAddress} with key ${publicKey} - validation passed`,
       );
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       throw new UnauthorizedException(
-        `Public key verification failed: ${error.message}`,
+        `Public key verification failed: ${message}`,
       );
     }
   }

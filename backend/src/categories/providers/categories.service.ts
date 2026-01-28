@@ -1,4 +1,8 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from '../entities/category.entity';
@@ -13,7 +17,7 @@ export class CategoriesService {
 
   async findAll(): Promise<Category[]> {
     return this.categoryRepository.find({
-        order: { name: 'ASC' }
+      order: { name: 'ASC' },
     });
   }
 
@@ -45,7 +49,13 @@ export class CategoriesService {
       return await this.categoryRepository.save(category);
     } catch (error) {
       // Handle unique constraint violation (in case of race condition)
-      if (error.code === '23505') { // PostgreSQL unique violation code
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as Record<string, any>).code === '23505'
+      ) {
+        // PostgreSQL unique violation code
         throw new ConflictException(
           `Category with name "${createCategoryDto.name}" already exists`,
         );

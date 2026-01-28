@@ -9,10 +9,7 @@ import { ProgressCalculationProvider } from './providers/progress-calculation.pr
 import { ProgressController } from './progress.controller';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([UserProgress, Puzzle]),
-    UsersModule,
-  ],
+  imports: [TypeOrmModule.forFeature([UserProgress, Puzzle]), UsersModule],
   controllers: [ProgressController],
   providers: [ProgressService, ProgressCalculationProvider],
   exports: [TypeOrmModule, ProgressService],

@@ -47,7 +47,7 @@ export class CreatePuzzleProvider {
     // 5. Persist to database
     try {
       return await this.puzzleRepository.save(puzzle);
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to create puzzle');
     }
   }

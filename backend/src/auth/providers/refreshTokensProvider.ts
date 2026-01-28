@@ -51,7 +51,7 @@ export class RefreshTokensProvider {
   @ApiBody({ type: RefreshTokenDto })
   public async refreshTokens(refreshTokenDto: RefreshTokenDto) {
     // Validate the refresh token using JWT
-    const { sub } = await this.jwtService.verifyAsync(
+    const { sub } = await this.jwtService.verifyAsync<{ sub: string }>(
       refreshTokenDto.refreshToken,
       {
         secret: this.jwtConfiguration.secret,

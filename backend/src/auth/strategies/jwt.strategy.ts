@@ -4,7 +4,6 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigType } from '@nestjs/config';
 import { Inject } from '@nestjs/common';
 import jwtConfig from '../authConfig/jwt.config';
-import { REQUEST_USER_KEY } from '../constants/auth.constant';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -26,8 +25,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: any) {
-    // This is what gets attached to request[REQUEST_USER_KEY] or request.user
+  validate(payload: { sub: string; email: string; username: string }) {
+    // This is what gets attached to request.user
     console.log('JWT Strategy validate payload:', payload);
 
     return {

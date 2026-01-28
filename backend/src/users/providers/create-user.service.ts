@@ -38,7 +38,9 @@ export class CreateUserService {
     try {
       // hash the password before saving
       if (!userData.password || typeof userData.password !== 'string') {
-        throw new BadRequestException('Password is required and must be a string');
+        throw new BadRequestException(
+          'Password is required and must be a string',
+        );
       }
       const hashedPassword = await this.hashingProvider.hashPassword(
         userData.password,
@@ -53,7 +55,7 @@ export class CreateUserService {
         );
       }
       return savedUser;
-    } catch (error) {
+    } catch {
       throw new InternalServerErrorException('Failed to create user');
     }
   }

@@ -115,7 +115,7 @@ export class GoogleAuthenticationService implements OnModuleInit {
       const newUser = await this.userService.createGoogleUser({
         email: email,
         username: given_name,
-        // eslint-disable-next-line prettier/prettier
+         
         googleId: googleId,
       });
       return this.generateTokensProvider.generateTokens(newUser);

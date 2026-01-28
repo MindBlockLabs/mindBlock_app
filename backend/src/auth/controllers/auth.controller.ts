@@ -53,18 +53,18 @@ export class AuthController {
       properties: {
         accessToken: {
           type: 'string',
-          description: 'JWT access token for authenticated user'
-        }
-      }
-    }
+          description: 'JWT access token for authenticated user',
+        },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Invalid wallet signature or authentication failed' 
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid wallet signature or authentication failed',
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Invalid request format or expired nonce' 
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid request format or expired nonce',
   })
   public async stellarWalletLogin(@Body() dto: StellarWalletLoginDto) {
     return await this.authservice.StellarWalletLogin(dto);
@@ -87,10 +87,10 @@ export class AuthController {
     status: 400,
     description: 'Invalid Stellar wallet address format',
   })
-  public async generateStellarWalletNonce(
+  public generateStellarWalletNonce(
     @Query('walletAddress') walletAddress: string,
-  ): Promise<NonceResponseDto> {
-    return await this.authservice.generateNonce(walletAddress);
+  ): NonceResponseDto {
+    return this.authservice.generateNonce(walletAddress);
   }
 
   @Get('/stellar-wallet-nonce/status')
@@ -107,24 +107,24 @@ export class AuthController {
       properties: {
         valid: {
           type: 'boolean',
-          description: 'Whether the nonce is valid'
+          description: 'Whether the nonce is valid',
         },
         reason: {
           type: 'string',
-          description: 'Reason if nonce is invalid'
+          description: 'Reason if nonce is invalid',
         },
         walletAddress: {
           type: 'string',
-          description: 'Associated wallet address (only if valid)'
+          description: 'Associated wallet address (only if valid)',
         },
         expiresAt: {
           type: 'number',
-          description: 'Expiration timestamp (only if valid)'
-        }
-      }
-    }
+          description: 'Expiration timestamp (only if valid)',
+        },
+      },
+    },
   })
-  public async checkNonceStatus(@Query('nonce') nonce: string) {
-    return await this.authservice.checkNonceStatus(nonce);
+  public checkNonceStatus(@Query('nonce') nonce: string) {
+    return this.authservice.checkNonceStatus(nonce);
   }
 }

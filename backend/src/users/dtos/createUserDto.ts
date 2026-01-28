@@ -8,7 +8,7 @@ import {
   IsArray,
   ArrayNotEmpty,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger'
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { userRole } from '../enums/userRole.enum';
 import { ChallengeLevel } from '../enums/challengeLevel.enum';
@@ -16,7 +16,6 @@ import { ChallengeType } from '../enums/challengeType.enum';
 import { ReferralSource } from '../enums/referralSource.enum';
 import { AgeGroup } from '../enums/ageGroup.enum';
 import { AuthProvider } from '../../auth/enum/authProvider.enum';
-
 
 export class CreateUserDto {
   /**
@@ -80,7 +79,7 @@ export class CreateUserDto {
   })
   @IsEnum(userRole)
   @IsOptional()
-  @Transform(({ value }) => value ?? userRole.USER)
+  @Transform(({ value }) => (value ?? userRole.USER) as userRole)
   userRole?: userRole;
 
   /**
@@ -121,14 +120,12 @@ export class CreateUserDto {
    */
   @ApiProperty({
     type: 'string',
-    example: 'poiuytrdspoiuytrewa\zxcvbnmml;poiuytrdsdcvbnm]',
+    example: 'poiuytrdspoiuytrewazxcvbnmml;poiuytrdsdcvbnm]',
   })
   @IsString()
   @IsOptional()
   @MaxLength(225)
   googleId?: string;
-
-
 
   @ApiProperty({
     enum: ChallengeLevel,

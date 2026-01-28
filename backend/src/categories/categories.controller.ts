@@ -1,9 +1,22 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Category } from './entities/category.entity';
 import { CategoriesService } from './providers/categories.service';
-import { ApiBody, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiOperation,
+  ApiQuery,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { CreateCategoryDto } from './dtos/create-category.dto';
 
 @ApiTags('Categories')
@@ -46,9 +59,10 @@ export class CategoriesController {
   }
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Get all categories',
-    description: 'Retrieve a list of all categories. Optionally filter by active status.',
+    description:
+      'Retrieve a list of all categories. Optionally filter by active status.',
   })
   @ApiQuery({
     name: 'isActive',
@@ -78,11 +92,15 @@ export class CategoriesController {
         data: categories,
         count: categories.length,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to retrieve categories';
       return {
         success: false,
         message: 'Failed to retrieve categories',
-        error: error.message,
+        error: message,
       };
     }
   }

@@ -1,0 +1,26 @@
+
+> mindBlock_app@0.0.1 lint
+> eslint "{src,apps,libs,test}/**/*.ts" --fix
+
+
+C:\Users\HomePC\Desktop\DevChant\mindBlock_app\backend\src\puzzles\dtos\create-puzzle.dto.ts
+  40:31  error  'args' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\HomePC\Desktop\DevChant\mindBlock_app\backend\src\users\providers\xp-level.service.spec.ts
+  21:5   error  Unsafe assignment of an error typed value     @typescript-eslint/no-unsafe-assignment
+  31:11  error  Unsafe assignment of an `any` value           @typescript-eslint/no-unsafe-assignment
+  51:31  error  Unsafe member access .save on an `any` value  @typescript-eslint/no-unsafe-member-access
+  62:31  error  Unsafe member access .save on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\HomePC\Desktop\DevChant\mindBlock_app\backend\src\xp\xp-level.service.spec.ts
+  32:11  error  Unsafe assignment of an `any` value           @typescript-eslint/no-unsafe-assignment
+  52:31  error  Unsafe member access .save on an `any` value  @typescript-eslint/no-unsafe-member-access
+  63:31  error  Unsafe member access .save on an `any` value  @typescript-eslint/no-unsafe-member-access
+
+C:\Users\HomePC\Desktop\DevChant\mindBlock_app\backend\test\user-activity.e2e-spec.ts
+  63:31  warning  Unsafe argument of type `any` assigned to a parameter of type `App`  @typescript-eslint/no-unsafe-argument
+  74:19  warning  Unsafe argument of type `any` assigned to a parameter of type `App`  @typescript-eslint/no-unsafe-argument
+  80:19  warning  Unsafe argument of type `any` assigned to a parameter of type `App`  @typescript-eslint/no-unsafe-argument
+
+??? 11 problems (8 errors, 3 warnings)
+

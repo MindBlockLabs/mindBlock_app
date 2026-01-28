@@ -102,7 +102,9 @@ export class ProgressCalculationProvider {
     });
 
     if (!puzzle) {
-      throw new NotFoundException(`Puzzle with ID ${submitAnswerDto.puzzleId} not found`);
+      throw new NotFoundException(
+        `Puzzle with ID ${submitAnswerDto.puzzleId} not found`,
+      );
     }
 
     if (recentAttempt) {
@@ -163,7 +165,22 @@ export class ProgressCalculationProvider {
       .addSelect('AVG(progress.timeSpent)', 'averageTimeSpent')
       .where('progress.userId = :userId', { userId })
       .andWhere('progress.categoryId = :categoryId', { categoryId })
-      .getRawOne();
+      .getRawOne<{
+        totalAttempts: string;
+        correctAttempts: string;
+        totalPoints: string;
+        averageTimeSpent: string;
+      }>();
+
+    if (!stats) {
+      return {
+        totalAttempts: 0,
+        correctAttempts: 0,
+        totalPoints: 0,
+        averageTimeSpent: 0,
+        accuracy: 0,
+      };
+    }
 
     return {
       totalAttempts: Number(stats.totalAttempts) || 0,
@@ -171,7 +188,7 @@ export class ProgressCalculationProvider {
       totalPoints: parseInt(stats.totalPoints) || 0,
       averageTimeSpent: parseFloat(stats.averageTimeSpent) || 0,
       accuracy:
-        stats.totalAttempts > 0
+        Number(stats.totalAttempts) > 0
           ? (parseInt(stats.correctAttempts) / parseInt(stats.totalAttempts)) *
             100
           : 0,
