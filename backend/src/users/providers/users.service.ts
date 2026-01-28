@@ -26,7 +26,7 @@ export class UsersService {
     private readonly findOneByGoogleIdProvider: FindOneByGoogleIdProvider,
 
     private readonly createGoogleUserProvider: CreateGoogleUserProvider,
-    private readonly updateUserService: UpdateUserService
+    private readonly updateUserService: UpdateUserService,
   ) {}
 
   public async findAllUsers(
@@ -35,9 +35,9 @@ export class UsersService {
     return this.findAll.findAll(dto);
   }
 
-  public async findOne(): Promise<any> {
-    return null;
-  }
+  // public async findOne(): Promise<any> {
+  //   return null;
+  // }
 
   public async GetOneByEmail(email: string) {
     return this.findOneByEmail.findOneByEmail(email);
@@ -68,7 +68,7 @@ export class UsersService {
   }
 
   public async update(id: string, data: EditUserDto): Promise<User> {
-    return this.updateUserService.editUser(id,data)
+    return this.updateUserService.editUser(id, data);
   }
 
   public async delete(id: string): Promise<void> {

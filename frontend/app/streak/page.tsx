@@ -4,26 +4,7 @@ import { useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { StreakScreen } from "@/components/StreakScreen";
 import { DayData } from "@/components/WeeklyCalendar";
-import { useStreak } from "@/providers/StreakProvider";
-
-const WEEKDAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
-
-function toZonedDate(date: Date, timeZone: string) {
-  const localized = date.toLocaleString("en-US", { timeZone });
-  return new Date(localized);
-}
-
-function isoDateString(date: Date) {
-  return date.toISOString().split("T")[0];
-}
-
-function startOfWeekMonday(date: Date) {
-  const jsDay = date.getDay(); // 0 = Sunday
-  const diffToMonday = (jsDay + 6) % 7; // convert Sunday=0 -> 6, Monday=1 ->0
-  const start = new Date(date);
-  start.setDate(date.getDate() - diffToMonday);
-  return start;
-}
+import { useRouter } from "next/navigation";
 
 export default function StreakPage() {
   const router = useRouter();

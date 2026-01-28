@@ -90,10 +90,10 @@ export class AuthController {
     status: 400,
     description: 'Invalid Stellar wallet address format',
   })
-  public async generateStellarWalletNonce(
+  public generateStellarWalletNonce(
     @Query('walletAddress') walletAddress: string,
-  ): Promise<NonceResponseDto> {
-    return await this.authservice.generateNonce(walletAddress);
+  ): NonceResponseDto {
+    return this.authservice.generateNonce(walletAddress);
   }
 
   @Get('/stellar-wallet-nonce/status')
@@ -127,8 +127,8 @@ export class AuthController {
       },
     },
   })
-  public async checkNonceStatus(@Query('nonce') nonce: string) {
-    return await this.authservice.checkNonceStatus(nonce);
+  public checkNonceStatus(@Query('nonce') nonce: string) {
+    return this.authservice.checkNonceStatus(nonce);
   }
 
   @Post('/forgot-password')

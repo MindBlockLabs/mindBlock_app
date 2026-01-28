@@ -1,4 +1,1 @@
-export class BlockchainDTO {
-
-    
-  }
+export class BlockchainDTO {}

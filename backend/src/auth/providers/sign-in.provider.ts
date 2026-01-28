@@ -33,7 +33,7 @@ export class SignInProvider {
   public async SignIn(signInDto: LoginDto) {
     // check if user exist in db
     // throw error if user doesnt exist
-    let user = await this.userService.GetOneByEmail(signInDto.email);
+    const user = await this.userService.GetOneByEmail(signInDto.email);
 
     // conpare password
     let isCheckedPassword: boolean = false;

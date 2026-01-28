@@ -51,7 +51,7 @@ export class RefreshTokensProvider {
   @ApiBody({ type: RefreshTokenDto })
   public async refreshTokens(refreshTokenDto: RefreshTokenDto) {
     // Validate the refresh token using JWT
-    const { sub } = await this.jwtService.verifyAsync(
+    const payload = await this.jwtService.verifyAsync<{ sub: string }>(
       refreshTokenDto.refreshToken,
       {
         secret: this.jwtConfiguration.secret,
@@ -59,6 +59,8 @@ export class RefreshTokensProvider {
         issuer: this.jwtConfiguration.issuer,
       },
     );
+
+    const sub = payload.sub;
 
     // Retrieve the user from the database
     const user = await this.userService.findOneByGoogleId(sub);

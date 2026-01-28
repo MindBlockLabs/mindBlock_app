@@ -6,8 +6,6 @@ import {
   IsNumber,
   IsOptional,
   Min,
-  ArrayMinSize,
-  ArrayContains,
   MinLength,
   Validate,
   ValidatorConstraint,
@@ -16,27 +14,34 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { PuzzleDifficulty, getPointsByDifficulty } from '../enums/puzzle-difficulty.enum';
+import {
+  PuzzleDifficulty,
+  getPointsByDifficulty,
+} from '../enums/puzzle-difficulty.enum';
 
 @ValidatorConstraint({ name: 'correctAnswerInOptions', async: false })
-export class CorrectAnswerInOptionsConstraint implements ValidatorConstraintInterface {
+export class CorrectAnswerInOptionsConstraint
+  implements ValidatorConstraintInterface
+{
   validate(correctAnswer: string, args: ValidationArguments) {
     const object = args.object as CreatePuzzleDto;
     return object.options?.includes(correctAnswer) || false;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return 'correctAnswer must be one of the provided options';
   }
 }
 
 @ValidatorConstraint({ name: 'optionsMinimumLength', async: false })
-export class OptionsMinimumLengthConstraint implements ValidatorConstraintInterface {
-  validate(options: string[], args: ValidationArguments) {
+export class OptionsMinimumLengthConstraint
+  implements ValidatorConstraintInterface
+{
+  validate(options: string[]) {
     return options?.length >= 2;
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage() {
     return 'options must contain at least 2 items';
   }
 }
@@ -44,7 +49,7 @@ export class OptionsMinimumLengthConstraint implements ValidatorConstraintInterf
 export class CreatePuzzleDto {
   @ApiProperty({
     description: 'The puzzle question text',
-    example: 'What has keys but can\'t open locks?',
+    example: "What has keys but can't open locks?",
     minLength: 10,
   })
   @IsString()
@@ -88,7 +93,8 @@ export class CreatePuzzleDto {
   categoryId: string;
 
   @ApiPropertyOptional({
-    description: 'Points awarded for solving this puzzle. If not provided, will be calculated based on difficulty',
+    description:
+      'Points awarded for solving this puzzle. If not provided, will be calculated based on difficulty',
     example: 250,
     minimum: 0,
     default: null,
