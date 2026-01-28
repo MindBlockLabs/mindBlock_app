@@ -50,10 +50,10 @@ export class CategoriesService {
     } catch (error) {
       // Handle unique constraint violation (in case of race condition)
       if (
-        error instanceof Error &&
+        error &&
         typeof error === 'object' &&
         'code' in error &&
-        error.code === '23505'
+        (error as Record<string, any>).code === '23505'
       ) {
         // PostgreSQL unique violation code
         throw new ConflictException(

@@ -150,7 +150,7 @@ export class User {
   passwordResetExpires?: Date;
 
   // Relationships
-  @OneToMany(() => UserProgress, (progress) => progress.puzzle)
+  @OneToMany(() => UserProgress, (progress) => progress.user)
   progressRecords: UserProgress[];
 
   @OneToMany(() => DailyQuest, (quest) => quest.user)

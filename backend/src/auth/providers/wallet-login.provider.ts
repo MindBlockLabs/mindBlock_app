@@ -53,9 +53,9 @@ export class StellarWalletLoginProvider {
 
       // 4. Verify the public key belongs to the wallet address
       this.verifyPublicKeyOwnership(dto.walletAddress, dto.publicKey);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-      throw new UnauthorizedException('Authentication failed: ' + errorMessage);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new UnauthorizedException('Authentication failed: ' + message);
     }
 
     // Check if user exists in db
@@ -164,11 +164,10 @@ export class StellarWalletLoginProvider {
       console.log(
         `Public key ownership verification for ${walletAddress} with key ${publicKey} - validation passed`,
       );
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       throw new UnauthorizedException(
-        `Public key verification failed: ${errorMessage}`,
+        `Public key verification failed: ${message}`,
       );
     }
   }

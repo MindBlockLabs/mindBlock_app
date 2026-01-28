@@ -92,13 +92,15 @@ export class CategoriesController {
         data: categories,
         count: categories.length,
       };
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to retrieve categories';
       return {
         success: false,
         message: 'Failed to retrieve categories',
-        error: errorMessage,
+        error: message,
       };
     }
   }
