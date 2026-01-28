@@ -63,8 +63,9 @@ export default function QuizPage() {
     >
       {!isFinished && <QuizHeader current={step + 1} total={QUIZ.length} />}
 
-      <main className="flex-grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
+      <main className="grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
+          <QuizCompletionStats />
           <LevelComplete
             totalPts={score * 10}
             correctAnswers={score}
@@ -139,7 +140,7 @@ export default function QuizPage() {
               onClick={handleAction}
               disabled={selectedId === null}
               style={{ boxShadow: `0 4px 0 0 #2663C7` }}
-              className={`w-full h-[50px] bg-[#3B82F6] rounded-[8px] font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
+              className={`w-full h-[50px] bg-[#3B82F6] rounded-lg font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
                 selectedId
                   ? "cursor-pointer opacity-100"
                   : "opacity-50 cursor-not-allowed"
