@@ -34,7 +34,7 @@ export class StellarWalletLoginProvider {
 
   public async StellarWalletLogin(dto: StellarWalletLoginDto) {
     try {
-      // 1. Verify nonce hasn't been used and use it
+      // 1. Verify nonce hasn't been used and use it (synchronous method)
       this.authService.verifyAndUseNonce(dto.nonce, dto.walletAddress);
 
       // 2. Create proper message to sign

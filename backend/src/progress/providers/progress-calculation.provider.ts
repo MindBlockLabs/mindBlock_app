@@ -17,6 +17,13 @@ export interface ProgressCalculationResult {
   validation: AnswerValidationResult;
 }
 
+interface ProgressStatsRaw {
+  totalAttempts: string;
+  correctAttempts: string;
+  totalPoints: string;
+  averageTimeSpent: string;
+}
+
 @Injectable()
 export class ProgressCalculationProvider {
   constructor(
@@ -165,12 +172,7 @@ export class ProgressCalculationProvider {
       .addSelect('AVG(progress.timeSpent)', 'averageTimeSpent')
       .where('progress.userId = :userId', { userId })
       .andWhere('progress.categoryId = :categoryId', { categoryId })
-      .getRawOne<{
-        totalAttempts: string;
-        correctAttempts: string;
-        totalPoints: string;
-        averageTimeSpent: string;
-      }>();
+      .getRawOne<ProgressStatsRaw>();
 
     if (!stats) {
       return {
@@ -183,13 +185,14 @@ export class ProgressCalculationProvider {
     }
 
     return {
-      totalAttempts: Number(stats.totalAttempts) || 0,
-      correctAttempts: parseInt(stats.correctAttempts) || 0,
-      totalPoints: parseInt(stats.totalPoints) || 0,
-      averageTimeSpent: parseFloat(stats.averageTimeSpent) || 0,
+      totalAttempts: Number(stats?.totalAttempts) || 0,
+      correctAttempts: parseInt(stats?.correctAttempts || '0', 10),
+      totalPoints: parseInt(stats?.totalPoints || '0', 10),
+      averageTimeSpent: parseFloat(stats?.averageTimeSpent || '0'),
       accuracy:
-        Number(stats.totalAttempts) > 0
-          ? (parseInt(stats.correctAttempts) / parseInt(stats.totalAttempts)) *
+        stats && Number(stats.totalAttempts) > 0
+          ? (parseInt(stats.correctAttempts, 10) /
+              Number(stats.totalAttempts)) *
             100
           : 0,
     };

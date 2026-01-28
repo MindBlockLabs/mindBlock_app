@@ -101,6 +101,12 @@ export class User {
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
 
+  @Column({ nullable: true })
+  passwordResetToken?: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  passwordResetExpires?: Date;
+
   // Relationships
   @OneToMany(() => UserProgress, (progress) => progress.user)
   progressRecords: UserProgress[];

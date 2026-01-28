@@ -24,7 +24,6 @@ export class UsersService {
     private readonly createUserService: CreateUserService,
     private readonly deleteUserService: DeleteUserService, // <-- injected delete a user
     private readonly findOneByGoogleIdProvider: FindOneByGoogleIdProvider,
-
     private readonly createGoogleUserProvider: CreateGoogleUserProvider,
     private readonly updateUserService: UpdateUserService,
   ) {}
@@ -35,9 +34,7 @@ export class UsersService {
     return this.findAll.findAll(dto);
   }
 
-  public findOne(): any {
-    return null;
-  }
+  // No findOne() method here as it's not needed or handled by sub-providers
 
   public async GetOneByEmail(email: string) {
     return this.findOneByEmail.findOneByEmail(email);

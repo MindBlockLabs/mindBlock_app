@@ -33,20 +33,20 @@ import { CategoriesModule } from './categories/categories.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const dbConfig =
-          configService.get<{
-            url?: string;
-            autoload?: string;
-            synchronize?: string;
-            host?: string;
-            port?: number;
-            user?: string;
-            password?: string;
-            name?: string;
-          }>('database') ?? {};
+        interface DatabaseConfig {
+          url?: string;
+          host?: string;
+          port?: number;
+          user?: string;
+          password?: string;
+          name?: string;
+          autoload?: string;
+          synchronize?: string;
+        }
+        const dbConfig = configService.get<DatabaseConfig>('database');
 
         if (!dbConfig) {
-          throw new Error('Database configuration is missing');
+          throw new Error('Database configuration not found');
         }
 
         // If DATABASE_URL is set, use connection string (production)

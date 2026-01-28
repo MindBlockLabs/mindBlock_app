@@ -55,8 +55,9 @@ export class UsersController {
     return this.usersService.findAllUsers(dto);
   }
 
-  findOne() {
-    return null;
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return id;
   }
 
   @Post()
