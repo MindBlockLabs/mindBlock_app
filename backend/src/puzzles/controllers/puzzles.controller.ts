@@ -4,17 +4,11 @@ import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
 import { Puzzle } from '../entities/puzzle.entity';
 import { PuzzleQueryDto } from '../dtos/puzzle-query.dto';
-import { SubmitPuzzleDto } from '../dtos/submit-puzzle.dto';
-import { SubmitPuzzleResponseDto } from '../dtos/submit-puzzle-response.dto';
-import { SubmitPuzzleProvider } from '../providers/submit-puzzle.provider';
 
 @Controller('puzzles')
 @ApiTags('puzzles')
 export class PuzzlesController {
-  constructor(
-    private readonly puzzlesService: PuzzlesService,
-    private readonly submitPuzzleProvider: SubmitPuzzleProvider,
-  ) {}
+  constructor(private readonly puzzlesService: PuzzlesService) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new puzzle' })
@@ -65,32 +59,5 @@ export class PuzzlesController {
   @Get()
   findAll(@Query() query: PuzzleQueryDto) {
     return this.puzzlesService.findAll(query);
-  }
-
-  @Post('submit')
-  @ApiOperation({ summary: 'Submit answer to a puzzle' })
-  @ApiResponse({
-    status: 201,
-    description: 'Answer submitted successfully',
-    type: SubmitPuzzleResponseDto,
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid input or puzzle not found',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Puzzle not found',
-  })
-  @ApiResponse({
-    status: 409,
-    description: 'Duplicate submission detected',
-  })
-  @ApiResponse({
-    status: 500,
-    description: 'Internal server error',
-  })
-  async submit(@Body() submitPuzzleDto: SubmitPuzzleDto): Promise<SubmitPuzzleResponseDto> {
-    return this.submitPuzzleProvider.execute(submitPuzzleDto);
   }
 }

@@ -13,7 +13,6 @@ import { CreateGoogleUserProvider } from './providers/googleUserProvider';
 import { PaginationModule } from '../common/pagination/pagination.module';
 import { FindOneByWallet } from './providers/find-one-by-wallet.provider';
 import { UpdateUserService } from './providers/update-user.service';
-import { UpdateUserXPService } from './providers/update-user-xp.service';
 import { UserProgress } from '../progress/entities/progress.entity';
 import { Streak } from '../streak/entities/streak.entity';
 import { DailyQuest } from '../quests/entities/daily-quest.entity';
@@ -35,8 +34,7 @@ import { DailyQuest } from '../quests/entities/daily-quest.entity';
     FindOneByGoogleIdProvider,
     CreateGoogleUserProvider,
     UpdateUserService,
-    UpdateUserXPService,
   ],
-  exports: [UsersService, TypeOrmModule, UpdateUserXPService],
+  exports: [UsersService, TypeOrmModule],
 })
 export class UsersModule {}
