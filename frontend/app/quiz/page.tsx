@@ -62,15 +62,9 @@ export default function QuizPage() {
         <QuizHeader current={step + 1} total={MOCK_QUIZ.length} />
       )}
 
-      <main className="flex-grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
+      <main className="grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
-          <LevelComplete
-            totalPts={score * 10}
-            correctAnswers={score}
-            totalQuestions={MOCK_QUIZ.length}
-            timeTaken="3:10"
-            onClaim={() => alert("Points Claimed!")}
-          />
+          <QuizCompletionStats />
         ) : (
           <div className="w-full space-y-12">
             <h2 className="text-[28px] mt-10 font-semibold text-center">
@@ -108,7 +102,7 @@ export default function QuizPage() {
               onClick={handleAction}
               disabled={selectedId === null}
               style={{ boxShadow: `0 4px 0 0 #2663C7` }}
-              className={`w-full h-[50px] bg-[#3B82F6] rounded-[8px] font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
+              className={`w-full h-[50px] bg-[#3B82F6] rounded-lg font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
                 selectedId
                   ? "cursor-pointer opacity-100"
                   : "opacity-50 cursor-not-allowed"

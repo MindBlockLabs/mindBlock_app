@@ -3,6 +3,7 @@ import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import StoreProvider from "@/providers/storeProvider";
 import ClientLayout from "@/components/ClientLayout";
+import CompletionFeatureProvider from "@/providers/CompletionFeatureProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +27,11 @@ export default function RootLayout({
       >
         <StoreProvider>
           <ToastProvider>
-            
-            <ClientLayout>
-              {children}</ClientLayout>
+            <CompletionFeatureProvider>
+              <ClientLayout>
+                {children}
+              </ClientLayout>
+            </CompletionFeatureProvider>
           </ToastProvider>
         </StoreProvider>
       </body>
