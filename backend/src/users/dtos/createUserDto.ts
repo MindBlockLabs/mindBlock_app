@@ -164,4 +164,78 @@ export class CreateUserDto {
   @IsOptional()
   @IsEnum(AgeGroup)
   ageGroup: AgeGroup;
+
+  /**
+   * Country of the user
+   */
+  @ApiProperty({
+    example: 'United States',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  country?: string;
+
+  /**
+   * User interests
+   */
+  @ApiProperty({
+    example: ['Coding', 'Design'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  interests?: string[];
+
+  /**
+   * User occupation
+   */
+  @ApiProperty({
+    example: 'Software Engineer',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(150)
+  occupation?: string;
+
+  /**
+   * User goals
+   */
+  @ApiProperty({
+    example: ['Learn NestJS', 'Build an app'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  goals?: string[];
+
+  /**
+   * Available hours for learning
+   */
+  @ApiProperty({
+    example: ['09:00', '10:00'],
+    required: false,
+    type: [String],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  availableHours?: string[];
+
+  /**
+   * User bio
+   */
+  @ApiProperty({
+    example: 'I am a passionate developer...',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  bio?: string;
 }
