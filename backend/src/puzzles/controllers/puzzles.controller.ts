@@ -49,4 +49,15 @@ export class PuzzlesController {
   findAll(@Query() query: PuzzleQueryDto) {
     return this.puzzlesService.findAll(query);
   }
+  
+  @ApiOperation({ summary: 'Get a puzzle by ID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Puzzle retrieved successfully',
+    type: Puzzle,
+  })
+  @Get(':id')
+  getById(@Param('id') id: string) {
+    return this.puzzlesService.getPuzzleById(id);
+  }
 }
