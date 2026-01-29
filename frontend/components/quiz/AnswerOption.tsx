@@ -27,10 +27,10 @@ export function AnswerOption({
     textClass = "text-rose-500";
     shadowColor = "#F43F5E";
   } else if (state === "teal") {
-    borderClass = "border-cyan-400";
-    bgClass = "bg-cyan-400/10";
-    textClass = "text-cyan-400";
-    shadowColor = "#22D3EE";
+    borderClass = "border-[#14B8A6]";
+    bgClass = "bg-[#D7FDF7]";
+    textClass = "text-[#14B8A6]";
+    shadowColor = "#14B8A6";
   }
 
   return (

@@ -128,6 +128,9 @@ export default function QuizPage() {
             <h2 className="text-[28px] mt-10 font-semibold text-center">
               {currentQuestion.text}
             </h2>
+            <p className="text-center text-sm text-[#E6E6E6]">
+              Points: {score * 10}
+            </p>
             <div className="space-y-7">
               {currentQuestion.options.map((optionText, index) => {
                 const isSelected = selectedAnswerId === optionText;
@@ -157,6 +160,33 @@ export default function QuizPage() {
                 );
               })}
             </div>
+            {isSubmitted && (
+              <div className="mt-4 space-y-2">
+                {(() => {
+                  const selectedOption = question.options.find(
+                    (o) => o.id === selectedId,
+                  );
+                  const correctOption = question.options.find(
+                    (o) => o.isCorrect,
+                  );
+                  const wasCorrect = !!selectedOption?.isCorrect;
+                  return (
+                    <>
+                      {!wasCorrect && correctOption && (
+                        <div className="text-sm font-semibold text-[#14B8A6] text-center">
+                          Correct answer: {correctOption.text}
+                        </div>
+                      )}
+                      {question.explanation && (
+                        <p className="text-xs text-[#E6E6E6] text-center">
+                          {question.explanation}
+                        </p>
+                      )}
+                    </>
+                  );
+                })()}
+              </div>
+            )}
 
             <button
               ref={actionBtnRef}
