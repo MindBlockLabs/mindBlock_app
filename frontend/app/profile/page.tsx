@@ -59,8 +59,8 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen grid  bg-background">
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="min-h-screen grid  bg-[#0A0F1A] ">
+      <div className="p-8 max-w-6xl ">
         {/* Page Header */}
 
         {/* Main Content */}
@@ -68,7 +68,7 @@ export default function ProfilePage() {
           {/* Left Column - Profile Info & Overview */}
           <div className="flex flex-col gap-8">
             {/* Profile Header Card */}
-            <div className="rounded-2xl bg-card  p-6">
+            <div className="rounded-2xl bg-card">
               <ProfileHeader
                 avatarUrl={mockUserData.avatarUrl}
                 name={mockUserData.name}
