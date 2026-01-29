@@ -8,10 +8,10 @@ export enum PuzzleDifficulty {
 // Helper function to get points based on difficulty
 export function getPointsByDifficulty(difficulty: PuzzleDifficulty): number {
   const pointsMap: Record<PuzzleDifficulty, number> = {
-    [PuzzleDifficulty.BEGINNER]: 100,
-    [PuzzleDifficulty.INTERMEDIATE]: 250,
-    [PuzzleDifficulty.ADVANCED]: 500,
-    [PuzzleDifficulty.EXPERT]: 1000,
+    [PuzzleDifficulty.BEGINNER]: 10,
+    [PuzzleDifficulty.INTERMEDIATE]: 25,
+    [PuzzleDifficulty.ADVANCED]: 50,
+    [PuzzleDifficulty.EXPERT]: 100,
   };
   return pointsMap[difficulty];
 }

@@ -158,4 +158,39 @@ export class User {
 
   @OneToOne(() => Streak, (streak) => streak.user)
   streak: Streak;
+
+  /**
+   * Returns the total XP required to reach the next level
+   */
+  getXpNeededForNextLevel(): number {
+    const thresholds = [1000, 2500, 5000, 10000];
+    if (this.level < 5) {
+      return thresholds[this.level - 1];
+    }
+    // Level 5+: 10000 + (level - 4) * 5000
+    return 10000 + (this.level - 4) * 5000;
+  }
+
+  /**
+   * Returns the progress percentage to the next level
+   */
+  getXpProgressPercentage(): number {
+    const currentLevelXp =
+      this.level === 1 ? 0 : this.getXpNeededForLevel(this.level);
+    const nextLevelXp = this.getXpNeededForNextLevel();
+
+    if (nextLevelXp === currentLevelXp) return 100;
+
+    const progress =
+      ((this.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
+    return Math.min(Math.max(progress, 0), 100);
+  }
+
+  private getXpNeededForLevel(level: number): number {
+    const thresholds = [0, 1000, 2500, 5000, 10000];
+    if (level <= 5) {
+      return thresholds[level - 1];
+    }
+    return 10000 + (level - 5) * 5000;
+  }
 }
