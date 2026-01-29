@@ -55,8 +55,8 @@ export class CreateUserService {
         );
       }
       return savedUser;
-    } catch {
-      throw new InternalServerErrorException('Failed to create user');
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to create user ${error}`);
     }
   }
 }

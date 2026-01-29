@@ -11,7 +11,7 @@ import { GetCategoryStatsProvider } from './providers/get-category-stats.provide
 import { GetOverallStatsProvider } from './providers/get-overall-stats.provider';
 import { ProgressCalculationProvider } from './providers/progress-calculation.provider';
 import { Puzzle } from '../puzzles/entities/puzzle.entity';
-
+import { XpLevelService } from '../users/providers/xp-level.service';
 
 @Module({
   imports: [
@@ -24,7 +24,8 @@ import { Puzzle } from '../puzzles/entities/puzzle.entity';
     GetCategoryStatsProvider,
     GetOverallStatsProvider,
     ProgressCalculationProvider,
+    XpLevelService,
   ],
-  exports: [ProgressService, ProgressCalculationProvider, TypeOrmModule],
+  exports: [ProgressService, ProgressCalculationProvider],
 })
 export class ProgressModule {}

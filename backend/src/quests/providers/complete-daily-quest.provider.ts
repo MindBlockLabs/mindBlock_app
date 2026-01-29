@@ -1,4 +1,3 @@
-// backend/src/quests/providers/complete-daily-quest.provider.ts
 import {
   Injectable,
   Logger,
@@ -67,9 +66,8 @@ export class CompleteDailyQuestProvider {
           );
 
           // Return existing completion data
-          const streak = await this.updateStreakProvider.getStreak(
-            userIdNumber,
-          );
+          const streak =
+            await this.updateStreakProvider.getStreak(userIdNumber);
           return {
             isAlreadyCompleted: true,
             success: true,
@@ -147,8 +145,7 @@ export class CompleteDailyQuestProvider {
       streakInfo: {
         currentStreak: streak.currentStreak,
         longestStreak: streak.longestStreak,
-        lastActivityDate:
-          streak.lastActivityDate || this.getTodayDateString(),
+        lastActivityDate: streak.lastActivityDate || this.getTodayDateString(),
       },
       completedAt: transactionResult.completedAt,
     };

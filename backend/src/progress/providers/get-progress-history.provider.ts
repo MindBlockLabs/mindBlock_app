@@ -3,7 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
 import { paginate } from '../../common/pagination/paginate';
-import { ProgressHistoryDto } from '../dtos/progress-history.dto';
 
 @Injectable()
 export class GetProgressHistoryProvider {

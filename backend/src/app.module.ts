@@ -40,8 +40,8 @@ import { CategoriesModule } from './categories/categories.module';
           user?: string;
           password?: string;
           name?: string;
-          autoload?: string;
-          synchronize?: string;
+          autoload?: boolean;
+          synchronize?: boolean;
         }
         const dbConfig = configService.get<DatabaseConfig>('database');
 
@@ -54,8 +54,8 @@ import { CategoriesModule } from './categories/categories.module';
           return {
             type: 'postgres',
             url: dbConfig.url,
-            autoLoadEntities: dbConfig.autoload === 'true',
-            synchronize: dbConfig.synchronize === 'true',
+            autoLoadEntities: dbConfig.autoload,
+            synchronize: dbConfig.synchronize,
           };
         }
 
@@ -67,8 +67,8 @@ import { CategoriesModule } from './categories/categories.module';
           username: dbConfig.user,
           password: dbConfig.password,
           database: dbConfig.name,
-          autoLoadEntities: dbConfig.autoload === 'true',
-          synchronize: dbConfig.synchronize === 'true',
+          autoLoadEntities: dbConfig.autoload,
+          synchronize: dbConfig.synchronize,
         };
       },
     }),
@@ -81,6 +81,7 @@ import { CategoriesModule } from './categories/categories.module';
     CommonModule,
     RedisModule,
     BlockchainModule,
+    ProgressModule,
     CategoriesModule,
   ],
   controllers: [AppController],

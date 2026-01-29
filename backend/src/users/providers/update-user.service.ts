@@ -38,8 +38,8 @@ export class UpdateUserService {
 
     try {
       return await this.userRepository.save(user);
-    } catch {
-      throw new InternalServerErrorException('Failed to update user');
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to update user ${error}`);
     }
   }
 }

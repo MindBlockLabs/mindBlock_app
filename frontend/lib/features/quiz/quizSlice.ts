@@ -75,26 +75,57 @@ function mapPuzzleToQuestion(puzzle: PuzzleResponseDto): Question {
 }
 
 export const fetchQuestions = createAsyncThunk(
-  'quiz/fetchQuestions',
-  async (category: string) => {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+  "quiz/fetchQuestions",
+  async (params: FetchQuestionsParams) => {
+    let puzzles: PuzzleResponseDto[];
 
-    return [
-      {
-        id: 'q1',
-        text: 'What is 2+2?',
-        options: ['3', '4', '5'],
-        correctAnswer: '4',
-        points: 10,
-      },
-      {
-        id: 'q2',
-        text: 'What is Next.js?',
-        options: ['DB', 'Framework', 'Language'],
-        correctAnswer: 'Framework',
-        points: 20,
-      },
-    ] as Question[];
+    if (params.type === "daily-quest") {
+      const quest = await fetchDailyQuest();
+      puzzles = quest.puzzles;
+    } else {
+      puzzles = await fetchPuzzles({
+        categoryId: params.categoryId,
+        difficulty: params.difficulty,
+      });
+    }
+
+    return puzzles.map(mapPuzzleToQuestion);
+  },
+);
+
+export const submitAnswerThunk = createAsyncThunk(
+  "quiz/submitAnswer",
+  async (
+    payload: {
+      userId: string;
+      puzzleId: string;
+      categoryId: string;
+      userAnswer: string;
+      timeSpent: number;
+    },
+    { getState },
+  ) => {
+    const state = getState() as { quiz: QuizState };
+    const currentQuestion = state.quiz.questions[state.quiz.currentIndex];
+
+    if (!currentQuestion) {
+      throw new Error("No current question");
+    }
+
+    const submitPayload: SubmitAnswerRequestDto = {
+      userId: payload.userId,
+      puzzleId: payload.puzzleId,
+      categoryId: payload.categoryId,
+      userAnswer: payload.userAnswer,
+      timeSpent: payload.timeSpent,
+    };
+
+    const result = await submitAnswerApi(submitPayload);
+
+    return {
+      ...result,
+      puzzleId: payload.puzzleId,
+    };
   },
 );
 

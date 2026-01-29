@@ -37,6 +37,4 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-bootstrap().catch((err) => {
-  console.error('Error during bootstrap:', err);
-});
+void bootstrap();
