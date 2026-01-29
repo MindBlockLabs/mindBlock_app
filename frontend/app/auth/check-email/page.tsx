@@ -1,10 +1,12 @@
 "use client";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
+import Link from "next/link";
+import Image from 'next/image';
 import { useToast } from "@/components/ui/ToastProvider";
 import { useState } from "react";
 import Button from "@/components/ui/Button";
-
+import { Mail } from "lucide-react";
 
 const CheckEmail = () => {
   const { showSuccess, showError } = useToast();
@@ -38,8 +40,7 @@ const CheckEmail = () => {
       } else {
         showError('Error', data.message || 'Failed to resend password reset link.');
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (_) {
+    } catch (error) {
       showError('Error', 'An unexpected error occurred. Please try again later.');
     } finally {
       setIsLoading(false);

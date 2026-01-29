@@ -12,7 +12,7 @@ import Button from "@/components/ui/Button";
 const ForgotPassword = () => {
   const router = useRouter();
 
-  const { showSuccess, showError } = useToast();
+  const { showSuccess, showError, showWarning, showInfo } = useToast();
     const [formData, setFormData] = useState({
       email: '',
     });
@@ -52,35 +52,25 @@ const ForgotPassword = () => {
         }
     
         try {
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ email: formData.email }),
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/forgot-password`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          );
-
+            body: JSON.stringify({ email: formData.email }),
+          });
+    
           const data = await response.json();
-
+    
           if (response.ok) {
             // Store email for resend functionality
-            sessionStorage.setItem("resetEmail", formData.email);
-            showSuccess(
-              "Success",
-              data.message || "Password reset link sent to your email.",
-            );
-            router.push("/auth/check-email");
+            sessionStorage.setItem('resetEmail', formData.email);
+            showSuccess('Success', data.message || 'Password reset link sent to your email.');
+            router.push('/auth/check-email');
           } else {
-            showError(
-              "Error",
-              data.message || "Failed to send password reset link.",
-            );
+            showError('Error', data.message || 'Failed to send password reset link.');
           }
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) {
+        } catch (error) {
           showError('Error', 'An unexpected error occurred. Please try again later.');
         } finally {
           setIsLoading(false);
