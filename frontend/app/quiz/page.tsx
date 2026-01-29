@@ -68,6 +68,13 @@ export default function QuizPage() {
       <main className="grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
           <QuizCompletionStats />
+          <LevelComplete
+            totalPts={score * 10}
+            correctAnswers={score}
+            totalQuestions={QUIZ.length}
+            timeTaken="3:10"
+            onClaim={() => alert("Points Claimed!")}
+          />
         ) : (
           <div className="w-full space-y-12">
             <h2 className="text-[28px] mt-10 font-semibold text-center">
