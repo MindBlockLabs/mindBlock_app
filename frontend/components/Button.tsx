@@ -3,7 +3,7 @@ import React from 'react';
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  variant?: 'primary' | 'secondary'| 'tertiary';
+  variant?: 'primary' | 'secondary'| 'tertiary'| 'logOut';
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -34,6 +34,11 @@ const Button: React.FC<ButtonProps> = ({
       container: 'bg-none w-10 h-5',
       wrapper: 'border-2 border-[#E6E6E64D] sm:py-2 sm:px-10',
       text: 'text-[#3B82F6]', 
+    },
+    logOut: {
+      container: 'bg-none w-10 h-5',
+      wrapper: 'border-2 border-[#F43F5E4D] sm:py-2 sm:px-10',
+      text: 'text-[#F43F5E] text-xs', 
     },
   };
 

@@ -1,10 +1,6 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-// import { Button } from "@/components/ui/button"
-// import { ProfileHeader } from "@/components/profile/profile-header"
-// import { ProfileOverview } from "@/components/profile/profile-overview"
-// import { AchievementsSection } from "@/components/profile/achievements-section"
 import Button from "@/components/Button";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverview } from "@/components/profile/ProfileOverview";
@@ -69,7 +65,6 @@ export default function ProfilePage() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          
           {/* Left Column - Profile Info & Overview */}
           <div className="flex flex-col gap-8">
             {/* Profile Header Card */}
@@ -104,11 +99,11 @@ export default function ProfilePage() {
 
             {/* Logout Button */}
             <Button
-              // variant="outline"
-              className="w-full border-primary text-primary hover:bg-primary/10 gap-2 bg-transparent"
+              variant="logOut"
+              className="w-full border-primary text-primary hover:bg-primary/10 gap-2 "
               onClick={handleLogout}
             >
-              <LogOut className="h-4 w-4" />
+              <div className="h-4 w-4" />
               Log out
             </Button>
           </div>

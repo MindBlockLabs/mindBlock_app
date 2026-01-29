@@ -1,12 +1,12 @@
-import { cn } from "@/lib/utils"
-import type { ReactNode } from "react"
+import { cn } from "@/lib/utils";
+import type { ReactNode } from "react";
 
 interface AchievementCardProps {
-  icon: ReactNode
-  title: string
-  date: string
-  badge?: string | number
-  className?: string
+  icon: ReactNode;
+  title: string;
+  date: string;
+  badge?: string | number;
+  className?: string;
 }
 
 export function AchievementCard({
@@ -19,22 +19,18 @@ export function AchievementCard({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-xl bg-card border border-border p-4 min-w-[120px]",
-        className
+        "flex flex-col items-center justify-center gap-1 rounded-xl bg-card border border-[#E6E6E64D] py-5 px-2 min-w-[100px] cursor-pointer transition-transform duration-200 hover:scale-105",
+        className,
       )}
     >
-      <div className="relative">
-        {icon}
-        {badge && (
-          <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-xs font-bold text-primary-foreground">
-            {badge}
-          </span>
-        )}
-      </div>
-      <span className="text-sm font-medium text-foreground text-center">
-        {title}
-      </span>
-      <span className="text-xs text-muted-foreground">{date}</span>
+      <div className="flex  items-center justify-center">{icon}</div>
+      {badge && (
+        <span className="text-xs flex items-center justify-center">
+          {badge}
+        </span>
+      )}
+      <span className="text-xs text-center">{title}</span>
+      <span className="text-[10px] text-muted-foreground">{date}</span>
     </div>
-  )
+  );
 }
