@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   HttpCode,
   HttpStatus,
   UnauthorizedException,
@@ -9,6 +10,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { DailyQuestService } from '../providers/daily-quest.service';
 import { DailyQuestResponseDto } from '../dtos/daily-quest-response.dto';
 import { DailyQuestStatusDto } from '../dtos/daily-quest-status.dto';
+import { CompleteDailyQuestResponseDto } from '../dtos/complete-daily-quest.dto';
 import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
 import { Auth } from '../../auth/decorators/auth.decorator';
 import { authType } from '../../auth/enum/auth-type.enum';
@@ -40,7 +42,7 @@ export class DailyQuestController {
   async getTodaysDailyQuest(
     @ActiveUser('sub') userId: string,
   ): Promise<DailyQuestResponseDto> {
-    console.log('REQUEST_USER_KEY:', request['user']); // Common key
+    console.log('REQUEST_USER_KEY:', request['user']);
     console.log('Full request keys:', Object.keys(request));
     console.log('userId:', userId);
     console.log('fullUser:', User);
@@ -75,5 +77,39 @@ export class DailyQuestController {
       throw new UnauthorizedException('User ID not found in token');
     }
     return this.dailyQuestService.getTodaysDailyQuestStatus(userId);
+  }
+
+  @Post('complete')
+  @Auth(authType.Bearer)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Complete daily quest and award bonus',
+    description:
+      'Finalizes the daily quest, awards bonus XP, and updates user streak. This endpoint is idempotent - repeated calls will not duplicate rewards.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Daily quest completed successfully',
+    type: CompleteDailyQuestResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Quest not fully completed or validation failed',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'No daily quest found for today',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - valid authentication required',
+  })
+  async completeDailyQuest(
+    @ActiveUser('sub') userId: string,
+  ): Promise<CompleteDailyQuestResponseDto> {
+    if (!userId) {
+      throw new UnauthorizedException('User ID not found in token');
+    }
+    return this.dailyQuestService.completeDailyQuest(userId);
   }
 }
