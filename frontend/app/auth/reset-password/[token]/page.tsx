@@ -1,8 +1,7 @@
 "use client";
 
 import ErrorBoundary from "@/components/ErrorBoundary";
-import Link from "next/link";
-import Image from 'next/image';
+
 import { useRouter, useParams } from "next/navigation";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -76,31 +75,39 @@ const ResetPassword = () => {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password/${token}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/reset-password/${token}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            password: formData.password,
+          }),
         },
-        body: JSON.stringify({ 
-          password: formData.password,
-        }),
-      });
+      );
 
       const data = await response.json();
 
       if (response.ok) {
-        showSuccess('Success', data.message || 'Password reset successfully.');
+        showSuccess("Success", data.message || "Password reset successfully.");
         // Clear the stored email
-        sessionStorage.removeItem('resetEmail');
-        localStorage.removeItem('resetEmail');
+        sessionStorage.removeItem("resetEmail");
+        localStorage.removeItem("resetEmail");
         // Redirect to sign in after 1.5 seconds
         setTimeout(() => {
-          router.push('/auth/signin');
+          router.push("/auth/signin");
         }, 1500);
       } else {
-        showError('Error', data.message || 'Failed to reset password. The link may have expired.');
+        showError(
+          "Error",
+          data.message ||
+            "Failed to reset password. The link may have expired.",
+        );
       }
-    } catch (error) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_) {
       showError('Error', 'An unexpected error occurred. Please try again later.');
     } finally {
       setIsLoading(false);
