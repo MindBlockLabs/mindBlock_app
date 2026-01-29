@@ -9,25 +9,20 @@ import { Wallet } from "lucide-react";
 import Image from "next/image";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useToast } from "@/components/ui/ToastProvider";
+import { useStellarWalletAuth } from "@/hooks/useStellarWalletAuth";
 
-// Proper TypeScript types for Ethereum provider
-interface EthereumProvider {
-  request: (args: {
-    method: string;
-    params?: unknown[];
-  }) => Promise<unknown>;
-  isMetaMask?: boolean;
-}
-
-declare global {
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
-}
 
 const SignUpPage = () => {
   const router = useRouter();
   const { showSuccess, showError, showWarning, showInfo } = useToast();
+  const {
+    isConnecting,
+    isSigning,
+    isLoggingIn,
+    error: walletError,
+    connectAndLogin,
+    clearError,
+  } = useStellarWalletAuth();
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
@@ -133,7 +128,7 @@ const SignUpPage = () => {
       console.log("Sending request with data:", requestBody); // Debug log
 
       const response = await fetch(
-        "https://mindblock-webaapp.onrender.com/users",
+        "http://localhost:3000/users",
         {
           method: "POST",
           headers: {
@@ -217,6 +212,8 @@ const SignUpPage = () => {
 
       if (
         data.accessToken ||
+        data.id ||
+        data.email ||
         data.message === "User created successfully" ||
         data.success
       ) {
@@ -267,250 +264,41 @@ const SignUpPage = () => {
   const handleGoogleSignUp = () => {
     showInfo("Google Sign-Up", "Redirecting to Google authentication...");
     window.location.href =
-      "https://mindblock-webaapp.onrender.com/auth/google-authentication";
+      "http://localhost:3000/auth/google-authentication";
   };
 
   const handleWalletConnect = async () => {
+    clearError();
+
     try {
-      showInfo("Wallet Connection", "Connecting to your wallet...");
+      await connectAndLogin("freighter" as any);
 
-      // Check if Web3 is available (MetaMask or similar)
-      if (typeof window.ethereum !== "undefined") {
-        // Request account access with type assertion
-        const accounts = (await window.ethereum.request({
-          method: "eth_requestAccounts",
-        })) as string[];
-        
-        const walletAddress = accounts[0];
-
-        if (walletAddress) {
-          // Generate a nonce for authentication
-          const timestamp = Date.now();
-          const randomString = Math.random().toString(36).substring(2, 15);
-          const nonce = `nonce_${timestamp}_${randomString}_${Math.random().toString(36).substring(2, 8)}`;
-
-          // Create a message for signing that includes the nonce
-          const message = `Sign this message to authenticate with Mind Block. Nonce: ${nonce}`;
-
-          try {
-            // Request signature using personal_sign with type assertion
-            const signature = (await window.ethereum.request({
-              method: "personal_sign",
-              params: [message, walletAddress],
-            })) as string;
-
-            // Get the public key (this might not be directly available from MetaMask)
-            // For now, we'll use a placeholder or try to derive it
-            let publicKey = "";
-            try {
-              // Try to get public key - this might not work with all wallets
-              const encryptionKey = (await window.ethereum.request({
-                method: "eth_getEncryptionPublicKey",
-                params: [walletAddress],
-              })) as string;
-              
-              // Convert base64 to hex format if needed
-              if (encryptionKey && !encryptionKey.startsWith("0x")) {
-                try {
-                  // Convert base64 to hex using browser's atob
-                  const binaryString = atob(encryptionKey);
-                  const bytes = new Uint8Array(binaryString.length);
-                  for (let i = 0; i < binaryString.length; i++) {
-                    bytes[i] = binaryString.charCodeAt(i);
-                  }
-                  publicKey =
-                    "0x" +
-                    Array.from(bytes)
-                      .map((b) => b.toString(16).padStart(2, "0"))
-                      .join("");
-                } catch (convError) {
-                  console.warn(
-                    "Could not convert public key format:",
-                    convError,
-                  );
-                  publicKey = encryptionKey; // Use as-is if conversion fails
-                }
-              } else {
-                publicKey = encryptionKey || "";
-              }
-            } catch (pkError) {
-              console.warn("Could not get public key:", pkError);
-              // Generate a placeholder public key in correct hex format
-              publicKey =
-                "0x" +
-                Array(128)
-                  .fill(0)
-                  .map(() => Math.floor(Math.random() * 16).toString(16))
-                  .join("");
-            }
-
-            // Format the request body to match the expected wallet login format
-            const requestBody = {
-              walletAddress: walletAddress,
-              signature: [signature], // Single signature in array format
-              nonce: nonce,
-              publicKey: publicKey,
-            };
-
-            console.log("Wallet login request:", requestBody); // Debug log
-
-            // Use the wallet login endpoint
-            const response = await fetch(
-              "https://mindblock-webaapp.onrender.com/auth/wallet-login",
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify(requestBody),
-              },
-            );
-
-            console.log("Wallet login response status:", response.status);
-
-            if (response.ok) {
-              const data = await response.json();
-              console.log("Wallet login response data:", data);
-
-              // Store token if provided
-              if (data.accessToken || data.token) {
-                try {
-                  localStorage.setItem(
-                    "accessToken",
-                    data.accessToken || data.token,
-                  );
-                } catch (storageError) {
-                  console.warn(
-                    "Could not save token to localStorage:",
-                    storageError,
-                  );
-                }
-              }
-
-              showSuccess(
-                "Wallet Connected",
-                "Successfully authenticated with wallet!",
-              );
-
-              // Redirect based on response
-              setTimeout(() => {
-                if (data.accessToken || data.token) {
-                  router.push("/dashboard");
-                } else {
-                  router.push("/auth/signin");
-                }
-              }, 1000);
-            } else {
-              // Handle wallet login errors
-              try {
-                const errorData = await response.json();
-                console.log("Wallet login error data:", errorData);
-
-                let errorMessage = "Wallet authentication failed";
-
-                // Handle nested message object
-                if (errorData.message) {
-                  if (typeof errorData.message === "string") {
-                    errorMessage = errorData.message;
-                  } else if (typeof errorData.message === "object") {
-                    // If message is an object, try to extract meaningful info
-                    if (errorData.message.error) {
-                      errorMessage = errorData.message.error;
-                    } else if (errorData.message.details) {
-                      errorMessage = errorData.message.details;
-                    } else {
-                      // Convert object to string for debugging
-                      errorMessage = JSON.stringify(errorData.message);
-                    }
-                  }
-                } else if (typeof errorData.error === "string") {
-                  errorMessage = errorData.error;
-                }
-
-                if (response.status === 404) {
-                  // Wallet not registered, suggest registration
-                  showError(
-                    "Wallet Not Registered",
-                    "This wallet is not registered. Please sign up first.",
-                  );
-                } else if (response.status === 401) {
-                  showError(
-                    "Authentication Failed",
-                    "Invalid signature. Please try again.",
-                  );
-                } else if (response.status === 400) {
-                  showError("Invalid Request", `Bad request: ${errorMessage}`);
-                } else {
-                  showError("Wallet Login Failed", errorMessage);
-                }
-              } catch (parseError) {
-                console.error(
-                  "Error parsing wallet login response:",
-                  parseError,
-                );
-                showError(
-                  "Wallet Login Failed",
-                  `Error ${response.status}: Please try again.`,
-                );
-              }
-            }
-          } catch (signError: unknown) {
-            console.error("Signature error:", signError);
-
-            // Type guard to check if it's an error with a code property
-            const isWalletError = (
-              error: unknown,
-            ): error is { code: number; message?: string } => {
-              return (
-                typeof error === "object" &&
-                error !== null &&
-                "code" in error &&
-                typeof (error as { code: unknown }).code === "number"
-              );
-            };
-
-            if (isWalletError(signError) && signError.code === 4001) {
-              showWarning(
-                "Signature Cancelled",
-                "Message signing was cancelled by user",
-              );
-            } else {
-              showError(
-                "Signature Error",
-                "Failed to sign message. Please try again.",
-              );
-            }
-          }
-        }
-      } else {
-        // No Web3 wallet detected
-        showWarning(
-          "Wallet Not Found",
-          "Please install MetaMask or another Web3 wallet to continue",
+      // Success - show toast and redirect
+      showSuccess("Login Successful", "Welcome back!");
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Wallet Connection Error:", error);
+      // Error handling with user-friendly messages
+      if (error?.code === "WALLET_NOT_INSTALLED") {
+        showError(
+          "Wallet Not Installed",
+          "Please install Freighter wallet from freighter.app to continue",
         );
-      }
-    } catch (error: unknown) {
-      console.error("Wallet connection error:", error);
-
-      // Type guard to check if it's an error with a code property
-      const isWalletError = (err: unknown): err is { code: number } => {
-        return (
-          typeof err === "object" &&
-          err !== null &&
-          "code" in err &&
-          typeof (err as { code: unknown }).code === "number"
-        );
-      };
-
-      if (isWalletError(error) && error.code === 4001) {
-        showWarning(
-          "Connection Cancelled",
-          "Wallet connection was cancelled by user",
+      } else if (error?.code === "USER_REJECTED") {
+        showWarning("Request Cancelled", "You cancelled the wallet request");
+      } else if (error?.code === "NONCE_EXPIRED") {
+        showError("Authentication Expired", "Please try again");
+      } else if (error?.code === "INVALID_SIGNATURE") {
+        showError("Authentication Failed", "Invalid signature or expired nonce");
+      } else if (error?.code === "NETWORK_ERROR") {
+        showError(
+          "Network Error",
+          "Unable to connect to server. Please try again.",
         );
       } else {
         showError(
-          "Wallet Error",
-          "Failed to connect wallet. Please try again.",
+          "Login Failed",
+          error?.message || "An unexpected error occurred",
         );
       }
     }
@@ -628,11 +416,17 @@ const SignUpPage = () => {
               <button
                 onClick={handleWalletConnect}
                 type="button"
-                disabled={isLoading}
+                disabled={isLoading || isConnecting || isSigning || isLoggingIn}
                 className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Wallet size={20} />
-                Connect Wallet
+                {isConnecting && "Connecting Wallet..."}
+                {isSigning && "Sign Message in Wallet..."}
+                {isLoggingIn && "Verifying..."}
+                {!isConnecting &&
+                  !isSigning &&
+                  !isLoggingIn &&
+                  "Connect Wallet"}
               </button>
             </div>
 
