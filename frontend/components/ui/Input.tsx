@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 
-interface InputProps {
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   type: 'text' | 'email' | 'password';
   placeholder: string;
   value: string;
@@ -18,7 +18,8 @@ const Input = ({
   value,
   onChange,
   label,
-  className = ''
+  className = '',
+  ...props
 }: InputProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -32,7 +33,7 @@ const Input = ({
   return (
     <div className={`${className}`}>
       {label && (
-        <label className="block text-sm font-medium text-[#E6E6E6CC] mb-2">
+        <label className="block text-sm font-medium text-white mb-2">
           {label}
         </label>
       )}
@@ -44,22 +45,23 @@ const Input = ({
           onChange={onChange}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          {...props}
           className={`
-            w-full h-[50px] px-[16px] py-[14px]
-            bg-[#07101D] 
-            border-[2px] rounded-[8px]
-            text-[##E6E6E6/80] text-base
-            placeholder:text-[#E6E6E666]
+            w-full h-[52px] px-[16px] py-[14px]
+            bg-[#050C16] 
+            border-[1px] rounded-xl
+            text-white text-base
+            placeholder:text-gray-400
             transition-all duration-200 ease-in-out
             focus:outline-none
-            ${isFocused 
-              ? 'border-[#3B82F6] ring-1 ring-[#3B82F6]/20' 
-              : 'border-[#E6E6E6CC]'
+            ${isFocused
+              ? 'border-[#3B82F6] ring-1 ring-[#3B82F6]/20'
+              : 'border-white/10 hover:border-white/20'
             }
             ${type === 'password' ? 'pr-12' : ''}
           `}
         />
-        
+
         {type === 'password' && (
           <button
             type="button"

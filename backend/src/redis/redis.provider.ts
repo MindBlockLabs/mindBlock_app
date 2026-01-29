@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Provider } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';

@@ -44,7 +44,7 @@ export class FindAll {
       );
 
       // users = await this.userRepository.find();
-    } catch {
+    } catch (error) {
       throw new RequestTimeoutException('Could not fetch users', {
         description: `Error connecting to database ${error}`,
       });

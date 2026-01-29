@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Global, Module, OnModuleDestroy, Inject } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { redisProvider } from './redis.provider';

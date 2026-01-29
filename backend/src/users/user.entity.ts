@@ -101,6 +101,48 @@ export class User {
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
 
+  /**
+   * Country of the user
+   */
+  @ApiProperty({ example: 'United States', required: false })
+  @Column('varchar', { length: 100, nullable: true })
+  country?: string;
+
+  /**
+   * User interests
+   */
+  @ApiProperty({ example: ['Coding', 'Design'], required: false })
+  @Column('simple-array', { nullable: true })
+  interests?: string[];
+
+  /**
+   * User occupation
+   */
+  @ApiProperty({ example: 'Software Engineer', required: false })
+  @Column('varchar', { length: 150, nullable: true })
+  occupation?: string;
+
+  /**
+   * User goals
+   */
+  @ApiProperty({ example: ['Learn NestJS', 'Build an app'], required: false })
+  @Column('simple-array', { nullable: true })
+  goals?: string[];
+
+  /**
+   * Available hours for learning
+   */
+  @ApiProperty({ example: ['09:00', '10:00'], required: false })
+  @Column('simple-array', { nullable: true })
+  availableHours?: string[];
+
+  /**
+   * User bio
+   */
+  @ApiProperty({ example: 'I am a passionate developer...', required: false })
+  @Column('text', { nullable: true })
+  bio?: string;
+
   @Column({ nullable: true })
   passwordResetToken?: string;
 
