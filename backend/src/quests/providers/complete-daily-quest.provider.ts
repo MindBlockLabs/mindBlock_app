@@ -131,7 +131,7 @@ export class CompleteDailyQuestProvider {
 
     // 7. Update streak after transaction commits
     const streak = await this.updateStreakProvider.updateStreak(
-      transactionResult.userId,
+      transactionResult.userId!,
     );
 
     this.logger.log(
