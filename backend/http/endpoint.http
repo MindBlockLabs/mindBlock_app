@@ -83,8 +83,8 @@ POST http://localhost:3000/categories
 Content-Type: application/json
 
 {
-  "name": "Logic",
-  "description": "Logic and reasoning puzzles",
+  "name": "Business",
+  "description": "Business transactions",
   "isActive": true
 }
 
