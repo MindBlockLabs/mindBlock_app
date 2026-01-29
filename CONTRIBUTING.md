@@ -27,7 +27,7 @@ npm --workspace frontend run lint
 npm --workspace backend run lint
 
 npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
-npm --workspace backend exec -- tsc --noEmit -p tsconfig.json.
+npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
 ```
 
 ## Branch Protection
