@@ -120,7 +120,7 @@ Authorization: Bearer
 ### STEP 7: Get Daily Quest Status
 ### ============================================
 GET http://localhost:3000/daily-quest/status
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
 
 ### Expected Response:
 # {
@@ -144,7 +144,7 @@ Authorization: Bearer
 ### STEP 9: Get Overall Stats
 ### ============================================
 GET http://localhost:3000/progress/stats
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
 
 ### Expected Response:
 # {
@@ -167,7 +167,7 @@ Authorization: Bearer
 ### STEP 11: Complete Daily Quest (after all puzzles done)
 ### ============================================
 POST http://localhost:3000/daily-quest/complete
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
 
 ### Expected Response:
 # {
@@ -188,7 +188,7 @@ Authorization: Bearer
 ### STEP 12: Try to complete again (idempotency test)
 ### ============================================
 POST http://localhost:3000/daily-quest/complete
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
 
 ### Should return same result, no duplicate rewards
 
