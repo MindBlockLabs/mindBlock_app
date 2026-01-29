@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { useAppDispatch, useAppSelector } from "@/lib/reduxHooks";
+import { useAppDispatch, useAppSelector } from "../lib/reduxHooks";
 import {
   fetchQuestions,
   submitAnswerThunk,
@@ -9,8 +9,8 @@ import {
   nextQuestion,
   startQuiz,
   type FetchQuestionsParams,
-} from "@/lib/features/quiz/quizSlice";
-import type { Question } from "@/lib/features/quiz/quizSlice";
+} from "../lib/features/quiz/quizSlice";
+import type { Question } from "../lib/features/quiz/quizSlice";
 
 function getUserIdFromToken(): string | null {
   if (typeof window === "undefined") {

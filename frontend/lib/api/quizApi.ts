@@ -124,7 +124,15 @@ export async function submitAnswer(
   });
 
   // The backend likely returns a ProgressCalculationResult with validation info.
-  const raw = await handleResponse<any>(response);
+  interface RawResponse {
+    validation?: {
+      isCorrect: boolean;
+      pointsEarned: number;
+    };
+    isCorrect?: boolean;
+    pointsEarned?: number;
+  }
+  const raw = await handleResponse<RawResponse>(response);
 
   const validation = raw?.validation ?? raw;
 

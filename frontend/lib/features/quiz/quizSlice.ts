@@ -5,7 +5,7 @@ import {
   submitAnswer as submitAnswerApi,
   type PuzzleResponseDto,
   type SubmitAnswerRequestDto,
-} from "@/lib/api/quizApi";
+} from "../../api/quizApi";
 
 export interface Question {
   id: string;

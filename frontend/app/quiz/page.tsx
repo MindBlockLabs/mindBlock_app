@@ -1,11 +1,11 @@
 "use client";
 import { useRef, useEffect } from "react";
 import { Nunito } from "next/font/google";
-import { useQuiz } from "@/hooks/useQuiz";
-import { useAppSelector } from "@/lib/reduxHooks";
-import { QuizHeader } from "@/components/quiz/QuizHeader";
-import { AnswerOption } from "@/components/quiz/AnswerOption";
-import { LevelComplete } from "@/components/quiz/LevelComplete";
+import { useQuiz } from "../../hooks/useQuiz";
+import { useAppSelector } from "../../lib/reduxHooks";
+import { QuizHeader } from "../../components/quiz/QuizHeader";
+import { AnswerOption } from "../../components/quiz/AnswerOption";
+import { LevelComplete } from "../../components/quiz/LevelComplete";
 
 const nunito = Nunito({
   subsets: ["latin"],
