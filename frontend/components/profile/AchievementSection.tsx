@@ -55,7 +55,7 @@ export function AchievementsSection({
         )}
       </div>
 
-      <div className="flex flex-wrap gap-4">
+      <div className="flex justify-between lg:justify-start gap-4 overflow-x-auto pb-2">
         {achievements.map((achievement) => (
           <AchievementCard
             key={achievement.id}
