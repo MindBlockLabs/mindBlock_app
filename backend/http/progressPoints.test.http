@@ -146,6 +146,19 @@ Authorization: Bearer
 GET http://localhost:3000/progress/stats
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
 
+
+### ============================================
+### Get Progress History (Paginated)
+### ============================================
+GET http://localhost:3000/progress?page=1&limit=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+
+### 6. Get Category-Specific Stats
+GET http://localhost:3000/progress/category/397b1a88-3a41-4c14-afee-20f57554368b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+
 ### Expected Response:
 # {
 #   "totalAttempts": 5,
