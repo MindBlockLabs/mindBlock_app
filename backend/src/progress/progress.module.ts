@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserProgress } from './entities/progress.entity';
 import { User } from '../users/user.entity';
-import { Puzzle } from '../puzzles/entities/puzzle.entity';
 import { Streak } from '../streak/entities/streak.entity';
 import { DailyQuest } from '../quests/entities/daily-quest.entity';
 import { ProgressController } from './controllers/progress.controller';
@@ -11,6 +10,7 @@ import { GetProgressHistoryProvider } from './providers/get-progress-history.pro
 import { GetCategoryStatsProvider } from './providers/get-category-stats.provider';
 import { GetOverallStatsProvider } from './providers/get-overall-stats.provider';
 import { ProgressCalculationProvider } from './providers/progress-calculation.provider';
+import { Puzzle } from '../puzzles/entities/puzzle.entity';
 
 
 @Module({
