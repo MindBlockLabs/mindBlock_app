@@ -13,7 +13,7 @@ export class UpdateUserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-  ) { }
+  ) {}
 
   async editUser(id: string, editUserDto: EditUserDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
