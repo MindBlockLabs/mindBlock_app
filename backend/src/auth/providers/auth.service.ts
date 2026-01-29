@@ -11,6 +11,7 @@ import { ForgotPasswordProvider } from './forgot-password.provider';
 import { ResetPasswordProvider } from './reset-password.provider';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
+import { NonceService } from './nonce.service';
 
 // interface OAuthUser {
 //   email: string;
@@ -21,11 +22,6 @@ import { ResetPasswordDto } from '../dtos/reset-password.dto';
 
 @Injectable()
 export class AuthService {
-  private nonces = new Map<
-    string,
-    { walletAddress: string; expiresAt: number; used: boolean }
-  >();
-
   constructor(
     /**
      * inject signInProvider
@@ -51,6 +47,11 @@ export class AuthService {
      *  inject resetPasswordProvider
      */
     private readonly resetPasswordProvider: ResetPasswordProvider,
+
+    /**
+     * inject nonceService
+     */
+    private readonly nonceService: NonceService,
   ) {}
 
   public async SignIn(signInDto: LoginDto) {
@@ -72,22 +73,18 @@ export class AuthService {
     const nonce = this.createSecureNonce(walletAddress);
     const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes from now
 
-    // Store nonce
-    this.nonces.set(nonce, {
-      walletAddress,
-      expiresAt,
-      used: false,
-    });
+    // Store nonce via NonceService
+    this.nonceService.storeNonce(nonce, walletAddress, expiresAt);
 
     // Clean up expired nonces periodically
-    this.cleanupExpiredNonces();
+    this.nonceService.cleanupExpiredNonces();
 
     return { nonce, expiresAt };
   }
 
   // Check nonce status (useful for debugging)
   public checkNonceStatus(nonce: string) {
-    const nonceData = this.nonces.get(nonce);
+    const nonceData = this.nonceService.getNonce(nonce);
 
     if (!nonceData) {
       return { valid: false, reason: 'Nonce not found' };
@@ -110,27 +107,7 @@ export class AuthService {
 
   // Verify and mark nonce as used (called by StellarWalletLoginProvider)
   public verifyAndUseNonce(nonce: string, walletAddress: string): void {
-    const nonceData = this.nonces.get(nonce);
-
-    if (!nonceData) {
-      throw new BadRequestException('Invalid nonce');
-    }
-
-    if (nonceData.used) {
-      throw new BadRequestException('Nonce already used');
-    }
-
-    if (Date.now() > nonceData.expiresAt) {
-      throw new BadRequestException('Nonce expired');
-    }
-
-    if (nonceData.walletAddress !== walletAddress) {
-      throw new BadRequestException('Nonce wallet address mismatch');
-    }
-
-    // Mark as used
-    nonceData.used = true;
-    this.nonces.set(nonce, nonceData);
+    this.nonceService.verifyAndUseNonce(nonce, walletAddress);
   }
 
   private createSecureNonce(walletAddress: string): string {
@@ -146,14 +123,6 @@ export class AuthService {
     return /^[GM][A-Z2-7]{55}$/.test(address);
   }
 
-  private cleanupExpiredNonces(): void {
-    const now = Date.now();
-    for (const [nonce, data] of this.nonces.entries()) {
-      if (now > data.expiresAt) {
-        this.nonces.delete(nonce);
-      }
-    }
-  }
 
   /**
    * Handles refreshing of access tokens

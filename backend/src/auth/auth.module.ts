@@ -19,6 +19,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { ForgotPasswordProvider } from './providers/forgot-password.provider';
 import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { MailService } from './providers/mail.service';
+import { NonceService } from './providers/nonce.service';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { MailService } from './providers/mail.service';
     ForgotPasswordProvider,
     ResetPasswordProvider,
     MailService,
+    NonceService,
     {
       provide: HashingProvider, // Use the abstract class as a token
       useClass: BcryptProvider, // Bind it to the concrete implementation
@@ -58,6 +60,7 @@ import { MailService } from './providers/mail.service';
     AuthService,
     HashingProvider,
     GoogleAuthenticationService,
+    NonceService,
   ],
 })
 export class AuthModule {}

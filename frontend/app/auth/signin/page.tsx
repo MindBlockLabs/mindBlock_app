@@ -9,10 +9,19 @@ import { Wallet } from 'lucide-react';
 import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
 
 const SignInPage = () => {
   const router = useRouter();
-  const { showSuccess, showError, showInfo } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
+  const {
+    isConnecting,
+    isSigning,
+    isLoggingIn,
+    error: walletError,
+    connectAndLogin,
+    clearError,
+  } = useStellarWalletAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -60,7 +69,7 @@ const SignInPage = () => {
     }
 
     try {
-      const response = await fetch('https://mindblock-webaapp.onrender.com/auth/signIn', {
+      const response = await fetch('http://localhost:3000/auth/signIn', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -147,7 +156,38 @@ const SignInPage = () => {
 
   const handleGoogleSignIn = () => {
     showInfo('Google Sign-In', 'Redirecting to Google authentication...');
-    window.location.href = "https://mindblock-webaapp.onrender.com/auth/google-authentication";
+    window.location.href = "http://localhost:3000/auth/google-authentication";
+  };
+
+  const handleWalletLogin = async () => {
+    clearError();
+
+    try {
+      await connectAndLogin('freighter' as any);
+
+      // Success - show toast and redirect
+      showSuccess('Login Successful', 'Welcome back!');
+      router.push('/dashboard');
+    } catch (error: any) {
+      console.error("Wallet Connection Error:", error);
+      // Error handling with user-friendly messages
+      if (error?.code === 'WALLET_NOT_INSTALLED') {
+        showError(
+          'Wallet Not Installed',
+          'Please install Freighter wallet from freighter.app to continue'
+        );
+      } else if (error?.code === 'USER_REJECTED') {
+        showWarning('Request Cancelled', 'You cancelled the wallet request');
+      } else if (error?.code === 'NONCE_EXPIRED') {
+        showError('Authentication Expired', 'Please try again');
+      } else if (error?.code === 'INVALID_SIGNATURE') {
+        showError('Authentication Failed', 'Invalid signature or expired nonce');
+      } else if (error?.code === 'NETWORK_ERROR') {
+        showError('Network Error', 'Unable to connect to server. Please try again.');
+      } else {
+        showError('Login Failed', error?.message || 'An unexpected error occurred');
+      }
+    }
   };
 
   return (
@@ -241,10 +281,15 @@ const SignInPage = () => {
             </button>
 
             <button
-              className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors"
+              onClick={handleWalletLogin}
+              disabled={isConnecting || isSigning || isLoggingIn}
+              className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Wallet size={20} />
-              Connect Wallet
+              {isConnecting && 'Connecting Wallet...'}
+              {isSigning && 'Sign Message in Wallet...'}
+              {isLoggingIn && 'Verifying...'}
+              {!isConnecting && !isSigning && !isLoggingIn && 'Connect Wallet'}
             </button>
           </div>
 
