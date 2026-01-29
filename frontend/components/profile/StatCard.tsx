@@ -12,14 +12,14 @@ export function StatCard({ icon, value, label, className }: StatCardProps) {
   return (
     <div
       className={cn(
-        "flex items-center gap-4 rounded-xl bg-card border border-border p-4",
+        "flex items-center rounded-xl bg-card border border-[#E6E6E64D] p-3 cursor-pointer transition-transform duration-200 hover:scale-105",
         className,
       )}
     >
-      <div className="flex-shrink-0">{icon}</div>
+      <div>{icon}</div>
       <div className="flex flex-col">
-        <span className="text-lg font-semibold text-foreground">{value}</span>
-        <span className="text-sm text-muted-foreground">{label}</span>
+        <span className="text-sm font-semibold text-foreground">{value}</span>
+        <span className="text-sm ">{label}</span>
       </div>
     </div>
   );
