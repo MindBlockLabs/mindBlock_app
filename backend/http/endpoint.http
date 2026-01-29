@@ -28,6 +28,24 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
 
 GET http://localhost:3000/puzzles/daily-quest 
 
+### Get all puzzles
+GET http://localhost:3000/puzzles
+
+### Get puzzles by category
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b
+
+### Get puzzles by difficulty
+GET http://localhost:3000/puzzles?difficulty=INTERMEDIATE
+
+### Get puzzles by category AND difficulty
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b&difficulty=INTERMEDIATE
+
+### Get puzzles with pagination
+GET http://localhost:3000/puzzles?page=1&limit=10
+
+### Get puzzles with all filters
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b&difficulty=INTERMEDIATE&page=1&limit=10
+
 
 
 
