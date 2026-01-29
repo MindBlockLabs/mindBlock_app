@@ -2,11 +2,23 @@ export interface PuzzleResponseDto {
   id: string;
   question: string;
   options: string[];
+  correctAnswer: string;  // ✅ Add this
   difficulty: string;
+  category: {              // ✅ Add full category object
+    id: string;
+    name: string;
+    description: string;
+    icon: string | null;
+    isActive: boolean;
+    createdAt: string;
+  };
   categoryId: string;
   points: number;
   timeLimit: number;
-  isCompleted: boolean;
+  explanation: string;  
+  createdAt: string; 
+  updatedAt: string;
+  isCompleted?: boolean;
 }
 
 export interface DailyQuestResponseDto {
@@ -73,7 +85,7 @@ export async function fetchDailyQuest(): Promise<DailyQuestResponseDto> {
     "Content-Type": "application/json",
     ...getAuthHeaders(),
   };
-  const response = await fetch(`${API_BASE_URL}/puzzles/daily-quest`, {
+  const response = await fetch("http://localhost:3000/puzzles/daily-quest", {
     method: "GET",
     headers,
   });

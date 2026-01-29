@@ -65,12 +65,12 @@ function mapPuzzleToQuestion(puzzle: PuzzleResponseDto): Question {
     id: puzzle.id,
     text: puzzle.question,
     options: puzzle.options,
+    correctAnswer: puzzle.correctAnswer,
     points: puzzle.points,
     categoryId: puzzle.categoryId,
     difficulty: puzzle.difficulty,
     timeLimit: puzzle.timeLimit,
     isCompleted: puzzle.isCompleted,
-    // correctAnswer will be set after submission
   };
 }
 
