@@ -160,31 +160,20 @@ export default function QuizPage() {
                 );
               })}
             </div>
-            {isSubmitted && (
-              <div className="mt-4 space-y-2">
-                {(() => {
-                  const selectedOption = question.options.find(
-                    (o) => o.id === selectedId,
-                  );
-                  const correctOption = question.options.find(
-                    (o) => o.isCorrect,
-                  );
-                  const wasCorrect = !!selectedOption?.isCorrect;
-                  return (
-                    <>
-                      {!wasCorrect && correctOption && (
-                        <div className="text-sm font-semibold text-[#14B8A6] text-center">
-                          Correct answer: {correctOption.text}
-                        </div>
-                      )}
-                      {question.explanation && (
-                        <p className="text-xs text-[#E6E6E6] text-center">
-                          {question.explanation}
-                        </p>
-                      )}
-                    </>
-                  );
-                })()}
+            {isSubmitted && submissionResult && (
+              <div className="mt-4 space-y-2 text-center">
+                <div
+                  className={`text-sm font-semibold ${
+                    submissionResult.isCorrect ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {submissionResult.isCorrect
+                    ? `Correct! +${submissionResult.pointsEarned} pts`
+                    : "Incorrect"}
+                </div>
+                <p className="text-xs text-[#E6E6E6]">
+                  Note: backend does not return the correct option, so we only highlight your selected answer.
+                </p>
               </div>
             )}
 
