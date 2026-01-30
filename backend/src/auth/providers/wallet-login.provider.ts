@@ -9,7 +9,7 @@ import * as crypto from 'crypto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { ChallengeLevel } from '../../users/enums/challengeLevel.enum';
 import { AgeGroup } from '../../users/enums/ageGroup.enum';
-import { User } from 'src/users/user.entity';
+import { User } from '../../users/user.entity';
 
 @Injectable()
 export class StellarWalletLoginProvider {
