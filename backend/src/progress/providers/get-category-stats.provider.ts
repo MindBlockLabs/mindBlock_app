@@ -2,7 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
-import { CategoryStatsDto } from '../dtos/category-stats.dto';
+
+interface CategoryStatsRaw {
+  categoryId: string;
+  totalAttempts: string;
+  correctAnswers: string;
+}
+
+interface CategoryNameRaw {
+  category_name: string;
+}
 
 @Injectable()
 export class GetCategoryStatsProvider {
@@ -16,11 +25,14 @@ export class GetCategoryStatsProvider {
       .createQueryBuilder('progress')
       .select('progress.categoryId', 'categoryId')
       .addSelect('COUNT(*)', 'totalAttempts')
-      .addSelect('SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)', 'correctAnswers')
+      .addSelect(
+        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
+        'correctAnswers',
+      )
       .where('progress.userId = :userId', { userId })
       .andWhere('progress.categoryId = :categoryId', { categoryId })
       .groupBy('progress.categoryId')
-      .getRawOne();
+      .getRawOne<CategoryStatsRaw>();
 
     if (!result) {
       return {
@@ -35,7 +47,9 @@ export class GetCategoryStatsProvider {
     const totalAttempts = parseInt(result.totalAttempts, 10) || 0;
     const correctAnswers = parseInt(result.correctAnswers, 10) || 0;
     const accuracy =
-      totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
+      totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
 
     // Get category name
     const category = await this.progressRepo
@@ -44,7 +58,7 @@ export class GetCategoryStatsProvider {
       .where('progress.categoryId = :categoryId', { categoryId })
       .select('category.name')
       .limit(1)
-      .getRawOne();
+      .getRawOne<CategoryNameRaw>();
 
     return {
       categoryId,

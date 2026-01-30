@@ -9,12 +9,24 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "password": "FatimaAminu@123"
 }
 
+GET http://localhost:3000/users
+
  
 POST http://localhost:3000/auth/signIn
 Content-Type: application/json
 {
     "email": "aminufatima@gmail.com",
     "password": "FatimaAminu@123"
+}
+
+### Submit puzzle answer (earns XP)
+POST http://localhost:3000/progress/submit
+Content-Type: application/json
+
+{
+  "userId": "1",
+  "puzzleId": "dcebf04a-542f-464d-92e4-3ad983cde9ba",
+  "answer": "42"
 }
 
 POST http://localhost:3000/auth/signIn
@@ -61,6 +73,7 @@ GET http://localhost:3000/puzzles?page=1&limit=10
 GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b&difficulty=INTERMEDIATE&page=1&limit=10
 
 
+GET http://localhost:3000/users/1/xp-level
 
 
 GET http://localhost:3000/users?limit=10&page=1
