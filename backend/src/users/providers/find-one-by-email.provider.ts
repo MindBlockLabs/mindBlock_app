@@ -44,9 +44,9 @@ export class FindOneByEmail {
 
     try {
       user = await this.userRepository.findOneBy({ email });
-    } catch (error) {
+    } catch {
       throw new RequestTimeoutException('Could not fetch user', {
-        description: `Error connecting to database ${error}`,
+        description: 'Error connecting to database',
       });
     }
 

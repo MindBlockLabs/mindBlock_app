@@ -13,13 +13,6 @@ import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { NonceService } from './nonce.service';
 
-// interface OAuthUser {
-//   email: string;
-//   username: string;
-//   picture: string;
-//   accessToken: string;
-// }
-
 @Injectable()
 export class AuthService {
   constructor(
@@ -134,7 +127,6 @@ export class AuthService {
   public refreshToken(refreshTokenDto: RefreshTokenDto) {
     return this.refreshTokensProvider.refreshTokens(refreshTokenDto);
   }
-
   public async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
     return await this.forgotPasswordProvider.forgotPassword(forgotPasswordDto);
   }
