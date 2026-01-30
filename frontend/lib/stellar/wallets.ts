@@ -1,5 +1,3 @@
-
-
 import freighterApi from '@stellar/freighter-api';
 import type { WalletType } from './types';
 import { StellarAuthError } from './types';
@@ -148,9 +146,9 @@ export async function signMessageWithWallet(
 
         if (typeof signed === 'string') {
           signature = signed;
-        } else if (signed instanceof Uint8Array || (signed && typeof (signed as any).length === 'number')) {
+        } else if (signed instanceof Uint8Array || (signed && typeof (signed as ArrayLike<number>).length === 'number')) {
           // Robust conversion for Uint8Array to base64 in browser
-          const binary = Array.from(new Uint8Array(signed as any))
+          const binary = Array.from(new Uint8Array(signed as ArrayLike<number>))
             .map(b => String.fromCharCode(b))
             .join('');
           signature = window.btoa(binary);

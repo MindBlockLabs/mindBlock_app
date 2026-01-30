@@ -116,7 +116,6 @@ export class AuthService {
     return /^[GM][A-Z2-7]{55}$/.test(address);
   }
 
-
   /**
    * Handles refreshing of access tokens
    * @param refreshTokenDto - DTO containing the refresh token

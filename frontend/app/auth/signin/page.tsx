@@ -10,6 +10,7 @@ import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
+import { WalletType } from '@/lib/stellar/types';
 
 const SignInPage = () => {
   const router = useRouter();
@@ -18,7 +19,6 @@ const SignInPage = () => {
     isConnecting,
     isSigning,
     isLoggingIn,
-    error: walletError,
     connectAndLogin,
     clearError,
   } = useStellarWalletAuth();
@@ -163,14 +163,19 @@ const SignInPage = () => {
     clearError();
 
     try {
-      await connectAndLogin('freighter' as any);
+      await connectAndLogin('freighter' as WalletType);
 
       // Success - show toast and redirect
       showSuccess('Login Successful', 'Welcome back!');
       router.push('/dashboard');
-    } catch (error: any) {
+    } catch (error) {
       console.error("Wallet Connection Error:", error);
       // Error handling with user-friendly messages
+
+      const isErrorWithCode = (e: unknown): e is { code?: string; message?: string } => {
+        return typeof e === 'object' && e !== null;
+      };
+      if (isErrorWithCode(error)) {
       if (error?.code === 'WALLET_NOT_INSTALLED') {
         showError(
           'Wallet Not Installed',
@@ -187,6 +192,7 @@ const SignInPage = () => {
       } else {
         showError('Login Failed', error?.message || 'An unexpected error occurred');
       }
+    }
     }
   };
 

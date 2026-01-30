@@ -1,9 +1,4 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import { UsersService } from '../../users/providers/users.service';
@@ -14,6 +9,7 @@ import * as crypto from 'crypto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { ChallengeLevel } from '../../users/enums/challengeLevel.enum';
 import { AgeGroup } from '../../users/enums/ageGroup.enum';
+import { User } from 'src/users/user.entity';
 
 @Injectable()
 export class StellarWalletLoginProvider {
@@ -58,13 +54,15 @@ export class StellarWalletLoginProvider {
     }
 
     // Check if user exists in db
-    let user: any = null;
+    let user: User | null = null;
     try {
       user = await this.userService.getOneByWallet(dto.walletAddress);
-    } catch (error) {
+    } catch {
       // If user doesn't exist, getOneByWallet throws UnauthorizedException
       // We catch it here so we can proceed to auto-create the user
-      console.log(`User not found for wallet ${dto.walletAddress}, will attempt auto-creation.`);
+      console.log(
+        `User not found for wallet ${dto.walletAddress}, will attempt auto-creation.`,
+      );
     }
 
     if (!user) {
@@ -138,9 +136,7 @@ export class StellarWalletLoginProvider {
           `[Signature Verification Result] FAILED for ${publicKey}`,
         );
       } else {
-        console.log(
-          `[Signature Verification Result] SUCCESS for ${publicKey}`,
-        );
+        console.log(`[Signature Verification Result] SUCCESS for ${publicKey}`);
       }
 
       return isValid;

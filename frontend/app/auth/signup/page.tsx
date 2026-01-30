@@ -10,6 +10,7 @@ import Image from "next/image";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useStellarWalletAuth } from "@/hooks/useStellarWalletAuth";
+import { WalletType } from "@/lib/stellar/types";
 
 
 const SignUpPage = () => {
@@ -271,15 +272,20 @@ const SignUpPage = () => {
     clearError();
 
     try {
-      await connectAndLogin("freighter" as any);
+      await connectAndLogin("freighter" as WalletType);
 
       // Success - show toast and redirect
       showSuccess("Login Successful", "Welcome back!");
       router.push("/dashboard");
-    } catch (error: any) {
+    } catch (error) {
       console.error("Wallet Connection Error:", error);
-      // Error handling with user-friendly messages
-      if (error?.code === "WALLET_NOT_INSTALLED") {
+      const isErrorWithCode = (e: unknown): e is { code?: string; message?: string } => {
+        return typeof e === 'object' && e !== null;
+      };
+      
+      if (isErrorWithCode(error)) {
+        if (error.code === "WALLET_NOT_INSTALLED") {
+
         showError(
           "Wallet Not Installed",
           "Please install Freighter wallet from freighter.app to continue",
@@ -301,6 +307,7 @@ const SignUpPage = () => {
           error?.message || "An unexpected error occurred",
         );
       }
+    }
     }
   };
 

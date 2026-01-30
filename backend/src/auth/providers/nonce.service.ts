@@ -7,13 +7,19 @@ export class NonceService {
     { walletAddress: string; expiresAt: number; used: boolean }
   >();
 
-  public storeNonce(nonce: string, walletAddress: string, expiresAt: number): void {
+  public storeNonce(
+    nonce: string,
+    walletAddress: string,
+    expiresAt: number,
+  ): void {
     this.nonces.set(nonce, {
       walletAddress,
       expiresAt,
       used: false,
     });
-    console.log(`[NonceService] Stored nonce: ${nonce}. Total: ${this.nonces.size}`);
+    console.log(
+      `[NonceService] Stored nonce: ${nonce}. Total: ${this.nonces.size}`,
+    );
   }
 
   public getNonce(nonce: string) {
@@ -29,12 +35,16 @@ export class NonceService {
   }
 
   public verifyAndUseNonce(nonce: string, walletAddress: string): void {
-    console.log(`[NonceService] Verifying nonce: ${nonce} for wallet ${walletAddress}`);
+    console.log(
+      `[NonceService] Verifying nonce: ${nonce} for wallet ${walletAddress}`,
+    );
     const nonceData = this.nonces.get(nonce);
 
     if (!nonceData) {
       const known = Array.from(this.nonces.keys()).join(', ');
-      console.error(`[NonceService] Nonce NOT FOUND: ${nonce}. Map size: ${this.nonces.size}. Known nonces: ${known}`);
+      console.error(
+        `[NonceService] Nonce NOT FOUND: ${nonce}. Map size: ${this.nonces.size}. Known nonces: ${known}`,
+      );
       throw new BadRequestException('Invalid nonce');
     }
 
