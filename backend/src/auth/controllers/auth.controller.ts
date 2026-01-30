@@ -130,7 +130,6 @@ export class AuthController {
   public checkNonceStatus(@Query('nonce') nonce: string) {
     return this.authservice.checkNonceStatus(nonce);
   }
-
   @Post('/forgot-password')
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 requests per minute
   @HttpCode(HttpStatus.OK)

@@ -49,7 +49,7 @@ export class PuzzlesController {
   findAll(@Query() query: PuzzleQueryDto) {
     return this.puzzlesService.findAll(query);
   }
-  
+
   @ApiOperation({ summary: 'Get a puzzle by ID' })
   @ApiResponse({
     status: 200,

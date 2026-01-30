@@ -4,6 +4,7 @@ import { MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
+import { XpLevelService } from '../../users/providers/xp-level.service';
 import { User } from '../../users/user.entity';
 import { Streak } from '../../streak/entities/streak.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
@@ -34,6 +35,7 @@ export class ProgressCalculationProvider {
     private readonly puzzleRepository: Repository<Puzzle>,
     @InjectRepository(UserProgress)
     private readonly userProgressRepository: Repository<UserProgress>,
+    private readonly xpLevelService: XpLevelService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     @InjectRepository(Streak)
@@ -229,6 +231,10 @@ export class ProgressCalculationProvider {
     // Save to database
     await this.userProgressRepository.save(userProgress);
 
+    if (validation.isCorrect && pointsEarned > 0) {
+      await this.xpLevelService.addXp(submitAnswerDto.userId, pointsEarned);
+    }
+
     return {
       userProgress,
       validation,
@@ -251,6 +257,16 @@ export class ProgressCalculationProvider {
       .where('progress.userId = :userId', { userId })
       .andWhere('progress.categoryId = :categoryId', { categoryId })
       .getRawOne<ProgressStatsRaw>();
+
+    if (!stats) {
+      return {
+        totalAttempts: 0,
+        correctAttempts: 0,
+        totalPoints: 0,
+        averageTimeSpent: 0,
+        accuracy: 0,
+      };
+    }
 
     return {
       totalAttempts: Number(stats?.totalAttempts) || 0,

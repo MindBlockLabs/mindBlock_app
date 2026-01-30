@@ -1,4 +1,3 @@
-// backend/src/quests/providers/daily-quest.service.ts
 import { Injectable } from '@nestjs/common';
 import { DailyQuestResponseDto } from '../dtos/daily-quest-response.dto';
 import { DailyQuestStatusDto } from '../dtos/daily-quest-status.dto';
