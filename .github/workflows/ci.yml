@@ -68,7 +68,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Build frontend
-        run: npm --workspace frontend run build
+        run: NEXT_TELEMETRY_DISABLED=1 NEXT_DISABLE_TURBOPACK=1 npm --workspace frontend run build
       - name: Build backend
         run: npm --workspace backend run build
 
