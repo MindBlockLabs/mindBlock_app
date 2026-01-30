@@ -101,6 +101,48 @@ export class User {
   @Column('varchar', { length: 50, nullable: true })
   ageGroup?: string;
 
+  /**
+   * Country of the user
+   */
+  @ApiProperty({ example: 'United States', required: false })
+  @Column('varchar', { length: 100, nullable: true })
+  country?: string;
+
+  /**
+   * User interests
+   */
+  @ApiProperty({ example: ['Coding', 'Design'], required: false })
+  @Column('simple-array', { nullable: true })
+  interests?: string[];
+
+  /**
+   * User occupation
+   */
+  @ApiProperty({ example: 'Software Engineer', required: false })
+  @Column('varchar', { length: 150, nullable: true })
+  occupation?: string;
+
+  /**
+   * User goals
+   */
+  @ApiProperty({ example: ['Learn NestJS', 'Build an app'], required: false })
+  @Column('simple-array', { nullable: true })
+  goals?: string[];
+
+  /**
+   * Available hours for learning
+   */
+  @ApiProperty({ example: ['09:00', '10:00'], required: false })
+  @Column('simple-array', { nullable: true })
+  availableHours?: string[];
+
+  /**
+   * User bio
+   */
+  @ApiProperty({ example: 'I am a passionate developer...', required: false })
+  @Column('text', { nullable: true })
+  bio?: string;
+
   @Column({ nullable: true })
   passwordResetToken?: string;
 
@@ -116,4 +158,39 @@ export class User {
 
   @OneToOne(() => Streak, (streak) => streak.user)
   streak: Streak;
+
+  /**
+   * Returns the total XP required to reach the next level
+   */
+  getXpNeededForNextLevel(): number {
+    const thresholds = [1000, 2500, 5000, 10000];
+    if (this.level < 5) {
+      return thresholds[this.level - 1];
+    }
+    // Level 5+: 10000 + (level - 4) * 5000
+    return 10000 + (this.level - 4) * 5000;
+  }
+
+  /**
+   * Returns the progress percentage to the next level
+   */
+  getXpProgressPercentage(): number {
+    const currentLevelXp =
+      this.level === 1 ? 0 : this.getXpNeededForLevel(this.level);
+    const nextLevelXp = this.getXpNeededForNextLevel();
+
+    if (nextLevelXp === currentLevelXp) return 100;
+
+    const progress =
+      ((this.xp - currentLevelXp) / (nextLevelXp - currentLevelXp)) * 100;
+    return Math.min(Math.max(progress, 0), 100);
+  }
+
+  private getXpNeededForLevel(level: number): number {
+    const thresholds = [0, 1000, 2500, 5000, 10000];
+    if (level <= 5) {
+      return thresholds[level - 1];
+    }
+    return 10000 + (level - 5) * 5000;
+  }
 }

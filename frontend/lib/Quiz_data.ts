@@ -2,6 +2,8 @@ export const MOCK_QUIZ = [
   {
     id: 1,
     question: "Which consensus mechanism does Bitcoin use?",
+    explanation:
+      "Bitcoin secures the network with Proof of Work, where miners solve computational puzzles to validate blocks.",
     options: [
       { id: "1a", text: "Proof of Authority", isCorrect: false },
       { id: "1b", text: "Proof of Work", isCorrect: true },
@@ -12,6 +14,8 @@ export const MOCK_QUIZ = [
   {
     id: 2,
     question: "What is the maximum supply of Bitcoin?",
+    explanation:
+      "Bitcoin’s supply is capped at 21 million coins by the protocol, preventing inflation beyond this limit.",
     options: [
       { id: "2a", text: "21 Million", isCorrect: true },
       { id: "2b", text: "100 Million", isCorrect: false },

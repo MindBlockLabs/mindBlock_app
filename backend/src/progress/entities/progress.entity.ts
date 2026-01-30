@@ -20,8 +20,8 @@ export class UserProgress {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  userId: number;
+  @Column('uuid')
+  userId: string;
 
   @ManyToOne(() => User, (user) => user.progressRecords, {
     onDelete: 'CASCADE',
@@ -29,8 +29,8 @@ export class UserProgress {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column()
-  puzzleId: number;
+  @Column('uuid')
+  puzzleId: string;
 
   @ManyToOne(() => Puzzle, (puzzle) => puzzle.progressRecords, {
     onDelete: 'CASCADE',
@@ -38,8 +38,8 @@ export class UserProgress {
   @JoinColumn({ name: 'puzzleId' })
   puzzle: Puzzle;
 
-  @Column()
-  categoryId: number;
+  @Column('uuid')
+  categoryId: string;
 
   @ManyToOne(() => Category, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'categoryId' })

@@ -1,10 +1,11 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Nunito } from "next/font/google";
-import { MOCK_QUIZ } from "@/lib/Quiz_data";
-import { QuizHeader } from "@/components/quiz/QuizHeader";
-import { AnswerOption } from "@/components/quiz/AnswerOption";
-import { LevelComplete } from "@/components/quiz/LevelComplete";
+import { useQuiz } from "../../hooks/useQuiz";
+import { useAppSelector } from "../../lib/reduxHooks";
+import { QuizHeader } from "../../components/quiz/QuizHeader";
+import { AnswerOption } from "../../components/quiz/AnswerOption";
+import { LevelComplete } from "../../components/quiz/LevelComplete";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -13,79 +14,136 @@ const nunito = Nunito({
 });
 
 export default function QuizPage() {
-  const [step, setStep] = useState(0);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [score, setScore] = useState(0);
-  const [isFinished, setIsFinished] = useState(false);
-
   const actionBtnRef = useRef<HTMLButtonElement>(null);
 
-  const question = MOCK_QUIZ[step];
+  const {
+    questions,
+    currentQuestion,
+    currentQuestionIndex,
+    selectedAnswerId,
+    isLoading,
+    isSubmitting,
+    isFinished,
+    submissionResult,
+    error,
+    score,
+    correctAnswersCount,
+    selectAnswer,
+    submitAnswer,
+    goToNextQuestion,
+  } = useQuiz({
+    autoFetch: true,
+    fetchParams: { type: "daily-quest" },
+  });
 
-  const handleSelectOption = (optionId: string) => {
-    if (isSubmitted) return;
-    setSelectedId(optionId);
-  };
+  const quizState = useAppSelector((state) => state.quiz);
+
+  const isSubmitted = submissionResult !== null;
 
   useEffect(() => {
-    if (selectedId && actionBtnRef.current) {
+    if (selectedAnswerId && actionBtnRef.current) {
       actionBtnRef.current.focus();
     }
-  }, [selectedId]);
+  }, [selectedAnswerId]);
 
-  const handleAction = () => {
+  const handleAction = async () => {
     if (!isSubmitted) {
-      setIsSubmitted(true);
-      const selectedOption = question.options.find(
-        (opt) => opt.id === selectedId,
-      );
-      if (selectedOption?.isCorrect) {
-        setScore((prev) => prev + 1);
+      try {
+        await submitAnswer();
+      } catch (err) {
+        console.error("Failed to submit answer:", err);
       }
     } else {
-      if (step < MOCK_QUIZ.length - 1) {
-        setStep(step + 1);
-        setSelectedId(null);
-        setIsSubmitted(false);
-      } else {
-        setIsFinished(true);
-      }
+      goToNextQuestion();
     }
   };
+
+  // Format time taken from total session time
+  const formatTimeTaken = () => {
+    const totalSeconds = Math.floor(quizState.totalSessionTime / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div
+        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
+      >
+        <div className="text-xl">Loading questions...</div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error && questions.length === 0) {
+    return (
+      <div
+        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
+      >
+        <div className="text-xl text-red-500">Error: {error}</div>
+      </div>
+    );
+  }
+
+  // No questions state
+  if (!currentQuestion && !isLoading) {
+    return (
+      <div
+        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
+      >
+        <div className="text-xl">No questions available</div>
+      </div>
+    );
+  }
+
+  if (!currentQuestion) {
+    return null;
+  }
 
   return (
     <div
       className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col p-6`}
     >
       {!isFinished && (
-        <QuizHeader current={step + 1} total={MOCK_QUIZ.length} />
+        <QuizHeader
+          current={currentQuestionIndex + 1}
+          total={questions.length}
+        />
       )}
 
       <main className="flex-grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
           <LevelComplete
-            totalPts={score * 10}
-            correctAnswers={score}
-            totalQuestions={MOCK_QUIZ.length}
-            timeTaken="3:10"
+            totalPts={score}
+            correctAnswers={correctAnswersCount}
+            totalQuestions={questions.length}
+            timeTaken={formatTimeTaken()}
             onClaim={() => alert("Points Claimed!")}
           />
         ) : (
           <div className="w-full space-y-12">
             <h2 className="text-[28px] mt-10 font-semibold text-center">
-              {question.question}
+              {currentQuestion.text}
             </h2>
+            <p className="text-center text-sm text-[#E6E6E6]">
+              Points: {score * 10}
+            </p>
             <div className="space-y-7">
-              {question.options.map((opt) => {
-                const isSelected = selectedId === opt.id;
+              {currentQuestion.options.map((optionText, index) => {
+                const isSelected = selectedAnswerId === optionText;
                 let state: "default" | "red" | "green" | "teal" = "default";
 
-                if (isSubmitted) {
+                if (isSubmitted && submissionResult) {
                   if (isSelected) {
-                    state = opt.isCorrect ? "green" : "red";
-                  } else if (opt.isCorrect) {
-                    state = "green";
+                    state = submissionResult.isCorrect ? "green" : "red";
+                  } else if (submissionResult.isCorrect) {
+                    // Show correct answer in green even if not selected
+                    // Note: We don't know which option is correct from backend
+                    // This would need backend to return correctAnswer in response
+                    state = "default";
                   }
                 } else if (isSelected) {
                   state = "teal";
@@ -93,28 +151,48 @@ export default function QuizPage() {
 
                 return (
                   <AnswerOption
-                    key={opt.id}
-                    text={opt.text}
+                    key={`${currentQuestion.id}-${index}`}
+                    text={optionText}
                     state={state}
-                    disabled={isSubmitted}
-                    onSelect={() => handleSelectOption(opt.id)}
+                    disabled={isSubmitted || isSubmitting}
+                    onSelect={() => selectAnswer(optionText)}
                   />
                 );
               })}
             </div>
+            {isSubmitted && submissionResult && (
+              <div className="mt-4 space-y-2 text-center">
+                <div
+                  className={`text-sm font-semibold ${
+                    submissionResult.isCorrect ? "text-emerald-400" : "text-rose-400"
+                  }`}
+                >
+                  {submissionResult.isCorrect
+                    ? `Correct! +${submissionResult.pointsEarned} pts`
+                    : "Incorrect"}
+                </div>
+                <p className="text-xs text-[#E6E6E6]">
+                  Note: backend does not return the correct option, so we only highlight your selected answer.
+                </p>
+              </div>
+            )}
 
             <button
               ref={actionBtnRef}
               onClick={handleAction}
-              disabled={selectedId === null}
+              disabled={selectedAnswerId === null || isSubmitting}
               style={{ boxShadow: `0 4px 0 0 #2663C7` }}
               className={`w-full h-[50px] bg-[#3B82F6] rounded-[8px] font-bold transition-all outline-none focus-visible:ring-4 focus-visible:ring-white/30 ${
-                selectedId
+                selectedAnswerId && !isSubmitting
                   ? "cursor-pointer opacity-100"
                   : "opacity-50 cursor-not-allowed"
               }`}
             >
-              {isSubmitted ? "Continue" : "Submit Answer"}
+              {isSubmitting
+                ? "Submitting..."
+                : isSubmitted
+                  ? "Continue"
+                  : "Submit Answer"}
             </button>
           </div>
         )}
