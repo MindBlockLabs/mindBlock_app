@@ -19,10 +19,10 @@ interface OnboardingData {
 
 interface OnboardingContextType {
     data: OnboardingData;
-    updateData: (section: keyof OnboardingData, payload: any) => void;
+    updateData: <K extends keyof OnboardingData>(section: K, payload: OnboardingData[K]) => void;
     // Specialized updaters for deep nesting
-    updateAdditionalInfo: (field: keyof OnboardingData['additionalInfo'], value: any) => void;
-    updateAvailability: (field: keyof OnboardingData['availability'], value: any) => void;
+    updateAdditionalInfo: <K extends keyof OnboardingData['additionalInfo']>(field: K, value: OnboardingData['additionalInfo'][K]) => void;
+    updateAvailability: <K extends keyof OnboardingData['availability']>(field: K, value: OnboardingData['availability'][K]) => void;
 }
 
 const defaultData: OnboardingData = {
@@ -45,14 +45,17 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
     const [data, setData] = useState<OnboardingData>(defaultData);
 
-    const updateData = (section: keyof OnboardingData, payload: any) => {
+    const updateData = <K extends keyof OnboardingData>(section: K, payload: OnboardingData[K]) => {
         setData((prev) => ({
             ...prev,
             [section]: payload,
         }));
     };
 
-    const updateAdditionalInfo = (field: keyof OnboardingData['additionalInfo'], value: any) => {
+    const updateAdditionalInfo = <K extends keyof OnboardingData['additionalInfo']>(
+        field: K, 
+        value: OnboardingData['additionalInfo'][K]
+    ) => {
         setData((prev) => ({
             ...prev,
             additionalInfo: {
@@ -62,7 +65,10 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
         }));
     };
 
-    const updateAvailability = (field: keyof OnboardingData['availability'], value: any) => {
+    const updateAvailability = <K extends keyof OnboardingData['availability']>(
+        field: K, 
+        value: OnboardingData['availability'][K]
+    ) => {
         setData((prev) => ({
             ...prev,
             availability: {

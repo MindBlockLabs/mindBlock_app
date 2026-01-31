@@ -9,6 +9,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "password": "FatimaAminu@123"
 }
 
+GET http://localhost:3000/users
 
  
 POST http://localhost:3000/auth/signIn
@@ -16,6 +17,16 @@ Content-Type: application/json
 {
     "email": "aminufatima@gmail.com",
     "password": "FatimaAminu@123"
+}
+
+### Submit puzzle answer (earns XP)
+POST http://localhost:3000/progress/submit
+Content-Type: application/json
+
+{
+  "userId": "1",
+  "puzzleId": "dcebf04a-542f-464d-92e4-3ad983cde9ba",
+  "answer": "42"
 }
 
 POST http://localhost:3000/auth/signIn
@@ -26,11 +37,43 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsI
     "password": "Password@123"
 }
 
+# forgot password
+POST http://localhost:3000/auth/forgot-password
+Content-Type: application/json
+{
+    "email": "aminubabafatima8@gmail.com"
+}
 
-GET http://localhost:3000/daily-quest 
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5MzI2NTA3LCJleHAiOjE3NjkzMzAxMDcsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.YnrXEo1yns77DQgzHR0XO8m5MfTxT_ic9U_2je9nB6M
+// reset passwors
+POST http://localhost:3000/auth/reset-password/:token
+Content-Type: application/json
+{
+    "password": "FatimaAminu@123"
+}
 
 
+GET http://localhost:3000/puzzles/daily-quest 
+
+### Get all puzzles
+GET http://localhost:3000/puzzles
+
+### Get puzzles by category
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b
+
+### Get puzzles by difficulty
+GET http://localhost:3000/puzzles?difficulty=INTERMEDIATE
+
+### Get puzzles by category AND difficulty
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b&difficulty=INTERMEDIATE
+
+### Get puzzles with pagination
+GET http://localhost:3000/puzzles?page=1&limit=10
+
+### Get puzzles with all filters
+GET http://localhost:3000/puzzles?categoryId=397b1a88-3a41-4c14-afee-20f57554368b&difficulty=INTERMEDIATE&page=1&limit=10
+
+
+GET http://localhost:3000/users/1/xp-level
 
 
 GET http://localhost:3000/users?limit=10&page=1
@@ -53,8 +96,8 @@ POST http://localhost:3000/categories
 Content-Type: application/json
 
 {
-  "name": "Logic",
-  "description": "Logic and reasoning puzzles",
+  "name": "Business",
+  "description": "Business transactions",
   "isActive": true
 }
 

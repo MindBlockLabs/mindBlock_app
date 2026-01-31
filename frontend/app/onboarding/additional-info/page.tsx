@@ -103,7 +103,7 @@ export default function AdditionalInfoPage() {
 
                 {/* Message Card */}
                 <div className="bg-[#121B29] py-4 px-8 rounded-2xl border border-[#3B82F626] mb-8">
-                    <span className="text-lg font-medium text-white">We're setting up your personalized challenges</span>
+                    <span className="text-lg font-medium text-white">We&apos;re setting up your personalized challenges</span>
                 </div>
 
                 {/* Animated Progress Bar */}

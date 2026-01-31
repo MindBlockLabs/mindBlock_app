@@ -16,6 +16,7 @@ import { UpdateUserService } from './providers/update-user.service';
 import { UserProgress } from '../progress/entities/progress.entity';
 import { Streak } from '../streak/entities/streak.entity';
 import { DailyQuest } from '../quests/entities/daily-quest.entity';
+import { XpLevelService } from './providers/xp-level.service';
 
 @Module({
   imports: [
@@ -34,7 +35,8 @@ import { DailyQuest } from '../quests/entities/daily-quest.entity';
     FindOneByGoogleIdProvider,
     CreateGoogleUserProvider,
     UpdateUserService,
+    XpLevelService,
   ],
-  exports: [UsersService, TypeOrmModule],
+  exports: [UsersService, TypeOrmModule, XpLevelService],
 })
 export class UsersModule {}
