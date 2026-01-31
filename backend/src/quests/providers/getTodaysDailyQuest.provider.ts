@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { DailyQuest } from '../entities/daily-quest.entity';
 import { DailyQuestPuzzle } from '../entities/daily-quest-puzzle.entity';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
@@ -153,15 +153,22 @@ export class GetTodaysDailyQuestProvider {
     categoryIds: string[],
     count: number,
   ): Promise<Puzzle[]> {
-    const puzzles = await this.puzzleRepository
-      .createQueryBuilder('puzzle')
-      .where('puzzle.difficulty = :difficulty', { difficulty })
-      .andWhere('puzzle.categoryId IN (:...categoryIds)', { categoryIds })
-      .orderBy('RANDOM()')
-      .limit(count)
-      .getMany();
+    const where: FindOptionsWhere<Puzzle> = {
+      difficulty,
+      categoryId: In(categoryIds),
+    };
 
-    return puzzles;
+    const puzzles = await this.puzzleRepository.find({
+      where,
+    });
+
+    // Fisher-Yates shuffle for randomized order similar to ORDER BY RANDOM()
+    for (let i = puzzles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [puzzles[i], puzzles[j]] = [puzzles[j], puzzles[i]];
+    }
+
+    return puzzles.slice(0, count);
   }
 
   private async buildQuestResponse(
