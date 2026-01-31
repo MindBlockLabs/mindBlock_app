@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
@@ -245,20 +245,14 @@ export class ProgressCalculationProvider {
    * Gets user progress statistics for a category
    */
   async getUserProgressStats(userId: string, categoryId: string) {
-    const stats = await this.userProgressRepository
-      .createQueryBuilder('progress')
-      .select('COUNT(*)', 'totalAttempts')
-      .addSelect(
-        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
-        'correctAttempts',
-      )
-      .addSelect('SUM(progress.pointsEarned)', 'totalPoints')
-      .addSelect('AVG(progress.timeSpent)', 'averageTimeSpent')
-      .where('progress.userId = :userId', { userId })
-      .andWhere('progress.categoryId = :categoryId', { categoryId })
-      .getRawOne<ProgressStatsRaw>();
+    const where: FindOptionsWhere<UserProgress> = {
+      userId,
+      categoryId,
+    };
 
-    if (!stats) {
+    const progressRecords = await this.userProgressRepository.find({ where });
+
+    if (progressRecords.length === 0) {
       return {
         totalAttempts: 0,
         correctAttempts: 0,
@@ -268,17 +262,31 @@ export class ProgressCalculationProvider {
       };
     }
 
+    const totalAttempts = progressRecords.length;
+    const correctAttempts = progressRecords.reduce(
+      (sum, record) => sum + (record.isCorrect ? 1 : 0),
+      0,
+    );
+    const totalPoints = progressRecords.reduce(
+      (sum, record) => sum + record.pointsEarned,
+      0,
+    );
+    const totalTimeSpent = progressRecords.reduce(
+      (sum, record) => sum + record.timeSpent,
+      0,
+    );
+    const averageTimeSpent =
+      totalAttempts > 0 ? totalTimeSpent / totalAttempts : 0;
+
+    const accuracy =
+      totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
+
     return {
-      totalAttempts: Number(stats?.totalAttempts) || 0,
-      correctAttempts: parseInt(stats?.correctAttempts || '0', 10),
-      totalPoints: parseInt(stats?.totalPoints || '0', 10),
-      averageTimeSpent: parseFloat(stats?.averageTimeSpent || '0'),
-      accuracy:
-        stats && Number(stats.totalAttempts) > 0
-          ? (parseInt(stats.correctAttempts, 10) /
-              Number(stats.totalAttempts)) *
-            100
-          : 0,
+      totalAttempts,
+      correctAttempts,
+      totalPoints,
+      averageTimeSpent,
+      accuracy,
     };
   }
 }
