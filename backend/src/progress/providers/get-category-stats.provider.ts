@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
 
 interface CategoryStatsRaw {
@@ -21,20 +21,17 @@ export class GetCategoryStatsProvider {
   ) {}
 
   async getCategoryStats(userId: string, categoryId: string) {
-    const result = await this.progressRepo
-      .createQueryBuilder('progress')
-      .select('progress.categoryId', 'categoryId')
-      .addSelect('COUNT(*)', 'totalAttempts')
-      .addSelect(
-        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
-        'correctAnswers',
-      )
-      .where('progress.userId = :userId', { userId })
-      .andWhere('progress.categoryId = :categoryId', { categoryId })
-      .groupBy('progress.categoryId')
-      .getRawOne<CategoryStatsRaw>();
+    const where: FindOptionsWhere<UserProgress> = {
+      userId,
+      categoryId,
+    };
 
-    if (!result) {
+    const progressRecords = await this.progressRepo.find({
+      where,
+      relations: ['category'],
+    });
+
+    if (progressRecords.length === 0) {
       return {
         categoryId,
         categoryName: '',
@@ -44,25 +41,22 @@ export class GetCategoryStatsProvider {
       };
     }
 
-    const totalAttempts = parseInt(result.totalAttempts, 10) || 0;
-    const correctAnswers = parseInt(result.correctAnswers, 10) || 0;
+    const totalAttempts = progressRecords.length;
+    const correctAnswers = progressRecords.reduce(
+      (sum, record) => sum + (record.isCorrect ? 1 : 0),
+      0,
+    );
+
     const accuracy =
       totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
-    // Get category name
-    const category = await this.progressRepo
-      .createQueryBuilder('progress')
-      .leftJoinAndSelect('progress.category', 'category')
-      .where('progress.categoryId = :categoryId', { categoryId })
-      .select('category.name')
-      .limit(1)
-      .getRawOne<CategoryNameRaw>();
+    const categoryName = progressRecords[0]?.category?.name || '';
 
     return {
       categoryId,
-      categoryName: category?.category_name || '',
+      categoryName,
       totalAttempts,
       correctAnswers,
       accuracy,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
 import { OverallStatsDto } from '../dtos/overall-stats.dto';
 
@@ -19,19 +19,13 @@ export class GetOverallStatsProvider {
   ) {}
 
   async getOverallStats(userId: string): Promise<OverallStatsDto> {
-    const result = await this.progressRepo
-      .createQueryBuilder('progress')
-      .select('COUNT(*)', 'totalAttempts')
-      .addSelect(
-        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
-        'totalCorrect',
-      )
-      .addSelect('SUM(progress.pointsEarned)', 'totalPointsEarned')
-      .addSelect('SUM(progress.timeSpent)', 'totalTimeSpent')
-      .where('progress.userId = :userId', { userId })
-      .getRawOne<OverallStatsRaw>();
+    const where: FindOptionsWhere<UserProgress> = {
+      userId,
+    };
 
-    if (!result) {
+    const progressRecords = await this.progressRepo.find({ where });
+
+    if (progressRecords.length === 0) {
       return {
         totalAttempts: 0,
         totalCorrect: 0,
@@ -41,8 +35,20 @@ export class GetOverallStatsProvider {
       };
     }
 
-    const totalAttempts = parseInt(result.totalAttempts, 10) || 0;
-    const totalCorrect = parseInt(result.totalCorrect, 10) || 0;
+    const totalAttempts = progressRecords.length;
+    const totalCorrect = progressRecords.reduce(
+      (sum, record) => sum + (record.isCorrect ? 1 : 0),
+      0,
+    );
+    const totalPointsEarned = progressRecords.reduce(
+      (sum, record) => sum + record.pointsEarned,
+      0,
+    );
+    const totalTimeSpent = progressRecords.reduce(
+      (sum, record) => sum + record.timeSpent,
+      0,
+    );
+
     const accuracy =
       totalAttempts > 0 ? Math.round((totalCorrect / totalAttempts) * 100) : 0;
 
@@ -50,8 +56,8 @@ export class GetOverallStatsProvider {
       totalAttempts,
       totalCorrect,
       accuracy,
-      totalPointsEarned: parseInt(result.totalPointsEarned, 10) || 0,
-      totalTimeSpent: parseInt(result.totalTimeSpent, 10) || 0,
+      totalPointsEarned,
+      totalTimeSpent,
     };
   }
 }

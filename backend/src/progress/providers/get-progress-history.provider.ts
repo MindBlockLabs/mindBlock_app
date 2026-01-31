@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
-import { paginate } from '../../common/pagination/paginate';
 
 @Injectable()
 export class GetProgressHistoryProvider {
@@ -16,12 +15,25 @@ export class GetProgressHistoryProvider {
     page: number = 1,
     limit: number = 10,
   ) {
-    const qb = this.progressRepo
-      .createQueryBuilder('progress')
-      .leftJoinAndSelect('progress.puzzle', 'puzzle')
-      .where('progress.userId = :userId', { userId })
-      .orderBy('progress.attemptedAt', 'DESC');
+    const where: FindOptionsWhere<UserProgress> = {
+      userId,
+    };
 
-    return paginate(qb, page, limit);
+    const [data, total] = await this.progressRepo.findAndCount({
+      where,
+      relations: ['puzzle'],
+      order: { attemptedAt: 'DESC' },
+      skip: (page - 1) * limit,
+      take: limit,
+    });
+
+    return {
+      data,
+      meta: {
+        page,
+        limit,
+        total,
+      },
+    };
   }
 }
