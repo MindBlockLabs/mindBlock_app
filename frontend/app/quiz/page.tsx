@@ -1,11 +1,14 @@
 "use client";
-import { useRef, useEffect } from "react";
+
+import { useState, useRef, useEffect } from "react";
 import { Nunito } from "next/font/google";
+import { MOCK_QUIZ } from "@/lib/Quiz_data";
+import { QuizHeader } from "@/components/quiz/QuizHeader";
+import { AnswerOption } from "@/components/quiz/AnswerOption";
+import { LevelComplete } from "@/components/quiz/LevelComplete";
+import { QuizCompletionStats } from "../../components/quiz/QuizCompletionStats";
 import { useQuiz } from "../../hooks/useQuiz";
 import { useAppSelector } from "../../lib/reduxHooks";
-import { QuizHeader } from "../../components/quiz/QuizHeader";
-import { AnswerOption } from "../../components/quiz/AnswerOption";
-import { LevelComplete } from "../../components/quiz/LevelComplete";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -114,15 +117,18 @@ export default function QuizPage() {
         />
       )}
 
-      <main className="flex-grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
+      <main className="grow flex flex-col items-center justify-center max-w-[566px] mx-auto w-full">
         {isFinished ? (
-          <LevelComplete
-            totalPts={score}
-            correctAnswers={correctAnswersCount}
-            totalQuestions={questions.length}
-            timeTaken={formatTimeTaken()}
-            onClaim={() => alert("Points Claimed!")}
-          />
+          <div>
+            <QuizCompletionStats />
+            <LevelComplete
+              totalPts={score}
+              correctAnswers={correctAnswersCount}
+              totalQuestions={questions.length}
+              timeTaken={formatTimeTaken()}
+              onClaim={() => alert("Points Claimed!")}
+            />
+          </div>
         ) : (
           <div className="w-full space-y-12">
             <h2 className="text-[28px] mt-10 font-semibold text-center">
