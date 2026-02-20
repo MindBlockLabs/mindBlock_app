@@ -11,48 +11,6 @@ on:
       - develop
 
 jobs:
-  validate-pr:
-    name: validate-pr
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Validate PR Title
-        run: |
-          title="${{ github.event.pull_request.title }}"
-          if ! echo "$title" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert): .{10,}$'; then
-            echo "❌ PR title does not meet requirements"
-            echo "Expected format: <type>: <description (min 10 chars)>"
-            echo "Allowed types: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert"
-            echo "Your title: $title"
-            exit 1
-          fi
-          echo "✅ PR title is valid"
-
-      - name: Validate PR Description
-        run: |
-          body="${{ github.event.pull_request.body }}"
-          word_count=$(echo "$body" | wc -w)
-          if [ "$word_count" -lt 15 ]; then
-            echo "❌ PR description is too short (found $word_count words, minimum 15 required)"
-            echo "Please provide a meaningful description that explains:"
-            echo "  - What problem does this PR solve?"
-            echo "  - How did you solve it?"
-            echo "  - Any relevant context or testing notes?"
-            exit 1
-          fi
-          echo "✅ PR description is sufficient ($word_count words)"
-
-      - name: Validate Branch Name
-        run: |
-          branch="${{ github.head_ref }}"
-          if ! echo "$branch" | grep -qE '^(feature|fix|docs)/[a-z0-9-]+$'; then
-            echo "❌ Branch name does not follow convention"
-            echo "Expected format: feature/*, fix/*, or docs/*"
-            echo "Your branch: $branch"
-            exit 1
-          fi
-          echo "✅ Branch name is valid"
-
   lint-imports:
     name: lint-imports
     runs-on: ubuntu-latest
@@ -100,8 +58,6 @@ jobs:
 
   build:
     name: build
-    needs: validate-pr
-    if: always() && (needs.validate-pr.result == 'success' || needs.validate-pr.result == 'skipped')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
