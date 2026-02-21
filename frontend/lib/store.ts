@@ -1,10 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import quizReducer from './features/quiz/quizSlice';
+import streakReducer from './features/streak/streakSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       quiz: quizReducer,
+      streak: streakReducer,
     },
   });
 };
