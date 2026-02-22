@@ -37,7 +37,6 @@ export function ProfileHeader({
       </div>
 
       <div className="flex flex-col items-center gap-4">
-
         {/* Avatar with edit badge */}
         <div className="relative cursor-pointer ">
           <Avatar className="size-24">
@@ -83,17 +82,16 @@ export function ProfileHeader({
         {/* Wallet ID */}
         <div className="flex items-center gap-2 text-[#8B5CF6] cursor-pointer rounded-lg bg-secondary px-3 py-2">
           <Copy className="h-4 w-4 " />
-          <span className="text-sm ">
-            {walletId}
-          </span>
+          <span className="text-sm ">{walletId}</span>
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-3 font-bold w-full text-sm max-w-xs">
+        <div className="flex  mt-5 justify-between font-bold w-full text-sm max-w-xs">
           <Button className="flex-1 gap-2 " variant="tertiary">
             <Pencil className="h-4 w-10 " />
             Edit Profile
           </Button>
+
           <Button type="button" variant="tertiary" className="px-2">
             <Share2 className="h-4 w-4" />
             <span className="sr-only">Share profile</span>

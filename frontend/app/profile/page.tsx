@@ -65,8 +65,9 @@ export default function ProfilePage() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          
           {/* Left Column - Profile Info & Overview */}
-          <div className="flex flex-col gap-8">
+          <div className=" gap-8">
             {/* Profile Header Card */}
             <div className="rounded-2xl bg-card">
               <ProfileHeader

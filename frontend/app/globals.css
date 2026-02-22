@@ -43,7 +43,7 @@ body {
   font-family: "Roboto", sans-serif;
 }
 
-/* Toast animations… (leave your keyframes below here) */
+/* Toast animations */
 @keyframes slide-in-from-right {
   from {
     transform: translateX(100%);
@@ -54,4 +54,95 @@ body {
     opacity: 1;
   }
 }
-/* ... rest of animations unchanged ... */
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-in {
+  animation: slide-in-from-right 0.3s ease-out;
+}
+
+.slide-in-from-right-full {
+  animation: slide-in-from-right 0.3s ease-out;
+}
+
+/* Level Complete Animations */
+@keyframes bounce-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-top {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-from-bottom {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 2s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-slide-in-from-top {
+  animation: slide-in-from-top 0.7s ease-out forwards;
+}
+
+.animate-slide-in-from-bottom {
+  animation: slide-in-from-bottom 0.5s ease-out forwards;
+}
+
+.animate-zoom-in {
+  animation: zoom-in 0.5s ease-out forwards;
+}

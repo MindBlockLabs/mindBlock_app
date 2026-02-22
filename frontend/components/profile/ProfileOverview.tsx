@@ -41,7 +41,7 @@ export function ProfileOverview({
   ] as const;
 
   return (
-    <section className="w-full">
+    <section className="w-full mt-8">
       <h3 className="mb-4 text-lg font-semibold text-foreground">Overview</h3>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
