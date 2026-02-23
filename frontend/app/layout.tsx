@@ -4,6 +4,7 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import StoreProvider from "@/providers/storeProvider";
 import ClientLayout from "@/components/ClientLayout";
 import CompletionFeatureProvider from "@/providers/CompletionFeatureProvider";
+import DashboardFeatureProvider from "@/providers/DashboardFeatureProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -33,11 +34,13 @@ export default function RootLayout({
       >
         <StoreProvider>
           <ToastProvider>
-            <CompletionFeatureProvider>
-              <ClientLayout>
-                {children}
-              </ClientLayout>
-            </CompletionFeatureProvider>
+            <DashboardFeatureProvider>
+              <CompletionFeatureProvider>
+                <ClientLayout>
+                  {children}
+                </ClientLayout>
+              </CompletionFeatureProvider>
+            </DashboardFeatureProvider>
           </ToastProvider>
         </StoreProvider>
       </body>

@@ -5,33 +5,20 @@ import DailyQuestCard from "@/components/dashboard/DailyQuestCard";
 import CategoryCard from "@/components/dashboard/CategoryCard";
 import Image from "next/image";
 import { Flame, Gem, User } from "lucide-react";
+import { useDashboard } from "@/features/dashboard";
 
 const Dashboard = () => {
   const router = useRouter();
+  const { data, isLoading, error } = useDashboard();
 
-  const categories = [
-    {
-      icon: "🧩",
-      name: "Puzzles",
-      description: "Pattern Recognition",
-      userLevel: "Level 5",
-      slug: "puzzles",
-    },
-    {
-      icon: "💻",
-      name: "Coding",
-      description: "Algorithm and Data Structures",
-      userLevel: "Level 2",
-      slug: "coding",
-    },
-    {
-      icon: "⛓️",
-      name: "Blockchain",
-      description: "Crypto & Defi Concepts",
-      userLevel: "Level 2",
-      slug: "blockchain",
-    },
-  ];
+  // Get stats from context or use defaults
+  const stats = data?.stats;
+  const streak = stats?.streak ?? 0;
+  const points = stats?.points ?? 0;
+  const dailyQuestProgress = stats?.dailyQuestProgress ?? { completed: 0, total: 5 };
+
+  // Get categories from context or use empty array
+  const categories = data?.categories ?? [];
 
   return (
     <div className="min-h-screen w-full bg-[#0A0F1A] text-slate-100">
@@ -56,13 +43,13 @@ const Dashboard = () => {
             <div className="flex items-center gap-2 text-amber-300">
               <Flame className="h-4 w-4" />
               <span className="text-slate-200 md:inline hidden">
-                3 Day Streak
+                {streak} Day Streak
               </span>
             </div>
             <div className="flex items-center gap-2 text-blue-300">
               <Gem className="h-4 w-4" />
               <span className="text-slate-200 md:inline hidden">
-                1.1K Points
+                {points} Points
               </span>
             </div>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700/70 text-slate-100">
@@ -74,36 +61,53 @@ const Dashboard = () => {
       </header>
 
       <main className="mx-auto w-full max-w-6xl px-4 pt-20 pb-8 sm:max-w-6xl sm:px-6">
+        {isLoading && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-slate-400">Loading dashboard...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="flex items-center justify-center py-8">
+            <div className="text-red-400">Error: {error}</div>
+          </div>
+        )}
+
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-6 text-xs text-slate-300">
             <div className="flex items-center gap-2">
               <Flame className="h-4 w-4 text-amber-300" />
-              <span>3 Day Streak</span>
+              <span>{streak} Day Streak</span>
             </div>
             <div className="flex items-center gap-2">
               <Gem className="h-4 w-4 text-blue-300" />
-              <span>1.1K Points</span>
+              <span>{points} Points</span>
             </div>
           </div>
           <DailyQuestCard
             title="Daily Quest"
-            questionCount={5}
-            progressCurrent={2}
-            progressTotal={5}
+            questionCount={dailyQuestProgress.total}
+            progressCurrent={dailyQuestProgress.completed}
+            progressTotal={dailyQuestProgress.total}
           />
         </div>
 
         <section className="mt-10">
           <h2 className="text-base font-semibold text-white">Categories</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+            {categories.length === 0 && !isLoading && (
+              <div className="col-span-full text-center text-slate-400 py-4">
+                No categories available
+              </div>
+            )}
             {categories.map((category) => (
               <CategoryCard
-                key={category.slug}
-                icon={category.icon}
+                key={category.id}
+                icon={category.icon ?? "🧩"}
                 name={category.name}
-                description={category.description}
-                userLevel={category.userLevel}
-                onClick={() => router.push(`/categories/${category.slug}`)}
+                description={category.description ?? ""}
+                userLevel="Level 1"
+                onClick={() => router.push(`/categories/${category.id}`)}
               />
             ))}
           </div>
