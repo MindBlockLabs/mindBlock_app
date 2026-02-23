@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useState } from "react";
 import Button from "@/components/ui/Button";

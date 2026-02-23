@@ -7,7 +7,7 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Wallet } from 'lucide-react';
 import Image from 'next/image';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/error/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
 import { useAuth } from '@/hooks/useAuth';
