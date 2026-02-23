@@ -10,6 +10,7 @@ import Image from 'next/image';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
 import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { WalletType } from '@/lib/stellar/types';
 
 const SignInPage = () => {
@@ -22,6 +23,7 @@ const SignInPage = () => {
     connectAndLogin,
     clearError,
   } = useStellarWalletAuth();
+  const { loginSuccess, loginFailure, setLoading } = useAuth();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -47,11 +49,13 @@ const SignInPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoading(true);
 
     // Validate email before submission
     if (!validateEmail(formData.username)) {
       showError('Invalid Email', 'Please enter a valid email address');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
@@ -59,12 +63,14 @@ const SignInPage = () => {
     if (!formData.username.trim()) {
       showError('Email Required', 'Please enter your email address');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
     if (!formData.password.trim()) {
       showError('Password Required', 'Please enter your password');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
@@ -88,41 +94,58 @@ const SignInPage = () => {
           if (response.status === 401) {
             const errorMsg = 'Invalid email or password.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 404) {
             const errorMsg = 'Account not found.';
             showError('Account Not Found', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 400) {
             const errorMsg = errorData.message || 'Invalid input.';
             showError('Invalid Input', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status >= 500) {
             const errorMsg = 'Server error. Please try again later.';
             showError('Server Error', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else {
             const errorMsg = errorData.message || 'Login failed. Please try again.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           }
         } catch {
           // If response isn't JSON, use status text or default message
           if (response.status === 401) {
             const errorMsg = 'Invalid email or password.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 404) {
             const errorMsg = 'Account not found.';
             showError('Account Not Found', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else {
             const errorMsg = `Login failed: ${response.statusText || 'Please try again.'}`;
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           }
         }
         setIsLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -133,24 +156,39 @@ const SignInPage = () => {
         // Store token in localStorage
         localStorage.setItem('accessToken', data.accessToken);
         
+        // Update Redux state
+        const user = {
+          id: data.user?.id || formData.username,
+          email: formData.username,
+          username: data.user?.username || formData.username.split('@')[0],
+        };
+        
+        loginSuccess(user, data.accessToken);
+        
         // Show success toast
         showSuccess('Login Successful', 'Welcome back!');
         setIsLoading(false);
+        setLoading(false);
         
         // Redirect to dashboard
         router.push('/dashboard');
       } else {
         const errorMsg = 'Invalid response from server. Please try again.';
         showError('Invalid Response', errorMsg);
+        loginFailure(errorMsg);
         setIsLoading(false);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Sign in error:', error);
       const errorMsg = 'Network error.';
       showError('Network Error', errorMsg);
+      loginFailure(errorMsg);
       setIsLoading(false);
+      setLoading(false);
     } finally {
       setIsLoading(false);
+      setLoading(false);
     }
   };
 

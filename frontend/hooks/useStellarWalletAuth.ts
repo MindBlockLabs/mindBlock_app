@@ -6,10 +6,13 @@ import type { WalletType, WalletAuthState } from '../lib/stellar/types';
 import { StellarAuthError } from '../lib/stellar/types';
 import { connectWallet, signMessageWithWallet } from '../lib/stellar/wallets';
 import { fetchNonce, submitWalletLogin } from '../lib/stellar/api';
+import { useAppDispatch } from '../lib/reduxHooks';
+import { walletLoginSuccess, walletLoginFailure } from '../lib/features/auth/authSlice';
 
 const AUTH_MESSAGE = 'Sign this message to authenticate with Mindblock.';
 
 export function useStellarWalletAuth() {
+  const dispatch = useAppDispatch();
   const [state, setState] = useState<WalletAuthState>({
     isConnecting: false,
     isSigning: false,
@@ -112,6 +115,9 @@ export function useStellarWalletAuth() {
         // Step 5: Store JWT token
         localStorage.setItem('accessToken', loginResponse.accessToken);
 
+        // Update Redux state
+        dispatch(walletLoginSuccess({ walletAddress, token: loginResponse.accessToken }));
+
         setState((prev) => ({
           ...prev,
           isLoggingIn: false,
@@ -122,6 +128,10 @@ export function useStellarWalletAuth() {
         return loginResponse.accessToken;
       } catch (error) {
         setError(error);
+        
+        // Update Redux state with failure
+        const errorMessage = error instanceof Error ? error.message : 'Authentication failed';
+        dispatch(walletLoginFailure(errorMessage));
 
         setState((prev) => ({
           ...prev,
@@ -142,6 +152,10 @@ export function useStellarWalletAuth() {
    */
   const logout = useCallback(() => {
     localStorage.removeItem('accessToken');
+    
+    // Redux state will be cleared by the auth slice logout action
+    // This hook maintains its own state for UI purposes
+    
     setState({
       isConnecting: false,
       isSigning: false,
