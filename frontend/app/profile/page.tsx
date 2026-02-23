@@ -6,7 +6,6 @@
 
 
 
-import { LogOut } from "lucide-react";
 import Button from "@/components/Button";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverview } from "@/components/profile/ProfileOverview";

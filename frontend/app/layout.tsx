@@ -1,4 +1,4 @@
-import { Poppins, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import StoreProvider from "@/providers/storeProvider";
@@ -7,12 +7,6 @@ import CompletionFeatureProvider from "@/providers/CompletionFeatureProvider";
 import DashboardFeatureProvider from "@/providers/DashboardFeatureProvider";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { NetworkStatusProvider } from "@/providers/NetworkStatusProvider";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"], 
-  variable: "--font-poppins",
-});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

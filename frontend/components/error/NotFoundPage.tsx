@@ -30,10 +30,10 @@ const NotFoundPage = () => {
           </div>
           <h1 className="text-3xl font-bold text-purple-400 mb-4">Page Not Found</h1>
           <p className="text-gray-300 mb-2">
-            Oops! The page you're looking for doesn't exist.
+            {`Oops! The page you're looking for doesn't exist.`}
           </p>
           <p className="text-gray-400 text-sm">
-            It might have been moved, deleted, or the URL might be incorrect.
+            {`It might have been moved, deleted, or the URL might be incorrect.`}
           </p>
         </div>
 

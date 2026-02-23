@@ -21,13 +21,6 @@ export interface ProgressCalculationResult {
   validation: AnswerValidationResult;
 }
 
-interface ProgressStatsRaw {
-  totalAttempts: string;
-  correctAttempts: string;
-  totalPoints: string;
-  averageTimeSpent: string;
-}
-
 @Injectable()
 export class ProgressCalculationProvider {
   constructor(

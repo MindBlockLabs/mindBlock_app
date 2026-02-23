@@ -33,7 +33,7 @@ const initialState: AuthState = {
 // Async thunks
 export const loginStart = createAsyncThunk(
   'auth/loginStart',
-  async (_, { rejectWithValue }) => {
+  async () => {
     // This is a placeholder for future email/password login
     // For now, this will be used with wallet authentication
     return null;
@@ -52,7 +52,7 @@ export const restoreSession = createAsyncThunk(
       // TODO: Validate token with backend and fetch user data
       // For now, just return the token
       return { token };
-    } catch (error) {
+    } catch {
       localStorage.removeItem('accessToken');
       return rejectWithValue('Session expired');
     }
@@ -69,7 +69,7 @@ export const refreshToken = createAsyncThunk(
         throw new Error('No token to refresh');
       }
       return { token };
-    } catch (error) {
+    } catch {
       localStorage.removeItem('accessToken');
       return rejectWithValue('Failed to refresh token');
     }

@@ -4,9 +4,7 @@ import { Streak } from '../entities/streak.entity';
 
 @Injectable()
 export class StreaksService {
-  constructor(
-    private readonly updateStreakProvider: UpdateStreakProvider,
-  ) {}
+  constructor(private readonly updateStreakProvider: UpdateStreakProvider) {}
 
   /**
    * Get user's current streak

@@ -20,7 +20,6 @@ const SignUpPage = () => {
     isConnecting,
     isSigning,
     isLoggingIn,
-    error: walletError,
     connectAndLogin,
     clearError,
   } = useStellarWalletAuth();

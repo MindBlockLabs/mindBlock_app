@@ -3,16 +3,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
 
-interface CategoryStatsRaw {
-  categoryId: string;
-  totalAttempts: string;
-  correctAnswers: string;
-}
-
-interface CategoryNameRaw {
-  category_name: string;
-}
-
 @Injectable()
 export class GetCategoryStatsProvider {
   constructor(
