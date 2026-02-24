@@ -109,8 +109,9 @@ export const DashboardProvider: React.FC<DashboardProviderProps> = ({
         stats,
         categories,
       });
-    } catch (err: any) {
-      setError(err.message || "Failed to fetch dashboard data");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch dashboard data";
+      setError(errorMessage);
       // Set default data on error
       setData({
         stats: defaultStats,

@@ -1,6 +1,6 @@
 // Error logging utility for the mindBlock app
 export class ErrorLogger {
-  static logError(error: Error, context?: string, extraData?: Record<string, any>) {
+  static logError(error: Error, context?: string, extraData?: Record<string, unknown>) {
     // In development, always log to console
     if (process.env.NODE_ENV === 'development') {
       console.group('Error Logger');
@@ -35,13 +35,13 @@ export class ErrorLogger {
     );
   }
 
-  static logNetworkError(error: any, context?: string) {
+  static logNetworkError(error: unknown, context?: string) {
     this.logError(
-      new Error(`Network Error: ${error?.message || 'Unknown network error'}`),
+      new Error(`Network Error: ${error instanceof Error ? error.message : 'Unknown network error'}`),
       context,
       { 
-        errorType: error?.constructor?.name,
-        details: error?.toString?.() || error
+        errorType: error instanceof Error ? error.constructor?.name : typeof error,
+        details: error instanceof Error ? error.toString?.() : String(error)
       }
     );
   }

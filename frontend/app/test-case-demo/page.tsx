@@ -49,17 +49,15 @@ const TestCaseDemoPage: React.FC = () => {
         <div className="bg-gray-900 rounded-xl p-6 shadow-lg">
           <h2 className="text-lg font-semibold text-gray-200 mb-4">Challenge Solution</h2>
           
-          {/* Mock code editor */}
           <div className="bg-gray-850 border border-gray-700 rounded-md p-4 mb-6 min-h-[200px]">
             <div className="font-mono text-sm text-gray-300">
-              <div className="mb-2">// Your solution here...</div>
-              <div>function reverseWords(str) {'{'}</div>
-              <div className="ml-4">return str.trim().split(/\s+/).reverse().join(' ');</div>
-              <div>{'}'}</div>
+              <div className="mb-2">{`// Your solution here...`}</div>
+              <div>{`function reverseWords(str) {`}</div>
+              <div className="ml-4">{`return str.trim().split(/\\s+/).reverse().join(' ');`}</div>
+              <div>{`}`}</div>
             </div>
           </div>
           
-          {/* Test Case Panel */}
           <div>
             <h3 className="text-md font-medium text-gray-300 mb-3">Test Cases</h3>
             <TestCasePanel
@@ -73,8 +71,8 @@ const TestCaseDemoPage: React.FC = () => {
         <div className="mt-8 text-gray-400 text-sm">
           <p>Demo showing the test case panel with:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li>Case 1: Success state (green checkmark + "Correct!")</li>
-            <li>Case 2: Error state (red X + "Wrong!" + error message)</li>
+            <li>{`Case 1: Success state (green checkmark + "Correct!")`}</li>
+            <li>{`Case 2: Error state (red X + "Wrong!" + error message)`}</li>
             <li>Case 3: Pending state (no validation status)</li>
             <li>Tab navigation with keyboard support</li>
             <li>Expand/collapse functionality</li>

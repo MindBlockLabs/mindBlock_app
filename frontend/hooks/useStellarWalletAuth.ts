@@ -9,8 +9,6 @@ import { fetchNonce, submitWalletLogin } from '../lib/stellar/api';
 import { useAppDispatch } from '../lib/reduxHooks';
 import { walletLoginSuccess, walletLoginFailure } from '../lib/features/auth/authSlice';
 
-const AUTH_MESSAGE = 'Sign this message to authenticate with Mindblock.';
-
 export function useStellarWalletAuth() {
   const dispatch = useAppDispatch();
   const [state, setState] = useState<WalletAuthState>({
@@ -144,7 +142,7 @@ export function useStellarWalletAuth() {
         throw error;
       }
     },
-    [clearError, setError]
+    [clearError, setError, dispatch]
   );
 
   /**

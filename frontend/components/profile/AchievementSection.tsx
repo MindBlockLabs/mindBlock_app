@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { AchievementCard } from "./AchievementCard";
 
 interface Achievement {
@@ -26,9 +27,11 @@ const iconSrcMap: Record<AchievementIcon, string> = {
 
 function AchievementIconImg({ name }: { name: AchievementIcon }) {
   return (
-    <img
+    <Image
       src={iconSrcMap[name]}
       alt={name}
+      width={48}
+      height={48}
       className="h-12 w-12"
       loading="lazy"
     />
