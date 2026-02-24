@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 import { DailyQuest } from '../entities/daily-quest.entity';
 import { DailyQuestStatusDto } from '../dtos/daily-quest-status.dto';
 import { GetTodaysDailyQuestProvider } from './getTodaysDailyQuest.provider';
-import { getDateString } from 'src/shared/utils/date.util';
+import { getDateString } from '../../shared/utils/date.util';
 
 /**
  * Provider for fetching the status of today's Daily Quest.

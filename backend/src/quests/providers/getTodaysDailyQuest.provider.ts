@@ -10,7 +10,7 @@ import { User } from '../../users/user.entity';
 import { DailyQuestResponseDto } from '../dtos/daily-quest-response.dto';
 import { PuzzleResponseDto } from '../dtos/puzzle-response.dto';
 import { PuzzleDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
-import { getDateString } from 'src/shared/utils/date.util';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class GetTodaysDailyQuestProvider {

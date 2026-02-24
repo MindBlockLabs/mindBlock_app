@@ -2,7 +2,7 @@ import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Streak } from '../entities/streak.entity';
-import { getDateString } from 'src/shared/utils/date.util';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class UpdateStreakProvider {

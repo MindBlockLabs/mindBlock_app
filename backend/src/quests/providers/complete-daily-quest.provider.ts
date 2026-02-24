@@ -10,7 +10,7 @@ import { DailyQuest } from '../entities/daily-quest.entity';
 import { User } from '../../users/user.entity';
 import { UpdateStreakProvider } from '../../streak/providers/update-streak.provider';
 import { CompleteDailyQuestResponseDto } from '../dtos/complete-daily-quest.dto';
-import { getDateString } from 'src/shared/utils/date.util';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class CompleteDailyQuestProvider {
