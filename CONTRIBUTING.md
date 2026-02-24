@@ -34,7 +34,6 @@ npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
 main and develop require status checks: lint-imports, build, type-check.
 Require branches to be up-to-date before merging.
 
-
 ## Pull Request Standards
 
 To maintain a clean commit history and make reviews efficient, all pull requests must meet the following requirements:
