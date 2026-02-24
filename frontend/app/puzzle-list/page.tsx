@@ -184,6 +184,8 @@ function PuzzleListContent() {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
+export const dynamic = 'force-dynamic';
+
 export default function PuzzleListPage() {
   return (
     <div className="min-h-screen w-full bg-[#0A0F1A] text-slate-100">
