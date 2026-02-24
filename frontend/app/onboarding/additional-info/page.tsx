@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import Button from '@/components/Button';
 import { useOnboarding } from '../OnboardingContext';
 import Image from 'next/image';
+import { useUpdateUserProfile } from '@/hooks/useUpdateUserProfile';
+import { useAuth } from '@/hooks/useAuth';
+import { mapChallengeLevel, mapChallengeType, mapReferralSource, mapAgeGroup } from '@/lib/utils/onboardingMapper';
 
 // Step 3a: How did you hear about Block Mind? (Selection)
 const referralSources = [
@@ -32,11 +35,14 @@ const ageRanges = [
 
 export default function AdditionalInfoPage() {
     const router = useRouter();
-    const { updateAdditionalInfo } = useOnboarding();
+    const { data, updateData, resetData } = useOnboarding();
+    const { updateProfile, isLoading, error, clearError } = useUpdateUserProfile();
+    const { isAuthenticated } = useAuth();
     const [step, setStep] = useState<'referral' | 'age'>('referral');
     const [selectedSource, setSelectedSource] = useState<string | null>(null);
     const [selectedAge, setSelectedAge] = useState<string | null>(null);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [loadingProgress, setLoadingProgress] = useState(0);
+    const [showError, setShowError] = useState(false);
 
     const handleSourceSelect = (source: string) => {
         setSelectedSource(source);
@@ -48,46 +54,78 @@ export default function AdditionalInfoPage() {
 
     const handleContinueFromReferral = () => {
         if (selectedSource) {
-            updateAdditionalInfo('country', selectedSource);
+            updateData('referralSource', selectedSource);
             setStep('age');
         }
     };
 
-    const handleContinueFromAge = () => {
-        if (selectedAge) {
-            updateAdditionalInfo('occupation', selectedAge); // Storing age
-            setIsSubmitting(true);
+    const handleContinueFromAge = async () => {
+        if (!selectedAge) return;
+
+        // Check authentication
+        if (!isAuthenticated) {
+            setShowError(true);
+            return;
+        }
+
+        updateData('ageGroup', selectedAge);
+
+        // Prepare data for API with proper enum mapping
+        const profileData = {
+            challengeLevel: mapChallengeLevel(data.challengeLevel),
+            challengeTypes: data.challengeTypes.map(mapChallengeType),
+            referralSource: mapReferralSource(selectedSource || data.referralSource),
+            ageGroup: mapAgeGroup(selectedAge),
+        };
+
+        try {
+            await updateProfile(profileData);
+            
+            // Reset onboarding data after successful save
+            resetData();
+            
+            // Redirect to dashboard
+            router.push('/dashboard');
+        } catch (err) {
+            setShowError(true);
         }
     };
 
-    const [loadingProgress, setLoadingProgress] = useState(0);
+    const handleRetry = () => {
+        setShowError(false);
+        clearError();
+    };
 
     // Handle loading animation when submitting
     React.useEffect(() => {
-        if (!isSubmitting) return;
+        if (!isLoading) {
+            setLoadingProgress(0);
+            return;
+        }
 
         const interval = setInterval(() => {
             setLoadingProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    return 100;
+                if (prev >= 90) {
+                    return 90; // Stop at 90% until actual completion
                 }
                 return prev + 2;
             });
         }, 50);
 
-        const timeout = setTimeout(() => {
-            router.push('/dashboard');
-        }, 2700);
-
         return () => {
             clearInterval(interval);
-            clearTimeout(timeout);
         };
-    }, [isSubmitting, router]);
+    }, [isLoading]);
+
+    // Complete progress bar on success
+    React.useEffect(() => {
+        if (!isLoading && loadingProgress > 0 && !error) {
+            setLoadingProgress(100);
+        }
+    }, [isLoading, loadingProgress, error]);
 
     // Loading screen with animated progress
-    if (isSubmitting) {
+    if (isLoading) {
         return (
             <div className="min-h-screen bg-[#020817] text-white flex flex-col items-center justify-center p-6 text-center">
                 {/* Puzzle Icon */}
@@ -103,7 +141,7 @@ export default function AdditionalInfoPage() {
 
                 {/* Message Card */}
                 <div className="bg-[#121B29] py-4 px-8 rounded-2xl border border-[#3B82F626] mb-8">
-                    <span className="text-lg font-medium text-white">We&apos;re setting up your personalized challenges</span>
+                    <span className="text-lg font-medium text-white">Preparing your account...</span>
                 </div>
 
                 {/* Animated Progress Bar */}
@@ -115,6 +153,49 @@ export default function AdditionalInfoPage() {
                         />
                     </div>
                     <span className="text-white font-medium text-sm w-12">{loadingProgress}%</span>
+                </div>
+            </div>
+        );
+    }
+
+    // Error screen
+    if (showError) {
+        return (
+            <div className="min-h-screen bg-[#020817] text-white flex flex-col items-center justify-center p-6 text-center">
+                {/* Error Icon */}
+                <div className="mb-6">
+                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                    </div>
+                </div>
+
+                {/* Error Message */}
+                <div className="bg-[#121B29] py-4 px-8 rounded-2xl border border-red-500/20 mb-8 max-w-md">
+                    <h3 className="text-lg font-semibold text-white mb-2">Something went wrong</h3>
+                    <p className="text-sm text-slate-300">
+                        {error || 'Unable to save your profile. Please try again.'}
+                    </p>
+                </div>
+
+                {/* Retry Button */}
+                <div className="w-full max-w-md space-y-3">
+                    <Button
+                        variant="primary"
+                        onClick={handleRetry}
+                        className="w-full"
+                    >
+                        Try Again
+                    </Button>
+                    <button
+                        onClick={() => router.push('/dashboard')}
+                        className="w-full text-slate-400 hover:text-white transition-colors text-sm"
+                    >
+                        Skip for now
+                    </button>
                 </div>
             </div>
         );
