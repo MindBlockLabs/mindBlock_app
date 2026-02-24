@@ -41,6 +41,7 @@ export class DailyQuestController {
   })
   async getTodaysDailyQuest(
     @ActiveUser('sub') userId: string,
+    userTimeZone: string,
   ): Promise<DailyQuestResponseDto> {
     console.log('REQUEST_USER_KEY:', request['user']);
     console.log('Full request keys:', Object.keys(request));
@@ -50,7 +51,7 @@ export class DailyQuestController {
     if (!userId) {
       throw new UnauthorizedException('User ID not found in token');
     }
-    return this.dailyQuestService.getTodaysDailyQuest(userId);
+    return this.dailyQuestService.getTodaysDailyQuest(userId, userTimeZone);
   }
 
   @Get('status')
@@ -72,11 +73,15 @@ export class DailyQuestController {
   })
   async getTodaysDailyQuestStatus(
     @ActiveUser('sub') userId: string,
+    userTimeZone: string,
   ): Promise<DailyQuestStatusDto> {
     if (!userId) {
       throw new UnauthorizedException('User ID not found in token');
     }
-    return this.dailyQuestService.getTodaysDailyQuestStatus(userId);
+    return this.dailyQuestService.getTodaysDailyQuestStatus(
+      userId,
+      userTimeZone,
+    );
   }
 
   @Post('complete')
@@ -106,10 +111,11 @@ export class DailyQuestController {
   })
   async completeDailyQuest(
     @ActiveUser('sub') userId: string,
+    userTimeZone: string,
   ): Promise<CompleteDailyQuestResponseDto> {
     if (!userId) {
       throw new UnauthorizedException('User ID not found in token');
     }
-    return this.dailyQuestService.completeDailyQuest(userId);
+    return this.dailyQuestService.completeDailyQuest(userId, userTimeZone);
   }
 }

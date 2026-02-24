@@ -14,8 +14,11 @@ export class DailyQuestService {
     private readonly completeDailyQuestProvider: CompleteDailyQuestProvider,
   ) {}
 
-  async getTodaysDailyQuest(userId: string): Promise<DailyQuestResponseDto> {
-    return this.getTodaysDailyQuestProvider.execute(userId);
+  async getTodaysDailyQuest(
+    userId: string,
+    userTimezone: string,
+  ): Promise<DailyQuestResponseDto> {
+    return this.getTodaysDailyQuestProvider.execute(userId, userTimezone);
   }
 
   /**
@@ -23,8 +26,9 @@ export class DailyQuestService {
    */
   async getTodaysDailyQuestStatus(
     userId: string,
+    userTimeZone: string,
   ): Promise<DailyQuestStatusDto> {
-    return this.getTodaysDailyQuestStatusProvider.execute(userId);
+    return this.getTodaysDailyQuestStatusProvider.execute(userId, userTimeZone);
   }
 
   /**
@@ -33,7 +37,8 @@ export class DailyQuestService {
    */
   async completeDailyQuest(
     userId: string,
+    userTimeZone: string,
   ): Promise<CompleteDailyQuestResponseDto> {
-    return this.completeDailyQuestProvider.execute(userId);
+    return this.completeDailyQuestProvider.execute(userId, userTimeZone);
   }
 }

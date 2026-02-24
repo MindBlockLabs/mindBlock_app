@@ -1,6 +1,11 @@
 "use client";
+//_________________________________________________________//
 
-import { LogOut } from "lucide-react";
+        // This Page will be adjusted after the wave 
+//_________________________________________________________//
+
+
+
 import Button from "@/components/Button";
 import { ProfileHeader } from "@/components/profile/ProfileHeader";
 import { ProfileOverview } from "@/components/profile/ProfileOverview";
@@ -113,3 +118,4 @@ export default function ProfilePage() {
     </div>
   );
 }
+

@@ -1,12 +1,14 @@
 import { configureStore } from '@reduxjs/toolkit';
 import quizReducer from './features/quiz/quizSlice';
 import streakReducer from './features/streak/streakSlice';
+import authReducer from './features/auth/authSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
       quiz: quizReducer,
       streak: streakReducer,
+      auth: authReducer,
     },
   });
 };

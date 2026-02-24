@@ -3,6 +3,7 @@
 import { useState } from "react";
 import SideNav from "@/components/SideNav";
 import { Menu } from "lucide-react";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 export default function ClientLayout({
   children,
@@ -23,7 +24,11 @@ export default function ClientLayout({
       >
         <Menu className="h-9 w-9" />
       </button>
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
+      </main>
     </div>
   );
 }

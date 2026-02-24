@@ -10,6 +10,7 @@ import { User } from '../../users/user.entity';
 import { DailyQuestResponseDto } from '../dtos/daily-quest-response.dto';
 import { PuzzleResponseDto } from '../dtos/puzzle-response.dto';
 import { PuzzleDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class GetTodaysDailyQuestProvider {
@@ -30,8 +31,12 @@ export class GetTodaysDailyQuestProvider {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async execute(userId: string): Promise<DailyQuestResponseDto> {
-    const todayDate = this.getTodayDateString();
+  async execute(
+    userId: string,
+    userTimezone: string,
+  ): Promise<DailyQuestResponseDto> {
+    const todayDate = getDateString(userTimezone, 0);
+
     this.logger.log(`Fetching daily quest for user ${userId} on ${todayDate}`);
 
     let dailyQuest = await this.findExistingQuest(userId, todayDate);
@@ -44,11 +49,6 @@ export class GetTodaysDailyQuestProvider {
     }
 
     return this.buildQuestResponse(dailyQuest);
-  }
-
-  private getTodayDateString(): string {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
   }
 
   private async findExistingQuest(
