@@ -29,7 +29,11 @@
   ],
   "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme",
   "dependencies": {
+    "@nestjs/common": "^11.1.14",
+    "@nestjs/core": "^11.1.14",
     "minimatch": "^10.1.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
     "tsconfig-paths": "^4.2.0"
   },
   "devDependencies": {

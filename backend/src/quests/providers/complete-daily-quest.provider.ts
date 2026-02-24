@@ -5,11 +5,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { DailyQuest } from '../entities/daily-quest.entity';
 import { User } from '../../users/user.entity';
 import { UpdateStreakProvider } from '../../streak/providers/update-streak.provider';
 import { CompleteDailyQuestResponseDto } from '../dtos/complete-daily-quest.dto';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class CompleteDailyQuestProvider {
@@ -17,25 +18,22 @@ export class CompleteDailyQuestProvider {
   private readonly BONUS_XP = 100;
 
   constructor(
-    @InjectRepository(DailyQuest)
-    private readonly dailyQuestRepository: Repository<DailyQuest>,
     @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
     private readonly updateStreakProvider: UpdateStreakProvider,
     private readonly dataSource: DataSource,
   ) {}
 
-  async execute(userId: string): Promise<CompleteDailyQuestResponseDto> {
-    const todayDate = this.getTodayDateString();
+  async execute(
+    userId: string,
+    userTimeZone: string,
+  ): Promise<CompleteDailyQuestResponseDto> {
+    const todayDate = getDateString(userTimeZone, 0);
     this.logger.log(
       `Attempting to complete daily quest for user ${userId} on ${todayDate}`,
     );
 
     // Parse userId to number for streak operations
-    const userIdNumber = parseInt(userId, 10);
-    if (isNaN(userIdNumber)) {
-      throw new BadRequestException('Invalid user ID format');
-    }
+    const userIdNumber = userId;
 
     // Use transaction to ensure atomicity
     const transactionResult = await this.dataSource.transaction(
@@ -130,6 +128,7 @@ export class CompleteDailyQuestProvider {
     // 7. Update streak after transaction commits
     const streak = await this.updateStreakProvider.updateStreak(
       transactionResult.userId!,
+      userTimeZone,
     );
 
     this.logger.log(
@@ -145,14 +144,10 @@ export class CompleteDailyQuestProvider {
       streakInfo: {
         currentStreak: streak.currentStreak,
         longestStreak: streak.longestStreak,
-        lastActivityDate: streak.lastActivityDate || this.getTodayDateString(),
+        lastActivityDate:
+          streak.lastActivityDate || getDateString(userTimeZone, 0),
       },
       completedAt: transactionResult.completedAt,
     };
-  }
-
-  private getTodayDateString(): string {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
   }
 }
