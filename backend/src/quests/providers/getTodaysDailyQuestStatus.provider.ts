@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { DailyQuest } from '../entities/daily-quest.entity';
 import { DailyQuestStatusDto } from '../dtos/daily-quest-status.dto';
 import { GetTodaysDailyQuestProvider } from './getTodaysDailyQuest.provider';
+import { getDateString } from 'src/shared/utils/date.util';
 
 /**
  * Provider for fetching the status of today's Daily Quest.
@@ -29,8 +30,11 @@ export class GetTodaysDailyQuestStatusProvider {
    * @param userId - The user's ID
    * @returns DailyQuestStatusDto with totalQuestions, completedQuestions, isCompleted
    */
-  async execute(userId: string): Promise<DailyQuestStatusDto> {
-    const todayDate = this.getTodayDateString();
+  async execute(
+    userId: string,
+    userTimeZone: string,
+  ): Promise<DailyQuestStatusDto> {
+    const todayDate = getDateString(userTimeZone, 0);
     this.logger.log(
       `Fetching daily quest status for user ${userId} on ${todayDate}`,
     );
@@ -64,14 +68,6 @@ export class GetTodaysDailyQuestStatusProvider {
     }
 
     return this.buildStatusResponse(dailyQuest);
-  }
-
-  /**
-   * Returns today's date as YYYY-MM-DD string (timezone-safe)
-   */
-  private getTodayDateString(): string {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
   }
 
   /**

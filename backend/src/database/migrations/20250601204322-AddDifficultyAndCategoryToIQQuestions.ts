@@ -1,8 +1,6 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class AddDifficultyAndCategoryToIQQuestions20250601204322
-  implements MigrationInterface
-{
+export class AddDifficultyAndCategoryToIQQuestions20250601204322 implements MigrationInterface {
   name = 'AddDifficultyAndCategoryToIQQuestions20250601204322';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
