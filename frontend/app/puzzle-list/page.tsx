@@ -78,9 +78,9 @@ const PuzzleCard: React.FC<PuzzleCardProps> = ({
   );
 };
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+// ─── Main Content Component (Uses useSearchParams) ──────────────────────────────
 
-export default function PuzzleListPage() {
+function PuzzleListContent() {
   const router       = useRouter();
   const searchParams = useSearchParams();
 
@@ -117,75 +117,92 @@ export default function PuzzleListPage() {
   const { data: puzzles, isLoading, isError, error } = usePuzzles(puzzleQuery);
 
   return (
+    <>
+      {/* Filter bar */}
+      <div className="mb-6">
+        <FilterBar filters={filters} onFiltersChange={handleFiltersChange} />
+      </div>
+
+      {/* Results count */}
+      {!isLoading && !isError && puzzles && (
+        <p className="mb-4 text-xs text-slate-500">
+          {puzzles.length} puzzle{puzzles.length !== 1 ? 's' : ''} found
+        </p>
+      )}
+
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading puzzles">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-32 rounded-xl border border-white/5 bg-white/[0.03] animate-pulse"
+              aria-hidden="true"
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Error state */}
+      {isError && (
+        <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+          <p className="text-red-400 font-medium">Failed to load puzzles</p>
+          <p className="text-xs text-slate-500">
+            {error instanceof Error ? error.message : 'Please try again later.'}
+          </p>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !isError && puzzles?.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+          <PuzzleIcon className="h-10 w-10 text-slate-600" />
+          <p className="font-medium text-slate-400">No puzzles match your filters</p>
+          <p className="text-xs text-slate-600">Try adjusting the difficulty or category</p>
+        </div>
+      )}
+
+      {/* Puzzle grid */}
+      {!isLoading && !isError && puzzles && puzzles.length > 0 && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {puzzles.map((puzzle) => (
+            <PuzzleCard
+              key={puzzle.id}
+              id={puzzle.id}
+              title={puzzle.title}
+              description={puzzle.description}
+              difficulty={puzzle.difficulty}
+              type={puzzle.type}
+              timeLimit={puzzle.timeLimit}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
+// ─── Page ────────────────────────────────────────────────────────────────────
+
+export default function PuzzleListPage() {
+  return (
     <div className="min-h-screen w-full bg-[#0A0F1A] text-slate-100">
       <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
-
         {/* Page header */}
         <div className="mb-6 flex items-center gap-3">
           <PuzzleIcon className="h-6 w-6 text-[#3B82F6]" />
           <h1 className="text-xl font-bold text-white">Puzzles</h1>
         </div>
 
-        {/* Filter bar */}
-        <div className="mb-6">
-          <FilterBar filters={filters} onFiltersChange={handleFiltersChange} />
-        </div>
-
-        {/* Results count */}
-        {!isLoading && !isError && puzzles && (
-          <p className="mb-4 text-xs text-slate-500">
-            {puzzles.length} puzzle{puzzles.length !== 1 ? 's' : ''} found
-          </p>
-        )}
-
-        {/* Loading skeleton */}
-        {isLoading && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading puzzles">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <div
-                key={i}
-                className="h-32 rounded-xl border border-white/5 bg-white/[0.03] animate-pulse"
-                aria-hidden="true"
-              />
-            ))}
-          </div>
-        )}
-
-        {/* Error state */}
-        {isError && (
-          <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
-            <p className="text-red-400 font-medium">Failed to load puzzles</p>
-            <p className="text-xs text-slate-500">
-              {error instanceof Error ? error.message : 'Please try again later.'}
-            </p>
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!isLoading && !isError && puzzles?.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
-            <PuzzleIcon className="h-10 w-10 text-slate-600" />
-            <p className="font-medium text-slate-400">No puzzles match your filters</p>
-            <p className="text-xs text-slate-600">Try adjusting the difficulty or category</p>
-          </div>
-        )}
-
-        {/* Puzzle grid */}
-        {!isLoading && !isError && puzzles && puzzles.length > 0 && (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {puzzles.map((puzzle) => (
-              <PuzzleCard
-                key={puzzle.id}
-                id={puzzle.id}
-                title={puzzle.title}
-                description={puzzle.description}
-                difficulty={puzzle.difficulty}
-                type={puzzle.type}
-                timeLimit={puzzle.timeLimit}
-              />
-            ))}
-          </div>
-        )}
+        <React.Suspense
+          fallback={
+            <div className="flex justify-center p-8">
+              <p className="text-slate-400">Loading filters...</p>
+            </div>
+          }
+        >
+          <PuzzleListContent />
+        </React.Suspense>
       </main>
     </div>
   );
