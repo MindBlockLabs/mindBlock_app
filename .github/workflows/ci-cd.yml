@@ -1,0 +1,35 @@
+name: CI/CD
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+jobs:
+  validate-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
+        with:
+          types: |
+            feat
+            fix
+            docs
+            chore
+            test
+            refactor
+            ci
+          requireScope: false
+
+      - name: Validate PR description
+        run: |
+          if ! grep -qE ".{20,}" <<< "${{ github.event.pull_request.body }}"; then
+            echo "❌ PR description too short. Please provide context."
+            exit 1
+          fi
+
+  build-and-deploy:
+    needs: validate-pr   # enforce validation before build
+    runs-on: ubuntu-latest
+    steps:
+      # existing build steps here
