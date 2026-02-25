@@ -12,6 +12,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
 import { useAuth } from '@/hooks/useAuth';
 import { WalletType } from '@/lib/stellar/types';
+import WalletModal, { WalletType as ModalWalletType } from '@/components/ui/WalletModal';
+import { useWalletModal } from '@/hooks/useWalletModal';
 
 const SignInPage = () => {
   const router = useRouter();
@@ -24,6 +26,7 @@ const SignInPage = () => {
     clearError,
   } = useStellarWalletAuth();
   const { loginSuccess, loginFailure, setLoading } = useAuth();
+  const { isOpen: isWalletModalOpen, openModal: openWalletModal, closeModal: closeWalletModal } = useWalletModal();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -197,40 +200,44 @@ const SignInPage = () => {
     window.location.href = "http://localhost:3000/auth/google-authentication";
   };
 
-  const handleWalletLogin = async () => {
+  const handleWalletSelect = async (walletType: ModalWalletType) => {
+    closeWalletModal();
+
+    if (walletType !== 'freighter') {
+      showInfo('Coming Soon', `${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet support is coming soon!`);
+      return;
+    }
+
     clearError();
 
     try {
       await connectAndLogin('freighter' as WalletType);
-
-      // Success - show toast and redirect
       showSuccess('Login Successful', 'Welcome back!');
       router.push('/dashboard');
     } catch (error) {
       console.error("Wallet Connection Error:", error);
-      // Error handling with user-friendly messages
 
       const isErrorWithCode = (e: unknown): e is { code?: string; message?: string } => {
         return typeof e === 'object' && e !== null;
       };
       if (isErrorWithCode(error)) {
-      if (error?.code === 'WALLET_NOT_INSTALLED') {
-        showError(
-          'Wallet Not Installed',
-          'Please install Freighter wallet from freighter.app to continue'
-        );
-      } else if (error?.code === 'USER_REJECTED') {
-        showWarning('Request Cancelled', 'You cancelled the wallet request');
-      } else if (error?.code === 'NONCE_EXPIRED') {
-        showError('Authentication Expired', 'Please try again');
-      } else if (error?.code === 'INVALID_SIGNATURE') {
-        showError('Authentication Failed', 'Invalid signature or expired nonce');
-      } else if (error?.code === 'NETWORK_ERROR') {
-        showError('Network Error', 'Unable to connect to server. Please try again.');
-      } else {
-        showError('Login Failed', error?.message || 'An unexpected error occurred');
+        if (error?.code === 'WALLET_NOT_INSTALLED') {
+          showError(
+            'Wallet Not Installed',
+            'Please install Freighter wallet from freighter.app to continue'
+          );
+        } else if (error?.code === 'USER_REJECTED') {
+          showWarning('Request Cancelled', 'You cancelled the wallet request');
+        } else if (error?.code === 'NONCE_EXPIRED') {
+          showError('Authentication Expired', 'Please try again');
+        } else if (error?.code === 'INVALID_SIGNATURE') {
+          showError('Authentication Failed', 'Invalid signature or expired nonce');
+        } else if (error?.code === 'NETWORK_ERROR') {
+          showError('Network Error', 'Unable to connect to server. Please try again.');
+        } else {
+          showError('Login Failed', error?.message || 'An unexpected error occurred');
+        }
       }
-    }
     }
   };
 
@@ -325,7 +332,7 @@ const SignInPage = () => {
             </button>
 
             <button
-              onClick={handleWalletLogin}
+              onClick={openWalletModal}
               disabled={isConnecting || isSigning || isLoggingIn}
               className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -351,6 +358,11 @@ const SignInPage = () => {
         </div>
       </div>
     </div>
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={closeWalletModal}
+        onSelect={handleWalletSelect}
+      />
     </ErrorBoundary>
   );
 };
