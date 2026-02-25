@@ -1,4 +1,4 @@
-import { usePrefersReducedMotion } from 'framer-motion';
+import { usePrefersReducedMotion } from '@/lib/animations/hooks';
 
 const useReducedMotionCheck = () => {
   const prefersReducedMotion = usePrefersReducedMotion();

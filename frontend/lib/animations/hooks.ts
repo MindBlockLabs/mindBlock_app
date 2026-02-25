@@ -5,7 +5,7 @@ import { useReducedMotion } from 'framer-motion';
  * Hook to determine if animations should be disabled based on user preferences.
  */
 export const usePrefersReducedMotion = (): boolean => {
-  return useReducedMotion();
+  return useReducedMotion() ?? false;
 };
 
 /**
