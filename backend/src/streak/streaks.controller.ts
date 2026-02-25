@@ -28,7 +28,7 @@ export class StreaksController {
     if (!user?.sub) {
       throw new UnauthorizedException('User not authenticated');
     }
-    const userId = parseInt(user.sub, 10);
+    const userId = user.sub;
     return this.streaksService.getStreak(userId);
   }
 
@@ -44,11 +44,14 @@ export class StreaksController {
     status: 401,
     description: 'Unauthorized',
   })
-  async updateStreak(@ActiveUser() user: ActiveUserData): Promise<Streak> {
+  async updateStreak(
+    @ActiveUser() user: ActiveUserData,
+    userTimezone: string,
+  ): Promise<Streak> {
     if (!user?.sub) {
       throw new UnauthorizedException('User not authenticated');
     }
-    const userId = parseInt(user.sub, 10);
-    return this.streaksService.updateStreak(userId);
+    const userId = user.sub;
+    return this.streaksService.updateStreak(userId, userTimezone);
   }
 }

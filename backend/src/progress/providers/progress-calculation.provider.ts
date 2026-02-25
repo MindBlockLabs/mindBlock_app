@@ -6,7 +6,6 @@ import { UserProgress } from '../entities/progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
 import { XpLevelService } from '../../users/providers/xp-level.service';
 import { User } from '../../users/user.entity';
-import { Streak } from '../../streak/entities/streak.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 import { getPointsByDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
 
@@ -21,13 +20,6 @@ export interface ProgressCalculationResult {
   validation: AnswerValidationResult;
 }
 
-interface ProgressStatsRaw {
-  totalAttempts: string;
-  correctAttempts: string;
-  totalPoints: string;
-  averageTimeSpent: string;
-}
-
 @Injectable()
 export class ProgressCalculationProvider {
   constructor(
@@ -38,8 +30,6 @@ export class ProgressCalculationProvider {
     private readonly xpLevelService: XpLevelService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Streak)
-    private readonly streakRepository: Repository<Streak>,
     @InjectRepository(DailyQuest)
     private readonly dailyQuestRepository: Repository<DailyQuest>,
   ) {}

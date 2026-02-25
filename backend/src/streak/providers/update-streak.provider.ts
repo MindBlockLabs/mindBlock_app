@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Streak } from '../entities/streak.entity';
+import { getDateString } from '../../shared/utils/date.util';
 
 @Injectable()
 export class UpdateStreakProvider {
@@ -16,19 +17,23 @@ export class UpdateStreakProvider {
    * Updates user streak based on daily quest completion
    * Handles streak continuation, breaks, and new streaks
    */
-  async updateStreak(userId: number): Promise<Streak> {
-    const todayDate = this.getTodayDateString();
+  async updateStreak(userId: string, userTimezone: string): Promise<Streak> {
+    const todayDate = getDateString(userTimezone, 0);
     this.logger.log(`Updating streak for user ${userId} on ${todayDate}`);
+
+    if (!userId) {
+      throw new NotFoundException();
+    }
 
     // Find or create user's streak record
     let streak = await this.streakRepository.findOne({
-      where: { userId },
+      where: { userId: parseInt(userId, 10) },
     });
 
     if (!streak) {
       // First time user - create new streak
       streak = this.streakRepository.create({
-        userId,
+        userId: parseInt(userId, 10),
         currentStreak: 1,
         longestStreak: 1,
         lastActivityDate: todayDate,
@@ -45,7 +50,7 @@ export class UpdateStreakProvider {
       }
 
       // Calculate streak continuation
-      const yesterday = this.getYesterdayDateString();
+      const yesterday = getDateString(userTimezone, -1);
       const isConsecutive = streak.lastActivityDate === yesterday;
 
       if (isConsecutive) {
@@ -82,20 +87,9 @@ export class UpdateStreakProvider {
   /**
    * Get user's current streak information
    */
-  async getStreak(userId: number): Promise<Streak | null> {
+  async getStreak(userId: string): Promise<Streak | null> {
     return await this.streakRepository.findOne({
-      where: { userId },
+      where: { userId: parseInt(userId, 10) },
     });
-  }
-
-  private getTodayDateString(): string {
-    const now = new Date();
-    return now.toISOString().split('T')[0];
-  }
-
-  private getYesterdayDateString(): string {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
   }
 }

@@ -4,13 +4,6 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { UserProgress } from '../entities/progress.entity';
 import { OverallStatsDto } from '../dtos/overall-stats.dto';
 
-interface OverallStatsRaw {
-  totalAttempts: string;
-  totalCorrect: string;
-  totalPointsEarned: string;
-  totalTimeSpent: string;
-}
-
 @Injectable()
 export class GetOverallStatsProvider {
   constructor(
