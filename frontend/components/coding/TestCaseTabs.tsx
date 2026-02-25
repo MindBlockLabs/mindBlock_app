@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus } from 'lucide-react';
 
 interface TestCase {
@@ -21,17 +21,13 @@ const TestCaseTabs: React.FC<TestCaseTabsProps> = ({
   activeCase, 
   onTabChange 
 }) => {
-  const [focusedTab, setFocusedTab] = useState<number | null>(null);
-
   const handleKeyDown = (e: React.KeyboardEvent, index: number) => {
     if (e.key === 'ArrowRight') {
       const nextIndex = (index + 1) % testCases.length;
       onTabChange(nextIndex);
-      setFocusedTab(nextIndex);
     } else if (e.key === 'ArrowLeft') {
       const prevIndex = (index - 1 + testCases.length) % testCases.length;
       onTabChange(prevIndex);
-      setFocusedTab(prevIndex);
     }
   };
 
@@ -48,6 +44,7 @@ const TestCaseTabs: React.FC<TestCaseTabsProps> = ({
           onClick={() => onTabChange(index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           tabIndex={0}
+          role="tab"
           aria-selected={activeCase === index}
         >
           Case {index + 1}

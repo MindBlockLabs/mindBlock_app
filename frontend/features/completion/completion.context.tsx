@@ -33,8 +33,9 @@ export const CompletionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       const data = await fetchUserStats();
       setStats(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to fetch stats');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch stats';
+      setError(errorMessage);
     }
   }, []);
 
@@ -46,8 +47,9 @@ export const CompletionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       await apiClaimPoints();
       setIsSuccess(true);
       await refreshStats();
-    } catch (err: any) {
-      setError(err.message || 'Failed to claim points');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to claim points';
+      setError(errorMessage);
     } finally {
       setIsClaiming(false);
     }

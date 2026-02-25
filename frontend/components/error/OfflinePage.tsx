@@ -38,11 +38,11 @@ const OfflinePage = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-yellow-400 mb-4">You're Offline</h1>
+          <h1 className="text-2xl font-bold text-yellow-400 mb-4">{`You're Offline`}</h1>
           <p className="text-gray-300 mb-2">
             {isOnline 
               ? "Connection restored!" 
-              : "It looks like you're not connected to the internet."}
+              : `It looks like you're not connected to the internet.`}
           </p>
           <p className="text-gray-400 text-sm">
             Check your network connection and try again.

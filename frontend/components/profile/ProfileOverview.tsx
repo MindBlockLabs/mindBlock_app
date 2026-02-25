@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { StatCard } from "./StatCard";
 
 interface ProfileOverviewProps {
@@ -50,7 +51,7 @@ export function ProfileOverview({
             key={stat.label}
             icon={
               <div className=" h-10 w-10 items-center justify-center">
-                <img src={stat.iconSrc} className="h-7 w-7" alt={stat.iconAlt} />
+                <Image src={stat.iconSrc} width={28} height={28} className="h-7 w-7" alt={stat.iconAlt} />
               </div>
             }
             value={stat.value}
