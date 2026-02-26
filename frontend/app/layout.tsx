@@ -7,6 +7,7 @@ import CompletionFeatureProvider from "@/providers/CompletionFeatureProvider";
 import DashboardFeatureProvider from "@/providers/DashboardFeatureProvider";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import { NetworkStatusProvider } from "@/providers/NetworkStatusProvider";
+import QueryProvider from "@/providers/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,15 +32,17 @@ export default function RootLayout({
         <NetworkStatusProvider>
           <ErrorBoundary>
             <StoreProvider>
-              <ToastProvider>
-                <DashboardFeatureProvider>
-                  <CompletionFeatureProvider>
-                    <ClientLayout>
-                      {children}
-                    </ClientLayout>
-                  </CompletionFeatureProvider>
-                </DashboardFeatureProvider>
-              </ToastProvider>
+              <QueryProvider>
+                <ToastProvider>
+                  <DashboardFeatureProvider>
+                    <CompletionFeatureProvider>
+                      <ClientLayout>
+                        {children}
+                      </ClientLayout>
+                    </CompletionFeatureProvider>
+                  </DashboardFeatureProvider>
+                </ToastProvider>
+              </QueryProvider>
             </StoreProvider>
           </ErrorBoundary>
         </NetworkStatusProvider>

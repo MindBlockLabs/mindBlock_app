@@ -14,3 +14,8 @@ export interface PuzzleQueryParams {
   page?: number;
   limit?: number;
 }
+
+export interface PuzzleFilters {
+  categoryId: string;
+  difficulty: string;
+}
