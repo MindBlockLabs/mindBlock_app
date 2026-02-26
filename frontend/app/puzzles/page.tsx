@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { Suspense, useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { usePuzzles } from "@/hooks/usePuzzles";
@@ -137,7 +137,7 @@ function PuzzleSkeleton() {
 // ──────────────────────────────────────────────
 // Main Puzzle List Page
 // ──────────────────────────────────────────────
-export default function PuzzlesPage() {
+function PuzzlesContent() {
   const searchParams = useSearchParams();
 
   // Parse initial page from URL
@@ -267,5 +267,13 @@ export default function PuzzlesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function PuzzlesPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950"><div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8"><PuzzleSkeleton /></div></div>}>
+      <PuzzlesContent />
+    </Suspense>
   );
 }
