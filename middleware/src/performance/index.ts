@@ -1,3 +1,3 @@
 // Placeholder: performance middleware exports will live here.
 
-export {};
+export const __performancePlaceholder = true;

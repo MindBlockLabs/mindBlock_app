@@ -1,3 +1,3 @@
 // Placeholder: validation middleware exports will live here.
 
-export {};
+export const __validationPlaceholder = true;

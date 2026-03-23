@@ -1,3 +1,3 @@
 // Placeholder: security middleware exports will live here.
 
-export {};
+export const __securityPlaceholder = true;

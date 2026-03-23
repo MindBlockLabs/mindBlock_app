@@ -1,3 +1,3 @@
 // Placeholder: config exports will live here.
 
-export {};
+export const __configPlaceholder = true;

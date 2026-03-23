@@ -1,3 +1,3 @@
 // Placeholder: monitoring middleware exports will live here.
 
-export {};
+export const __monitoringPlaceholder = true;
