@@ -101,7 +101,7 @@ jobs:
           components: rustfmt
       - name: Install Stellar CLI
         run: |
-          curl -fsSL https://github.com/stellar/stellar-cli/raw/main/install.sh | sh -s -- --dir /usr/local/bin
+          curl -fsSL https://github.com/stellar/stellar-cli/raw/main/install.sh | sh -s -- --dir /usr/local/bin --install-deps
       - name: Check formatting
         run: cargo fmt --check
         working-directory: contracts
