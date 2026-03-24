@@ -87,3 +87,28 @@ jobs:
         run: npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
       - name: Type-check backend
         run: npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
+
+  contracts:
+    name: contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+          targets: wasm32-unknown-unknown
+          components: rustfmt
+      - name: Install Stellar CLI
+        run: |
+          curl -sSfL https://github.com/stellar/stellar-cli/releases/latest/download/stellar-cli-linux-x86_64.tar.gz | tar -xz
+          sudo mv stellar /usr/local/bin/
+      - name: Check formatting
+        run: cargo fmt --check
+        working-directory: contracts
+      - name: Build contract
+        run: stellar contract build
+        working-directory: contracts
+      - name: Run tests
+        run: cargo test
+        working-directory: contracts

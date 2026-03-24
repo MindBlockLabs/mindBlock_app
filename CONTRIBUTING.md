@@ -18,6 +18,8 @@ CI will reject PRs containing src/* imports.
 Issue/PR: https://github.com/MindBlockLabs/mindBlock_app/pull/0000 (placeholder)
 
 **MUST RUN** Local check to before submitting a pr:
+
+For frontend/backend contributors:
 ```bash
 npm ci
 npm --workspace frontend run build
@@ -30,8 +32,14 @@ npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
 npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
 ```
 
+For contract contributors:
+- Install prerequisites: Rust, wasm32-unknown-unknown target, and Stellar CLI
+- Check formatting: `cargo fmt --check` run from inside `contracts/`
+- Build the contract: `stellar contract build` run from inside `contracts/`
+- Run tests: `cargo test` run from inside `contracts/`
+
 ## Branch Protection
-main and develop require status checks: lint-imports, build, type-check.
+main and develop require status checks: lint-imports, build, type-check, contracts.
 Require branches to be up-to-date before merging.
 
 ## Pull Request Standards
