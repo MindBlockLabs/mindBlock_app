@@ -2,5 +2,5 @@ node_modules
 contributoNote.md
 
 # Rust build artifacts
-contract/target/
-contract/Cargo.lock
+contracts/target/
+contracts/Cargo.lock
