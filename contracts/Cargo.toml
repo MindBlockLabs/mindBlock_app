@@ -8,3 +8,6 @@ soroban-sdk = "22.0.0"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[profile.release]
+overflow-checks = true
