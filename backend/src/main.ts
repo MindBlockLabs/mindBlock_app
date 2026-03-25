@@ -1,7 +1,8 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
@@ -16,8 +17,11 @@ async function bootstrap() {
     }),
   );
 
-  // Enable global exception handling
-  app.useGlobalFilters(new HttpExceptionFilter());
+  // Stamp every request with a correlation ID before any other handler runs
+  app.use(new CorrelationIdMiddleware().use.bind(new CorrelationIdMiddleware()));
+
+  // Enable global exception handling (catches ALL errors, not just HttpExceptions)
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Setup Swagger API Documentation at http://localhost:3000/api
   const config = new DocumentBuilder()
