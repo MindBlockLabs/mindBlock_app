@@ -15,6 +15,10 @@ export class UpdateUserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
+  async getUserById(id: string): Promise<User | null> {
+    return await this.userRepository.findOne({ where: { id } });
+  }
+
   async editUser(id: string, editUserDto: EditUserDto): Promise<User> {
     const user = await this.userRepository.findOne({ where: { id } });
 
