@@ -21,7 +21,7 @@ export class CorrelationIdMiddleware implements NestMiddleware {
     const correlationId =
       (req.headers['x-correlation-id'] as string | undefined) ||
       (req.headers['x-request-id'] as string | undefined) ||
-      uuidv4();
+      randomUUID();
 
     // Attach to request for downstream use (filters, interceptors, services)
     (req as any).correlationId = correlationId;
