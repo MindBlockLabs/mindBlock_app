@@ -4,6 +4,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { AppModule } from './app.module';
+import { HealthService } from './health/health.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -39,6 +40,28 @@ async function bootstrap() {
     credentials: true,
   });
 
+  // Graceful shutdown handling
+  const healthService = app.get(HealthService);
+  
+  const gracefulShutdown = async (signal: string) => {
+    console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
+    
+    // Signal health checks that we're shutting down
+    healthService.setIsShuttingDown();
+    
+    // Wait a moment for load balancers to detect the unhealthy state
+    setTimeout(async () => {
+      console.log('🔄 Closing HTTP server...');
+      await app.close();
+      console.log('✅ Graceful shutdown completed');
+      process.exit(0);
+    }, 5000);
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
   await app.listen(3000);
+  console.log('🚀 Application is running on: http://localhost:3000');
 }
 void bootstrap();

@@ -21,6 +21,12 @@ import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
+import { HealthModule } from './health/health.module';
+
+// const ENV = process.env.NODE_ENV;
+// console.log('NODE_ENV:', process.env.NODE_ENV);
+// console.log('ENV:', ENV);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -95,6 +101,7 @@ import { GeolocationMiddleware } from './common/middleware/geolocation.middlewar
         publicRoutes: ['/auth', '/api', '/docs', '/health'],
       }),
     }),
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
