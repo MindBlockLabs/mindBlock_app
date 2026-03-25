@@ -1,4 +1,4 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod, Inject } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -16,7 +16,7 @@ import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
 import { CategoriesModule } from './categories/categories.module';
-import { JwtAuthModule, JwtAuthMiddleware } from '@mindblock/middleware';
+import { JwtAuthModule, JwtAuthMiddleware } from './auth/middleware/jwt-auth.module';
 import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
