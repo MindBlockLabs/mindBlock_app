@@ -1,5 +1,5 @@
 #![no_std]
-use soroban_sdk::{Address, Env, Map, String, Vec, contract, contractimpl, contracttype};
+use soroban_sdk::{Address, Env, String, Vec, contract, contractimpl, contracttype};
 
 #[derive(Clone)]
 #[contracttype]
@@ -92,10 +92,10 @@ impl MindBlockContract {
     }
 
     /// Get top players by XP (leaderboard)
-    pub fn get_leaderboard(env: Env, limit: u32) -> Vec<Player> {
+    pub fn get_leaderboard(env: Env, _limit: u32) -> Vec<Player> {
         // Note: In production, implement proper pagination and sorting
         // This is a simplified version
-        let mut leaderboard = Vec::new(&env);
+        let leaderboard = Vec::new(&env);
 
         // This would need to be implemented with proper indexing
         // For now, returns empty vector as placeholder
@@ -156,7 +156,7 @@ mod test {
     #[test]
     fn test_register_player() {
         let env = Env::default();
-        let contract_id = env.register_contract(None, MindBlockContract);
+        let contract_id = env.register(MindBlockContract, ());
         let client = MindBlockContractClient::new(&env, &contract_id);
 
         let player = Address::generate(&env);
@@ -173,7 +173,7 @@ mod test {
     #[test]
     fn test_submit_puzzle() {
         let env = Env::default();
-        let contract_id = env.register_contract(None, MindBlockContract);
+        let contract_id = env.register(MindBlockContract, ());
         let client = MindBlockContractClient::new(&env, &contract_id);
 
         let player = Address::generate(&env);
