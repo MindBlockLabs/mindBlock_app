@@ -20,6 +20,11 @@ import { JwtAuthModule, JwtAuthMiddleware } from './auth/middleware/jwt-auth.mod
 import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
+import { HealthModule } from './health/health.module';
+
+// const ENV = process.env.NODE_ENV;
+// console.log('NODE_ENV:', process.env.NODE_ENV);
+// console.log('ENV:', ENV);
 
 @Module({
   imports: [
@@ -95,6 +100,7 @@ import { UsersService } from './users/providers/users.service';
         publicRoutes: ['/auth', '/api', '/docs', '/health'],
       }),
     }),
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
