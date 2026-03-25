@@ -42,6 +42,7 @@
     "google-auth-library": "^9.15.1",
     "ioredis": "^5.6.1",
     "nodemailer": "^7.0.12",
+    "@mindblock/middleware": "*",
     "oauth2client": "^1.0.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",

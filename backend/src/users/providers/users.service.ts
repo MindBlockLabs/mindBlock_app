@@ -34,7 +34,9 @@ export class UsersService {
     return this.findAll.findAll(dto);
   }
 
-  // No findOne() method here as it's not needed or handled by sub-providers
+  public async findOneById(id: string): Promise<User | null> {
+    return await this.updateUserService.getUserById(id);
+  }
 
   public async GetOneByEmail(email: string) {
     return this.findOneByEmail.findOneByEmail(email);

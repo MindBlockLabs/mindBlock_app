@@ -1,3 +1,2 @@
-// Placeholder: auth middleware exports will live here.
-
-export const __authPlaceholder = true;
+export * from './jwt-auth.middleware';
+export * from './jwt-auth.module';
