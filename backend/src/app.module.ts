@@ -16,6 +16,7 @@ import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
 import { CategoriesModule } from './categories/categories.module';
+import { HealthModule } from './health/health.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -83,6 +84,7 @@ import { CategoriesModule } from './categories/categories.module';
     BlockchainModule,
     ProgressModule,
     CategoriesModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
