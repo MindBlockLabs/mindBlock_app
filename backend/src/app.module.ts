@@ -20,6 +20,7 @@ import { JwtAuthModule, JwtAuthMiddleware } from './auth/middleware/jwt-auth.mod
 import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
+import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
 
 // const ENV = process.env.NODE_ENV;
@@ -110,6 +111,10 @@ export class AppModule implements NestModule {
    * Apply the JWT Authentication Middleware to all routes except public ones.
    */
   configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(GeolocationMiddleware)
+      .forRoutes('*');
+
     consumer
       .apply(JwtAuthMiddleware)
       .exclude(
