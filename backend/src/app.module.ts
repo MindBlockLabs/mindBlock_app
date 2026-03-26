@@ -18,6 +18,7 @@ import { StreakModule } from './streak/strerak.module';
 import { CategoriesModule } from './categories/categories.module';
 import { TransactionMiddleware } from './middleware/transaction/transaction.middleware';
 import { TransactionLogger } from './middleware/transaction/transaction.logger';
+import { CompressionMiddleware } from './middleware/compression/compression.middleware';
 
 @Module({
   imports: [
@@ -88,5 +89,8 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     // Apply transaction middleware globally
     consumer.apply(TransactionMiddleware).forRoutes('*');
+
+    // Apply compression middleware globally
+    consumer.apply(CompressionMiddleware).forRoutes('*');
   }
 }
