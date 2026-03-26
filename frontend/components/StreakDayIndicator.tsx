@@ -2,7 +2,7 @@ import React from "react";
 import Image from "next/image";
 
 export interface StreakDayIndicatorProps {
-    status: 'empty' | 'completed' | 'streak';
+    status: 'empty' | 'completed' | 'streak' | 'missed';
     isToday?: boolean;
     inStreakRun?: boolean;
 }
@@ -23,6 +23,8 @@ export const StreakDayIndicator: React.FC<StreakDayIndicatorProps> = ({
         statusClasses = "bg-[#FACC15]";
     } else if (status === "streak") {
         statusClasses = "bg-[#FACC15] shadow-lg shadow-[#FACC15]/50";
+    } else if (status === "missed") {
+        statusClasses = "bg-white";
     }
 
     // isToday styling (adding ring to distinguish)
@@ -30,9 +32,9 @@ export const StreakDayIndicator: React.FC<StreakDayIndicatorProps> = ({
 
     return (
         <div className="relative flex items-center justify-center w-[24px] h-[24px] md:w-[28px] md:h-[28px]">
-            {/* Optional highlighted background for streak run */}
+            {/* Horizontal highlight bar for streak runs */}
             {inStreakRun && status === "streak" && (
-                <div className="absolute w-[200%] h-full bg-[#FACC15]/10 rounded-full z-0" />
+                <div className="absolute w-[300%] h-[8px] bg-[#FACC15]/20 rounded-full z-0" />
             )}
             
             <div className={`${baseClasses} ${statusClasses} ${todayClasses}`}>
