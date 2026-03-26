@@ -2,7 +2,6 @@ import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/c
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { APP_INTERCEPTOR } from '@nestjs/core';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
@@ -24,7 +23,6 @@ import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
 import { ApiKeyModule } from './api-keys/api-key.module';
-import { RequestSizeLoggingInterceptor } from './common/interceptors/request-size-logging.interceptor';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -108,13 +106,7 @@ import { RequestSizeLoggingInterceptor } from './common/interceptors/request-siz
     ApiKeyModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: RequestSizeLoggingInterceptor,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   /**
