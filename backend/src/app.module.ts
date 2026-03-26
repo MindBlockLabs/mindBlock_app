@@ -27,6 +27,7 @@ import {
   ApiVersionService,
 } from './common/versioning';
 import { DocsController } from './docs/docs.controller';
+import { RolesGuard } from './roles/roles.guard';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -109,7 +110,7 @@ import { DocsController } from './docs/docs.controller';
     HealthModule,
   ],
   controllers: [AppController, DocsController],
-  providers: [AppService, ApiVersionService],
+  providers: [AppService, ApiVersionService, RolesGuard],
 })
 export class AppModule implements NestModule {
   /**

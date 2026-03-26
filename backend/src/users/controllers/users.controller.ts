@@ -7,6 +7,7 @@ import {
   Param,
   Body,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from '../providers/users.service';
 import { XpLevelService } from '../providers/xp-level.service';
@@ -15,9 +16,13 @@ import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { EditUserDto } from '../dtos/editUserDto.dto';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { User } from '../user.entity';
+import { RolesGuard } from '../../roles/roles.guard';
+import { Roles } from '../../roles/roles.decorator';
+import { userRole } from '../enums/userRole.enum';
 
 @Controller('users')
 @ApiTags('users')
+@UseGuards(RolesGuard)
 export class UsersController {
   constructor(
     private readonly usersService: UsersService,
@@ -25,6 +30,7 @@ export class UsersController {
   ) {}
 
   @Delete(':id')
+  @Roles(userRole.ADMIN)
   @ApiOperation({ summary: 'Delete user by ID' })
   @ApiResponse({ status: 200, description: 'User successfully deleted' })
   @ApiResponse({ status: 404, description: 'User not found' })
@@ -51,11 +57,13 @@ export class UsersController {
   }
 
   @Get()
+  @Roles(userRole.ADMIN, userRole.MODERATOR)
   findAll(@Query() dto: paginationQueryDto) {
     return this.usersService.findAllUsers(dto);
   }
 
   @Get(':id')
+  @Roles({ roles: [userRole.ADMIN, userRole.MODERATOR], ownership: { param: 'id' } })
   findOne(@Param('id') id: string) {
     return id;
   }
@@ -73,6 +81,7 @@ export class UsersController {
   }
 
   @Patch(':id')
+  @Roles({ roles: [userRole.ADMIN], ownership: { param: 'id' } })
   @ApiOperation({ summary: 'Update user by ID' })
   @ApiResponse({ status: 200, description: 'user successfully updated' })
   @ApiResponse({ status: 404, description: 'User not found' })
