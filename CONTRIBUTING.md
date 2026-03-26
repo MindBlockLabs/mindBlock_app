@@ -30,8 +30,39 @@ npm --workspace frontend exec -- tsc --noEmit -p tsconfig.json
 npm --workspace backend exec -- tsc --noEmit -p tsconfig.json
 ```
 
+## Contract Development
+
+### Prerequisites
+Install the following tools before working on contracts:
+
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+
+# Add wasm32-unknown-unknown target
+rustup target add wasm32-unknown-unknown
+
+# Install Stellar CLI
+cargo install --locked stellar-cli
+```
+
+**MUST RUN** Local checks from inside `contracts/` before submitting a PR:
+
+```bash
+cd contracts/
+
+# Check formatting
+cargo fmt --check
+
+# Build the contract
+stellar contract build
+
+# Run tests
+cargo test
+```
+
 ## Branch Protection
-main and develop require status checks: lint-imports, build, type-check.
+main and develop require status checks: lint-imports, build, type-check, contracts.
 Require branches to be up-to-date before merging.
 
 ## Pull Request Standards

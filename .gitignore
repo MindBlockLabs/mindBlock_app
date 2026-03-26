@@ -4,3 +4,5 @@ contributoNote.md
 # Rust build artifacts
 contract/target/
 contract/Cargo.lock
+
+.DS_Store
