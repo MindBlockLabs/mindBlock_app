@@ -6,7 +6,6 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './auth/auth.module';
 import appConfig from './config/app.config';
 import databaseConfig from './config/database.config';
-import analyticsConfig from './config/analytics.config';
 import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
@@ -22,9 +21,7 @@ import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
-import { ActivityTrackerMiddleware } from './analytics/middleware/activity-tracker.middleware';
 import { HealthModule } from './health/health.module';
-import { AnalyticsModule } from './analytics/analytics.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -35,7 +32,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, databaseConfig, analyticsConfig, jwtConfig],
+      load: [appConfig, databaseConfig, jwtConfig],
     }),
     EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
@@ -105,7 +102,6 @@ import { AnalyticsModule } from './analytics/analytics.module';
       }),
     }),
     HealthModule,
-    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -117,10 +113,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(GeolocationMiddleware)
-      .forRoutes('*');
-
-    consumer
-      .apply(ActivityTrackerMiddleware)
       .forRoutes('*');
 
     consumer
