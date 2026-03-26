@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as express from 'express';
 import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { AppModule } from './app.module';
@@ -8,6 +9,42 @@ import { HealthService } from './health/health.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // Configure request body size limits to prevent DoS attacks
+  // Apply body parsing middleware with size limits BEFORE other middleware
+  app.use(express.json({ limit: '1mb' }));
+  app.use(express.urlencoded({ limit: '10mb', extended: true }));
+  app.use(
+    express.raw({
+      limit: '100mb',
+      type: 'application/octet-stream',
+    }),
+  );
+
+  // Custom error handler for payload too large errors from body parser
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    if (err.status === 413 || err.code === 'PAYLOAD_TOO_LARGE') {
+      return res.status(413).json({
+        statusCode: 413,
+        errorCode: 'PAYLOAD_TOO_LARGE',
+        message: `Request body exceeds maximum allowed size`,
+        timestamp: new Date().toISOString(),
+        path: req.url,
+      });
+    }
+
+    if (err.type === 'entity.too.large') {
+      return res.status(413).json({
+        statusCode: 413,
+        errorCode: 'PAYLOAD_TOO_LARGE',
+        message: `Request body exceeds maximum allowed size`,
+        timestamp: new Date().toISOString(),
+        path: req.url,
+      });
+    }
+
+    next(err);
+  });
 
   // Enable global validation
   app.useGlobalPipes(
