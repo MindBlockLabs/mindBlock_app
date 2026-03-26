@@ -12,7 +12,7 @@ import {
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { ApiKeyService } from './api-key.service';
 import { ApiKeyScope } from './api-key.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 class CreateApiKeyDto {
   name: string;
@@ -34,7 +34,7 @@ class ApiKeyResponseDto {
 
 @ApiTags('API Keys')
 @Controller('api-keys')
-@UseGuards(JwtAuthGuard)
+@UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth()
 export class ApiKeyController {
   constructor(private readonly apiKeyService: ApiKeyService) {}

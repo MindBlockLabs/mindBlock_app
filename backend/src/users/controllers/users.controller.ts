@@ -11,6 +11,10 @@ import {
 import { UsersService } from '../providers/users.service';
 import { XpLevelService } from '../providers/xp-level.service';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
+import { EditUserDto } from '../dtos/editUserDto.dto';
+import { CreateUserDto } from '../dtos/createUserDto';
+import { User } from '../user.entity';
 import { RequireApiKey, RequireApiKeyScopes } from '../../api-keys/api-key.decorators';
 import { ApiKeyScope } from '../../api-keys/api-key.entity';
 
