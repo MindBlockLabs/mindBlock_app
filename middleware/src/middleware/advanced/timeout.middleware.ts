@@ -1,7 +1,10 @@
 import {
+  DynamicModule,
+  Global,
   Inject,
   Injectable,
   Logger,
+  Module,
   NestMiddleware,
   ServiceUnavailableException,
 } from '@nestjs/common';
@@ -58,5 +61,23 @@ export class TimeoutMiddleware implements NestMiddleware {
     res.once('close', onComplete);
 
     next();
+  }
+}
+
+@Global()
+@Module({})
+export class TimeoutMiddlewareModule {
+  static register(options: TimeoutMiddlewareOptions = {}): DynamicModule {
+    return {
+      module: TimeoutMiddlewareModule,
+      providers: [
+        {
+          provide: TIMEOUT_MIDDLEWARE_OPTIONS,
+          useValue: options,
+        },
+        TimeoutMiddleware,
+      ],
+      exports: [TimeoutMiddleware],
+    };
   }
 }

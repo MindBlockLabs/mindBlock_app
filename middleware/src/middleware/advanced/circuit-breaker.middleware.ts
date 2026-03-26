@@ -40,7 +40,7 @@ export class CircuitBreakerService {
   private readonly halfOpenRetryIntervalMs: number;
 
   private state: CircuitBreakerState = 'CLOSED';
-  private failureCount = 0;
+  private failureTimestamps: number[] = [];
   private nextAttemptAt: number | null = null;
   private halfOpenInFlight = false;
 
@@ -65,7 +65,7 @@ export class CircuitBreakerService {
     return {
       name: this.name,
       state: this.state,
-      failureCount: this.failureCount,
+      failureCount: this.failureTimestamps.length,
       failureThreshold: this.failureThreshold,
       timeoutWindowMs: this.timeoutWindowMs,
       halfOpenRetryIntervalMs: this.halfOpenRetryIntervalMs,
@@ -95,7 +95,7 @@ export class CircuitBreakerService {
     const previousState = this.state;
 
     this.state = 'CLOSED';
-    this.failureCount = 0;
+    this.failureTimestamps = [];
     this.nextAttemptAt = null;
     this.halfOpenInFlight = false;
 
@@ -108,22 +108,25 @@ export class CircuitBreakerService {
 
   recordFailure(): void {
     this.refreshState();
-    this.failureCount += 1;
+    this.failureTimestamps.push(Date.now());
+    this.pruneFailures();
 
     if (
       this.state === 'HALF_OPEN' ||
-      this.failureCount >= this.failureThreshold
+      this.failureTimestamps.length >= this.failureThreshold
     ) {
       this.openCircuit();
       return;
     }
 
     this.logger.warn(
-      `Circuit "${this.name}" failure count is ${this.failureCount}/${this.failureThreshold}.`,
+      `Circuit "${this.name}" failure count is ${this.failureTimestamps.length}/${this.failureThreshold}.`,
     );
   }
 
   private refreshState(): void {
+    this.pruneFailures();
+
     if (
       this.state === 'OPEN' &&
       this.nextAttemptAt !== null &&
@@ -131,9 +134,15 @@ export class CircuitBreakerService {
     ) {
       this.state = 'HALF_OPEN';
       this.halfOpenInFlight = false;
-      this.failureCount = Math.max(this.failureCount, this.failureThreshold);
       this.logger.warn(`Circuit "${this.name}" moved to HALF_OPEN.`);
     }
+  }
+
+  private pruneFailures(): void {
+    const thresholdTime = Date.now() - this.timeoutWindowMs;
+    this.failureTimestamps = this.failureTimestamps.filter(
+      (timestamp) => timestamp >= thresholdTime,
+    );
   }
 
   private openCircuit(): void {
@@ -142,7 +151,7 @@ export class CircuitBreakerService {
     this.halfOpenInFlight = false;
 
     this.logger.error(
-      `Circuit "${this.name}" opened after ${this.failureCount} failures.`,
+      `Circuit "${this.name}" opened after ${this.failureTimestamps.length} failures within ${this.timeoutWindowMs}ms.`,
     );
   }
 }
@@ -211,13 +220,7 @@ export class CircuitBreakerMiddleware implements NestMiddleware {
     res.once('finish', onFinish);
     res.once('close', onClose);
 
-    next((error?: unknown) => {
-      if (error) {
-        finalizeFailure();
-      }
-
-      next(error as any);
-    });
+    next();
   }
 }
 
