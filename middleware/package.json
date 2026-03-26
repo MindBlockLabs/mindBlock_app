@@ -10,8 +10,6 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch --passWithNoTests",
     "test:cov": "jest --coverage --passWithNoTests",
-    "benchmark:middleware": "node benchmarks/middleware/run-all.cjs",
-    "benchmark:middleware:verify": "node benchmarks/middleware/verify-coverage.cjs",
     "lint": "eslint -c eslint.config.mjs \"src/**/*.ts\" \"tests/**/*.ts\"",
     "lint:fix": "eslint -c eslint.config.mjs \"src/**/*.ts\" \"tests/**/*.ts\" --fix",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
