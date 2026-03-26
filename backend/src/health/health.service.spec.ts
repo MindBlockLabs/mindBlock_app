@@ -95,13 +95,12 @@ describe('HealthService', () => {
 
       const result = await service.getReadinessHealth();
 
-      // Database and Redis should be healthy (these are the critical checks)
+      expect(result.status).toBe('healthy');
+      expect(result.checks).toBeDefined();
       expect(result.checks!.database.status).toBe('healthy');
       expect(result.checks!.redis.status).toBe('healthy');
-      
-      // Memory and filesystem status may vary by environment, just check they exist
-      expect(result.checks!.memory).toBeDefined();
-      expect(result.checks!.filesystem).toBeDefined();
+      expect(result.checks!.memory.status).toBe('healthy');
+      expect(result.checks!.filesystem.status).toBe('healthy');
     });
 
     it('should return unhealthy when database fails', async () => {
@@ -236,7 +235,7 @@ describe('HealthService', () => {
       await service.getDetailedHealth();
       
       // Second call with skip cache
-      await service.getDetailedHealthSkipCache();
+      await service.getDetailedHealth();
 
       // Should call dependencies twice
       expect(mockConnection.query).toHaveBeenCalledTimes(2);
