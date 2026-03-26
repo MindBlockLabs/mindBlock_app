@@ -8,3 +8,7 @@ export * from './monitoring';
 export * from './validation';
 export * from './common';
 export * from './config';
+
+// Analytics middleware exports (backend implementation)
+// Note: Main analytics implementation is in backend/src/analytics
+// This package can re-export shared utilities if needed
