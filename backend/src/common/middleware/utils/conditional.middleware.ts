@@ -5,7 +5,7 @@ import * as micromatch from 'micromatch';
 export type RoutePattern = string | RegExp | (string | RegExp)[];
 
 /**
- * Checks if the request path matches any of the provided patterns
+ * Checks if the request path matches any of the provided patternsss
  */
 function matchesPath(path: string, patterns: RoutePattern): boolean {
   if (!patterns || (Array.isArray(patterns) && patterns.length === 0)) {
