@@ -1,5 +1,3 @@
-import { userRole } from '../../users/enums/userRole.enum';
-
 /**Active user data interface */
 export interface ActiveUserData {
   /**sub of type number */
@@ -7,7 +5,4 @@ export interface ActiveUserData {
 
   /**email of type string */
   email?: string;
-
-  /**authenticated user role */
-  userRole?: userRole;
 }

@@ -7,7 +7,6 @@ import {
 } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as jwt from 'jsonwebtoken';
-import { userRole } from '../../users/enums/userRole.enum';
 
 /**
  * Interface for the Redis client to support token blacklisting.
@@ -41,7 +40,7 @@ export interface JwtAuthMiddlewareOptions {
 export interface DecodedUserPayload {
   userId: string;
   email: string;
-  userRole: userRole;
+  userRole: string;
   [key: string]: any;
 }
 
@@ -125,7 +124,7 @@ export class JwtAuthMiddleware implements NestMiddleware {
       const userPayload: DecodedUserPayload = {
         userId,
         email: decoded.email,
-        userRole: (decoded.userRole || decoded.role || userRole.USER) as userRole,
+        userRole: decoded.userRole || decoded.role,
       };
 
       if (!userPayload.userId || !userPayload.email) {
