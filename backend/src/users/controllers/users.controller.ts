@@ -15,6 +15,8 @@ import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { EditUserDto } from '../dtos/editUserDto.dto';
 import { CreateUserDto } from '../dtos/createUserDto';
 import { User } from '../user.entity';
+import { RequireApiKey, RequireApiKeyScopes } from '../../api-keys/api-key.decorators';
+import { ApiKeyScope } from '../../api-keys/api-key.entity';
 
 @Controller('users')
 @ApiTags('users')
@@ -78,5 +80,23 @@ export class UsersController {
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(@Param('id') id: string, @Body() editUserDto: EditUserDto) {
     return this.usersService.update(id, editUserDto);
+  }
+
+  @Get('api-keys/stats')
+  @RequireApiKey()
+  @ApiOperation({ summary: 'Get user statistics (requires API key)' })
+  @ApiResponse({ status: 200, description: 'User stats retrieved' })
+  async getUserStatsWithApiKey() {
+    // This endpoint requires API key authentication
+    return { message: 'This endpoint requires API key authentication' };
+  }
+
+  @Post('api-keys/admin-action')
+  @RequireApiKeyScopes(ApiKeyScope.ADMIN)
+  @ApiOperation({ summary: 'Admin action (requires admin API key scope)' })
+  @ApiResponse({ status: 200, description: 'Admin action performed' })
+  async adminActionWithApiKey() {
+    // This endpoint requires API key with admin scope
+    return { message: 'Admin action performed with API key' };
   }
 }

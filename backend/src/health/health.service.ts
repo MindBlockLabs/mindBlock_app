@@ -92,6 +92,38 @@ export class HealthService {
     };
   }
 
+  async getDetailedHealthSkipCache(): Promise<HealthCheckResult> {
+    const options: HealthCheckOptions = { 
+      includeDetails: true, 
+      timeout: HEALTH_CHECK_TIMEOUT,
+      skipCache: true 
+    };
+    
+    const status = await this.performHealthChecks(options);
+    
+    // Determine overall status
+    const statuses = Object.values(status).map((check: HealthCheck) => check.status);
+    const hasUnhealthy = statuses.includes('unhealthy');
+    const hasDegraded = statuses.includes('degraded');
+    
+    let overallStatus: 'healthy' | 'degraded' | 'unhealthy';
+    if (hasUnhealthy) {
+      overallStatus = 'unhealthy';
+    } else if (hasDegraded) {
+      overallStatus = 'degraded';
+    } else {
+      overallStatus = 'healthy';
+    }
+
+    return {
+      status: overallStatus,
+      version: this.version,
+      uptime: Math.floor((Date.now() - this.startTime) / 1000),
+      timestamp: new Date().toISOString(),
+      checks: status as unknown as Record<string, HealthCheck>,
+    };
+  }
+
   private async performHealthChecks(options: HealthCheckOptions): Promise<HealthStatus> {
     const cacheKey = `health-checks-${JSON.stringify(options)}`;
     
@@ -235,7 +267,9 @@ export class HealthService {
     
     try {
       const fs = require('fs').promises;
-      await fs.access('/tmp', fs.constants.W_OK);
+      // Use a cross-platform temp directory check
+      const tempDir = process.env.TEMP || process.env.TMP || '.';
+      await fs.access(tempDir, fs.constants.W_OK);
       
       const responseTime = Date.now() - startTime;
       
@@ -244,6 +278,7 @@ export class HealthService {
         responseTime,
         details: {
           writable: true,
+          path: tempDir,
           responseTime: `${responseTime}ms`,
         },
       };

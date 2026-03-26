@@ -55,7 +55,7 @@
     "sqlite3": "^5.1.7",
     "stellar-sdk": "^13.3.0",
     "swagger-ui-express": "^5.0.1",
-    "typeorm": "^0.3.21"
+    "typeorm": "^0.3.28"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
