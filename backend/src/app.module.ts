@@ -22,6 +22,7 @@ import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
+import { ApiKeyModule } from './api-keys/api-key.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -102,6 +103,7 @@ import { HealthModule } from './health/health.module';
       }),
     }),
     HealthModule,
+    ApiKeyModule,
   ],
   controllers: [AppController],
   providers: [AppService],
