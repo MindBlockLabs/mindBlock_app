@@ -22,6 +22,8 @@ import { CategoryStatsDto } from '../dtos/category-stats.dto';
 import { OverallStatsDto } from '../dtos/overall-stats.dto';
 import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
 import { ActiveUserData } from '../../auth/interfaces/activeInterface';
+import { Roles } from '../../roles/roles.decorator';
+import { userRole } from '../../users/enums/userRole.enum';
 
 @Controller('progress')
 @ApiTags('Progress')
@@ -35,6 +37,7 @@ export class ProgressController {
   ) {}
 
   @Get()
+  @Roles(userRole.USER)
   @ApiOperation({
     summary: 'Get paginated progress history',
     description:
@@ -62,6 +65,7 @@ export class ProgressController {
   }
 
   @Get('stats')
+  @Roles(userRole.USER)
   @ApiOperation({
     summary: 'Get overall user statistics',
     description:
@@ -81,6 +85,7 @@ export class ProgressController {
   }
 
   @Get('category/:id')
+  @Roles(userRole.USER)
   @ApiOperation({
     summary: 'Get category-specific statistics',
     description:

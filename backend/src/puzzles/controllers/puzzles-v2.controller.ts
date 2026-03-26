@@ -21,6 +21,8 @@ import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
 import { Puzzle } from '../entities/puzzle.entity';
 import { PuzzleDifficulty } from '../enums/puzzle-difficulty.enum';
+import { Roles } from '../../roles/roles.decorator';
+import { userRole } from '../../users/enums/userRole.enum';
 
 class PuzzleV2QueryDto {
   @IsOptional()
@@ -100,6 +102,7 @@ export class PuzzlesV2Controller {
   constructor(private readonly puzzlesService: PuzzlesService) {}
 
   @Post()
+  @Roles(userRole.ADMIN)
   @ApiOperation({ summary: 'Create a new puzzle (v2 contract)' })
   @ApiResponse({
     status: 201,
