@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -16,10 +16,8 @@ import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
 import { CategoriesModule } from './categories/categories.module';
-
-// const ENV = process.env.NODE_ENV;
-// console.log('NODE_ENV:', process.env.NODE_ENV);
-// console.log('ENV:', ENV);
+import { TransactionMiddleware } from './middleware/transaction/transaction.middleware';
+import { TransactionLogger } from './middleware/transaction/transaction.logger';
 
 @Module({
   imports: [
@@ -81,10 +79,14 @@ import { CategoriesModule } from './categories/categories.module';
     CommonModule,
     RedisModule,
     BlockchainModule,
-    ProgressModule,
     CategoriesModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TransactionLogger],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // Apply transaction middleware globally
+    consumer.apply(TransactionMiddleware).forRoutes('*');
+  }
+}
