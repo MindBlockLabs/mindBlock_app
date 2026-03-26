@@ -8,3 +8,4 @@ export * from './monitoring';
 export * from './validation';
 export * from './common';
 export * from './config';
+export * from './middleware';
