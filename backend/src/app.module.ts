@@ -22,12 +22,6 @@ import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
-import {
-  ApiVersionMiddleware,
-  ApiVersionService,
-} from './common/versioning';
-import { DocsController } from './docs/docs.controller';
-import { RolesGuard } from './roles/roles.guard';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -104,13 +98,13 @@ import { RolesGuard } from './roles/roles.guard';
         redisClient: redisClient,
         validateUser: async (userId: string) => await usersService.findOneById(userId),
         logging: true,
-        publicRoutes: ['/api/auth', '/api/docs', '/health'],
+        publicRoutes: ['/auth', '/api', '/docs', '/health'],
       }),
     }),
     HealthModule,
   ],
-  controllers: [AppController, DocsController],
-  providers: [AppService, ApiVersionService, RolesGuard],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule implements NestModule {
   /**
@@ -122,14 +116,9 @@ export class AppModule implements NestModule {
       .forRoutes('*');
 
     consumer
-      .apply(ApiVersionMiddleware)
-      .forRoutes({ path: 'api/*path', method: RequestMethod.ALL });
-
-    consumer
       .apply(JwtAuthMiddleware)
       .exclude(
-        { path: 'api/auth/(.*)', method: RequestMethod.ALL },
-        { path: 'api/docs/(.*)', method: RequestMethod.GET },
+        { path: 'auth/(.*)', method: RequestMethod.ALL },
         { path: 'api', method: RequestMethod.GET },
         { path: 'docs', method: RequestMethod.GET },
         { path: 'health', method: RequestMethod.GET },
