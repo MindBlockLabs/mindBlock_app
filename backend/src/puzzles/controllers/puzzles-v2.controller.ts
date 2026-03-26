@@ -7,7 +7,7 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import {
   IsBoolean,
   IsEnum,
@@ -45,7 +45,7 @@ class PuzzleV2QueryDto {
   pageSize?: number = 20;
 
   @IsOptional()
-  @Type(() => Boolean)
+  @Transform(({ value }) => value === true || value === 'true')
   @IsBoolean()
   includeCategorySummary?: boolean = true;
 }
