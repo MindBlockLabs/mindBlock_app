@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import FilterBar from '@/components/puzzles/FilterBar';
 import { usePuzzles } from '@/hooks/usePuzzles';
 import type { PuzzleDifficulty, PuzzleFilters } from '@/lib/types/puzzles';
 import { Puzzle as PuzzleIcon, Clock, Zap } from 'lucide-react';
+import Pagination from '@/components/ui/Pagination';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -20,11 +21,22 @@ const VALID_DIFFICULTIES: PuzzleDifficulty[] = [
   'ALL', 'BEGINNER', 'INTERMEDIATE', 'ADVANCED', 'EXPERT',
 ];
 
+const ITEMS_PER_PAGE_OPTIONS = [10, 20, 50];
+
 function parseFiltersFromParams(params: URLSearchParams): PuzzleFilters {
   const category  = params.get('category') ?? '';
   const rawDiff   = (params.get('difficulty') ?? '').toUpperCase() as PuzzleDifficulty;
   const difficulty = VALID_DIFFICULTIES.includes(rawDiff) ? rawDiff : 'ALL';
   return { categoryId: category, difficulty };
+}
+
+function parsePaginationFromParams(params: URLSearchParams) {
+  const page = parseInt(params.get('page') ?? '1', 10);
+  const itemsPerPage = parseInt(params.get('itemsPerPage') ?? '10', 10);
+  return {
+    currentPage: Math.max(1, page),
+    itemsPerPage: ITEMS_PER_PAGE_OPTIONS.includes(itemsPerPage) ? itemsPerPage : 10,
+  };
 }
 
 // ─── Puzzle Card ─────────────────────────────────────────────────────────────
@@ -88,24 +100,64 @@ function PuzzleListContent() {
     parseFiltersFromParams(searchParams)
   );
 
+  const [pagination, setPagination] = useState(() =>
+    parsePaginationFromParams(searchParams)
+  );
+
   // Keep local state in sync if the browser URL changes externally (back/forward)
   useEffect(() => {
     setFilters(parseFiltersFromParams(searchParams));
+    setPagination(parsePaginationFromParams(searchParams));
   }, [searchParams]);
 
-  // Sync filters → URL
-  const handleFiltersChange = useCallback(
-    (next: PuzzleFilters) => {
-      setFilters(next);
-
+  // Sync filters & pagination → URL
+  const updateURL = useCallback(
+    (nextFilters: PuzzleFilters, nextPagination: { currentPage: number; itemsPerPage: number }) => {
       const params = new URLSearchParams();
-      if (next.categoryId)             params.set('category',   next.categoryId);
-      if (next.difficulty !== 'ALL')   params.set('difficulty', next.difficulty);
+      if (nextFilters.categoryId)             params.set('category',   nextFilters.categoryId);
+      if (nextFilters.difficulty !== 'ALL')   params.set('difficulty', nextFilters.difficulty);
+      if (nextPagination.currentPage > 1)     params.set('page',       nextPagination.currentPage.toString());
+      if (nextPagination.itemsPerPage !== 10) params.set('itemsPerPage', nextPagination.itemsPerPage.toString());
 
       const query = params.toString();
       router.push(query ? `/puzzle-list?${query}` : '/puzzle-list', { scroll: false });
     },
     [router],
+  );
+
+  // Sync filters → URL
+  const handleFiltersChange = useCallback(
+    (next: PuzzleFilters) => {
+      setFilters(next);
+      // Reset to page 1 when filters change
+      const newPagination = { ...pagination, currentPage: 1 };
+      setPagination(newPagination);
+      updateURL(next, newPagination);
+    },
+    [pagination, updateURL],
+  );
+
+  // Handle pagination changes
+  const handlePageChange = useCallback(
+    (page: number) => {
+      const newPagination = { ...pagination, currentPage: page };
+      setPagination(newPagination);
+      updateURL(filters, newPagination);
+      
+      // Scroll to top smoothly
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [filters, pagination, updateURL],
+  );
+
+  // Handle items per page change
+  const handleItemsPerPageChange = useCallback(
+    (itemsPerPage: number) => {
+      const newPagination = { itemsPerPage, currentPage: 1 };
+      setPagination(newPagination);
+      updateURL(filters, newPagination);
+    },
+    [filters, updateURL],
   );
 
   // Build query params for usePuzzles — omit 'ALL' (no filter)
@@ -116,6 +168,27 @@ function PuzzleListContent() {
 
   const { data: puzzles, isLoading, isError, error } = usePuzzles(puzzleQuery);
 
+  // Calculate pagination
+  const paginatedData = useMemo(() => {
+    if (!puzzles) return [];
+    
+    const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+    const endIndex = startIndex + pagination.itemsPerPage;
+    return puzzles.slice(startIndex, endIndex);
+  }, [puzzles, pagination.currentPage, pagination.itemsPerPage]);
+
+  const totalPages = useMemo(() => {
+    if (!puzzles) return 0;
+    return Math.ceil(puzzles.length / pagination.itemsPerPage);
+  }, [puzzles, pagination.itemsPerPage]);
+
+  // Adjust current page if it exceeds total pages (e.g., after filtering)
+  useEffect(() => {
+    if (totalPages > 0 && pagination.currentPage > totalPages) {
+      handlePageChange(totalPages);
+    }
+  }, [totalPages, pagination.currentPage, handlePageChange]);
+
   return (
     <>
       {/* Filter bar */}
@@ -125,9 +198,33 @@ function PuzzleListContent() {
 
       {/* Results count */}
       {!isLoading && !isError && puzzles && (
-        <p className="mb-4 text-xs text-slate-500">
-          {puzzles.length} puzzle{puzzles.length !== 1 ? 's' : ''} found
-        </p>
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-xs text-slate-500">
+            {puzzles.length} puzzle{puzzles.length !== 1 ? 's' : ''} found
+            {totalPages > 1 && (
+              <span className="ml-2">
+                Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1}-
+                {Math.min(pagination.currentPage * pagination.itemsPerPage, puzzles.length)} of {puzzles.length}
+              </span>
+            )}
+          </p>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-2 text-sm text-slate-400">
+              <span>Items per page:</span>
+              <select
+                value={pagination.itemsPerPage}
+                onChange={(e) => handleItemsPerPageChange(parseInt(e.target.value, 10))}
+                className="bg-slate-800 border border-slate-600 rounded px-2 py-1 text-slate-300 focus:outline-none focus:border-[#3B82F6]/40"
+              >
+                {ITEMS_PER_PAGE_OPTIONS.map(option => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Loading skeleton */}
@@ -157,26 +254,37 @@ function PuzzleListContent() {
       {!isLoading && !isError && puzzles?.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
           <PuzzleIcon className="h-10 w-10 text-slate-600" />
-          <p className="font-medium text-slate-400">No puzzles match your filters</p>
-          <p className="text-xs text-slate-600">Try adjusting the difficulty or category</p>
+          <p className="font-medium text-slate-400">No puzzles found</p>
+          <p className="text-xs text-slate-600">Try clearing your filters or adjusting your search.</p>
         </div>
       )}
 
       {/* Puzzle grid */}
       {!isLoading && !isError && puzzles && puzzles.length > 0 && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {puzzles.map((puzzle) => (
-            <PuzzleCard
-              key={puzzle.id}
-              id={puzzle.id}
-              title={puzzle.title}
-              description={puzzle.description}
-              difficulty={puzzle.difficulty}
-              type={puzzle.type}
-              timeLimit={puzzle.timeLimit}
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedData.map((puzzle) => (
+              <PuzzleCard
+                key={puzzle.id}
+                id={puzzle.id}
+                title={puzzle.title}
+                description={puzzle.description}
+                difficulty={puzzle.difficulty}
+                type={puzzle.type}
+                timeLimit={puzzle.timeLimit}
+              />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
             />
-          ))}
-        </div>
+          )}
+        </>
       )}
     </>
   );

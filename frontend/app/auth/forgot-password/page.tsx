@@ -3,6 +3,7 @@
 import ErrorBoundary from "@/components/error/ErrorBoundary";
 import Link from "next/link";
 import Image from 'next/image';
+import { ArrowLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Input from "@/components/ui/Input";
 import { useToast } from "@/components/ui/ToastProvider";
@@ -94,12 +95,7 @@ const ForgotPassword = () => {
       {/* Back Arrow - stays at top on desktop, within main content */}
       <div className="hidden md:flex md:items-start md:p-6">
         <Link href="/auth/signin">
-          <Image
-            src="/Vector.png"
-            alt="Home"
-            width={20}
-            height={20}
-          />
+          <ArrowLeft size={20} />
         </Link>
       </div>
       {/* Main Content */}
@@ -131,7 +127,7 @@ const ForgotPassword = () => {
           <form onSubmit={handleForgotPassword} className="space-y-6">
             <Input
               type="email"
-              placeholder="Email"
+              placeholder="Email Address"
               value={formData.email}
               onChange={handleInputChange('email')}
             />

@@ -1,4 +1,5 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -24,13 +25,20 @@ import { SecurityHeadersMiddleware } from './middleware/security/security-header
 
 
 
+import { JwtAuthModule, JwtAuthMiddleware } from './auth/middleware/jwt-auth.module';
+import { REDIS_CLIENT } from './redis/redis.constants';
+import jwtConfig from './auth/authConfig/jwt.config';
+import { UsersService } from './users/providers/users.service';
+import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
+import { HealthModule } from './health/health.module';
+
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
-      load: [appConfig, databaseConfig],
+      load: [appConfig, databaseConfig, jwtConfig],
     }),
     EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
@@ -86,6 +94,19 @@ import { SecurityHeadersMiddleware } from './middleware/security/security-header
     RedisModule,
     BlockchainModule,
     CategoriesModule,
+    // Register the custom JWT Auth Middleware module
+    JwtAuthModule.registerAsync({
+      imports: [ConfigModule, UsersModule, RedisModule],
+      inject: [ConfigService, UsersService, REDIS_CLIENT],
+      useFactory: (configService: ConfigService, usersService: UsersService, redisClient: any) => ({
+        secret: configService.get<string>('jwt.secret') || '',
+        redisClient: redisClient,
+        validateUser: async (userId: string) => await usersService.findOneById(userId),
+        logging: true,
+        publicRoutes: ['/auth', '/api', '/docs', '/health'],
+      }),
+    }),
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService, TransactionLogger],
@@ -100,5 +121,23 @@ export class AppModule implements NestModule {
         consumer.apply(IdempotencyMiddleware).forRoutes('*');
             consumer.apply(SecurityHeadersMiddleware).forRoutes('*');
         
+
+  /**
+   * Apply the JWT Authentication Middleware to all routes except public ones.
+   */
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(GeolocationMiddleware)
+      .forRoutes('*');
+
+    consumer
+      .apply(JwtAuthMiddleware)
+      .exclude(
+        { path: 'auth/(.*)', method: RequestMethod.ALL },
+        { path: 'api', method: RequestMethod.GET },
+        { path: 'docs', method: RequestMethod.GET },
+        { path: 'health', method: RequestMethod.GET },
+      )
+      .forRoutes('*');
   }
 }
