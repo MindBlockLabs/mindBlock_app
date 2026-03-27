@@ -1,7 +1,7 @@
 #![no_std]
 use soroban_sdk::{contract, contractimpl, contracttype, Address, Env, String, Vec};
 
-#[derive(Clone)]
+#[derive(Clone, Debug, PartialEq)] // Added Debug and PartialEq for tests
 #[contracttype]
 pub struct Player {
     pub address: Address,
@@ -20,6 +20,12 @@ pub struct PuzzleSubmission {
     pub category: String,
     pub score: u32,
     pub timestamp: u64,
+}
+
+#[derive(Clone)]
+#[contracttype]
+pub enum DataKey {
+    PlayerIndex,
 }
 
 #[contract]
@@ -41,6 +47,30 @@ impl MindBlockContract {
         };
 
         env.storage().instance().set(&player, &new_player);
+
+        // Update player index
+        let mut index: Vec<Address> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::PlayerIndex)
+            .unwrap_or_else(|| Vec::new(&env));
+
+        // Check if player is already in index
+        let mut exists = false;
+        for i in 0..index.len() {
+            if index.get(i).unwrap() == player {
+                exists = true;
+                break;
+            }
+        }
+
+        if !exists {
+            index.push_back(player);
+            env.storage()
+                .persistent()
+                .set(&DataKey::PlayerIndex, &index);
+        }
+
         new_player
     }
 
@@ -92,12 +122,50 @@ impl MindBlockContract {
     }
 
     /// Get top players by XP (leaderboard)
-    pub fn get_leaderboard(env: Env, _limit: u32) -> Vec<Player> {
-        // Note: In production, implement proper pagination and sorting
-        // This is a simplified version
-        // This would need to be implemented with proper indexing
-        // For now, returns empty vector as placeholder
-        Vec::new(&env)
+    pub fn get_leaderboard(env: Env, limit: u32) -> Vec<Player> {
+        let index: Vec<Address> = env
+            .storage()
+            .persistent()
+            .get(&DataKey::PlayerIndex)
+            .unwrap_or_else(|| Vec::new(&env));
+
+        let mut players = Vec::new(&env);
+        for i in 0..index.len() {
+            let addr = index.get(i).unwrap();
+            if let Some(player_data) = env.storage().instance().get::<Address, Player>(&addr) {
+                players.push_back(player_data);
+            }
+        }
+
+        // Sort players by XP descending using bubble sort (Soroban Vec is immutable, so we build a new one)
+        // This is inefficient for large N, but works for now.
+        if players.is_empty() {
+            return players;
+        }
+
+        let n = players.len();
+        let mut sorted = players;
+
+        // Bubble sort implementation on Soroban Vec
+        for i in 0..n {
+            for j in 0..n - i - 1 {
+                let p1 = sorted.get(j).unwrap();
+                let p2 = sorted.get(j + 1).unwrap();
+                if p1.xp < p2.xp {
+                    sorted.set(j, p2);
+                    sorted.set(j + 1, p1);
+                }
+            }
+        }
+
+        // Apply limit
+        let mut limited = Vec::new(&env);
+        let count = if limit < n { limit } else { n };
+        for i in 0..count {
+            limited.push_back(sorted.get(i).unwrap());
+        }
+
+        limited
     }
 
     /// Update player IQ level
@@ -184,5 +252,40 @@ mod test {
         let xp = client.submit_puzzle(&player, &1, &category, &95);
 
         assert!(xp > 0);
+    }
+
+    #[test]
+    fn test_leaderboard_sorting() {
+        let env = Env::default();
+        let contract_id = env.register(MindBlockContract, ());
+        let client = MindBlockContractClient::new(&env, &contract_id);
+
+        let p1 = Address::generate(&env);
+        let p2 = Address::generate(&env);
+        let p3 = Address::generate(&env);
+
+        let category = String::from_str(&env, "coding");
+
+        env.mock_all_auths();
+
+        client.register_player(&p1, &String::from_str(&env, "Alice"), &10);
+        client.register_player(&p2, &String::from_str(&env, "Bob"), &20);
+        client.register_player(&p3, &String::from_str(&env, "Charlie"), &30);
+
+        // Accumulate XP
+        client.submit_puzzle(&p1, &1, &category, &50); // Alice: (50 * 10) / 10 = 50 XP
+        client.submit_puzzle(&p2, &1, &category, &50); // Bob: (50 * 20) / 10 = 100 XP
+        client.submit_puzzle(&p3, &1, &category, &50); // Charlie: (50 * 30) / 10 = 150 XP
+
+        let leaderboard = client.get_leaderboard(&5);
+        assert_eq!(leaderboard.len(), 3);
+        assert_eq!(leaderboard.get(0).unwrap().address, p3); // Charlie first
+        assert_eq!(leaderboard.get(1).unwrap().address, p2); // Bob second
+        assert_eq!(leaderboard.get(2).unwrap().address, p1); // Alice third
+
+        // Test limit
+        let leaderboard_limit = client.get_leaderboard(&1);
+        assert_eq!(leaderboard_limit.len(), 1);
+        assert_eq!(leaderboard_limit.get(0).unwrap().address, p3);
     }
 }
