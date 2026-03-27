@@ -19,6 +19,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { TransactionMiddleware } from './middleware/transaction/transaction.middleware';
 import { TransactionLogger } from './middleware/transaction/transaction.logger';
 import { CompressionMiddleware } from './middleware/compression/compression.middleware';
+import { IdempotencyMiddleware } from './middleware/idempotency/idempotency.middleware';
+import { IdempotencyService } from './middleware/idempotency/idempotency.service';
 
 @Module({
   imports: [
@@ -92,5 +94,6 @@ export class AppModule implements NestModule {
 
     // Apply compression middleware globally
     consumer.apply(CompressionMiddleware).forRoutes('*');
+        consumer.apply(IdempotencyMiddleware).forRoutes('*'); // new
   }
 }
