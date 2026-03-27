@@ -6,15 +6,17 @@ interface StatCardProps {
   value: string | number;
   label: string;
   className?: string;
+  onClick?: () => void;
 }
 
-export function StatCard({ icon, value, label, className }: StatCardProps) {
+export function StatCard({ icon, value, label, className, onClick }: StatCardProps) {
   return (
     <div
       className={cn(
         "flex items-center rounded-xl bg-card border border-[#E6E6E64D] p-3 cursor-pointer transition-transform duration-200 hover:scale-105",
         className,
       )}
+      onClick={onClick}
     >
       <div>{icon}</div>
       <div className="flex flex-col">

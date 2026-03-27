@@ -1,29 +1,45 @@
 import React from "react";
+import Image from "next/image";
 
-interface StreakDayIndicatorProps {
-    day: string;
-    completed: boolean;
+export interface StreakDayIndicatorProps {
+    status: 'empty' | 'completed' | 'streak' | 'missed';
+    isToday?: boolean;
+    inStreakRun?: boolean;
 }
 
 export const StreakDayIndicator: React.FC<StreakDayIndicatorProps> = ({
-    day,
-    completed,
+    status,
+    isToday = false,
+    inStreakRun = false,
 }) => {
+    // Base classes for the perfect circle shape to ensure no layout shift
+    const baseClasses = "flex items-center justify-center w-[24px] h-[24px] md:w-[28px] md:h-[28px] rounded-full z-10 shrink-0";
+    
+    // Status-specific classes
+    let statusClasses = "";
+    if (status === "empty") {
+        statusClasses = "bg-[#E6E6E6]"; 
+    } else if (status === "completed") {
+        statusClasses = "bg-[#FACC15]";
+    } else if (status === "streak") {
+        statusClasses = "bg-[#FACC15] shadow-lg shadow-[#FACC15]/50";
+    } else if (status === "missed") {
+        statusClasses = "bg-white";
+    }
+
+    // isToday styling (adding ring to distinguish)
+    const todayClasses = isToday ? "ring-2 ring-white ring-offset-2 ring-offset-[#050C16]" : "";
+
     return (
-        <div className="flex flex-col items-center gap-[6px] md:gap-[10px]">
-            <span className={`text-[10px] md:text-xs font-nunito font-semibold uppercase ${completed ? "text-[#FACC15]" : "text-[#E6E6E6]"}`}>
-                {day}
-            </span>
-            <div
-                className={`flex items-center justify-center w-[24px] h-[24px] md:w-[28px] md:h-[28px] rounded-[25px] ${completed
-                    ? "bg-[#FACC15] shadow-lg shadow-[#FACC15]/50 py-[9px] px-[7px] md:py-[11px] md:px-[9px]"
-                    : "bg-[#E6E6E6] border-2 border-[#E6E6E6]"
-                    }`}
-            >
-                {completed && (
-                    <svg width="10" height="8" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
+        <div className="relative flex items-center justify-center w-[24px] h-[24px] md:w-[28px] md:h-[28px]">
+            {/* Horizontal highlight bar for streak runs */}
+            {inStreakRun && status === "streak" && (
+                <div className="absolute w-[300%] h-[8px] bg-[#FACC15]/20 rounded-full z-0" />
+            )}
+            
+            <div className={`${baseClasses} ${statusClasses} ${todayClasses}`}>
+                {status === "streak" && (
+                    <Image src="/fire.svg" alt="streak fire" width={14} height={16} className="w-[12px] h-[14px] md:w-[14px] md:h-[16px]" />
                 )}
             </div>
         </div>

@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { StatCard } from "./StatCard";
+import { useRouter } from "next/navigation";
 
 interface ProfileOverviewProps {
   dayStreak: number;
@@ -14,30 +15,36 @@ export function ProfileOverview({
   rank,
   challengeLevel,
 }: ProfileOverviewProps) {
+  const router = useRouter();
+  
   const stats = [
     {
       iconSrc: "/fire.svg",
       iconAlt: "fire",
       value: dayStreak,
       label: "Day streak",
+      link: "/streak",
     },
     {
       iconSrc: "/diamond.svg",
       iconAlt: "diamond",
       value: totalPoints,
       label: "Total Points",
+      link: "/",
     },
     {
       iconSrc: "/trophy.svg", 
       iconAlt: "trophy",
       value: `#${rank}`,
       label: "Rank",
+      link: "/",
     },
     {
       iconSrc: "/puzzlePiece.svg",
       iconAlt: "puzzle piece",
       value: challengeLevel,
       label: "Challenge Level",
+      link: "/",
     },
   ] as const;
 
@@ -49,6 +56,7 @@ export function ProfileOverview({
         {stats.map((stat) => (
           <StatCard
             key={stat.label}
+            onClick={() => stat.link && router.push(stat.link)}
             icon={
               <div className=" h-10 w-10 items-center justify-center">
                 <Image src={stat.iconSrc} width={28} height={28} className="h-7 w-7" alt={stat.iconAlt} />

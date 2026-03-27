@@ -25,7 +25,8 @@
   "workspaces": [
     "frontend",
     "backend",
-    "contracts"
+    "contracts",
+    "middleware"
   ],
   "homepage": "https://github.com/MindBlockLabs/mindBlock_Backend#readme",
   "dependencies": {
