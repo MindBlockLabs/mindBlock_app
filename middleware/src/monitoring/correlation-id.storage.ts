@@ -2,6 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 export interface CorrelationContext {
   correlationId: string;
+  userId?: string;
 }
 
 export class CorrelationIdStorage {
