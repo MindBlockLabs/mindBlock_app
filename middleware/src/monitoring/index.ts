@@ -1,3 +1,6 @@
-// Placeholder: monitoring middleware exports will live here.
-
-export const __monitoringPlaceholder = true;
+export * from './correlation-id.middleware';
+export * from './correlation-id.storage';
+export * from './correlation-logger.service';
+export * from './correlation.module';
+export * from './correlation-exception-filter';
+export * from './correlation-propagation.utils';
