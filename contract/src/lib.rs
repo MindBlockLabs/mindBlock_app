@@ -10,6 +10,9 @@ pub struct Player {
     pub iq_level: u32,
     pub puzzles_solved: u64,
     pub current_streak: u32,
+    /// Unix timestamp (seconds) of the player's last successful puzzle submission.
+    /// Used to automatically reset streak after 24+ hours of inactivity (#293).
+    pub last_active_timestamp: u64,
 }
 
 #[derive(Clone)]
@@ -38,6 +41,7 @@ impl MindBlockContract {
             iq_level,
             puzzles_solved: 0,
             current_streak: 0,
+            last_active_timestamp: 0,
         };
 
         env.storage().instance().set(&player, &new_player);
@@ -65,6 +69,25 @@ impl MindBlockContract {
             .get(&player)
             .unwrap_or_else(|| panic!("Player not registered"));
 
+        // #294: Reject duplicate submissions before any state mutation.
+        let submission_key = (player.clone(), puzzle_id);
+        if env.storage().instance().has(&submission_key) {
+            panic!("Puzzle already submitted");
+        }
+
+        // #293: Auto-reset streak when the player has been inactive for more than 24 hours.
+        let current_timestamp = env.ledger().timestamp();
+        const SECONDS_IN_A_DAY: u64 = 86_400;
+        // Guard on puzzles_solved > 0 rather than last_active_timestamp != 0,
+        // because the test environment starts the ledger clock at 0, making
+        // timestamp == 0 an ambiguous sentinel for "never submitted".
+        if player_data.puzzles_solved > 0
+            && current_timestamp > player_data.last_active_timestamp
+            && current_timestamp - player_data.last_active_timestamp > SECONDS_IN_A_DAY
+        {
+            player_data.current_streak = 0;
+        }
+
         // Calculate XP based on score and IQ level
         let xp_reward = (score as u64) * (player_data.iq_level as u64) / 10;
 
@@ -72,6 +95,7 @@ impl MindBlockContract {
         player_data.xp += xp_reward;
         player_data.puzzles_solved += 1;
         player_data.current_streak += 1;
+        player_data.last_active_timestamp = current_timestamp; // #293: track last activity
 
         // Save updated player data
         env.storage().instance().set(&player, &player_data);
@@ -82,10 +106,9 @@ impl MindBlockContract {
             puzzle_id,
             category,
             score,
-            timestamp: env.ledger().timestamp(),
+            timestamp: current_timestamp,
         };
 
-        let submission_key = (player.clone(), puzzle_id);
         env.storage().instance().set(&submission_key, &submission);
 
         player_data.xp
@@ -149,40 +172,241 @@ impl MindBlockContract {
 #[cfg(test)]
 mod test {
     use super::*;
-    use soroban_sdk::{testutils::Address as _, Address, Env, String};
+    use soroban_sdk::{
+        testutils::{Address as _, Ledger},
+        Address, Env, String,
+    };
+
+    // ── helpers ──────────────────────────────────────────────────────────────
+
+    /// Returns (env, player_address, contract_id).
+    /// The client must be constructed inside each test to avoid lifetime issues.
+    fn setup() -> (Env, Address, Address) {
+        let env = Env::default();
+        env.mock_all_auths();
+        let contract_id = env.register(MindBlockContract, ());
+        let player = Address::generate(&env);
+        (env, player, contract_id)
+    }
+
+    // ── register_player ───────────────────────────────────────────────────────
 
     #[test]
     fn test_register_player() {
-        let env = Env::default();
-        let contract_id = env.register(MindBlockContract, ());
+        let (env, player, contract_id) = setup();
         let client = MindBlockContractClient::new(&env, &contract_id);
-
-        let player = Address::generate(&env);
         let username = String::from_str(&env, "TestPlayer");
-
-        env.mock_all_auths();
 
         let result = client.register_player(&player, &username, &100);
 
         assert_eq!(result.xp, 0);
         assert_eq!(result.iq_level, 100);
+        assert_eq!(result.puzzles_solved, 0);
+        assert_eq!(result.current_streak, 0);
+        assert_eq!(result.last_active_timestamp, 0);
     }
+
+    // ── submit_puzzle (happy path) ────────────────────────────────────────────
 
     #[test]
     fn test_submit_puzzle() {
-        let env = Env::default();
-        let contract_id = env.register(MindBlockContract, ());
+        let (env, player, contract_id) = setup();
         let client = MindBlockContractClient::new(&env, &contract_id);
-
-        let player = Address::generate(&env);
         let username = String::from_str(&env, "TestPlayer");
         let category = String::from_str(&env, "coding");
-
-        env.mock_all_auths();
 
         client.register_player(&player, &username, &100);
         let xp = client.submit_puzzle(&player, &1, &category, &95);
 
-        assert!(xp > 0);
+        // XP = 95 * 100 / 10 = 950
+        assert_eq!(xp, 950);
+    }
+
+    // ── get_player ────────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_get_player_unregistered_returns_none() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        assert!(client.get_player(&player).is_none());
+    }
+
+    #[test]
+    fn test_get_player_registered() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Alice");
+
+        client.register_player(&player, &username, &120);
+
+        let data = client.get_player(&player).unwrap();
+        assert_eq!(data.iq_level, 120);
+        assert_eq!(data.xp, 0);
+    }
+
+    // ── get_xp ────────────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_get_xp() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Bob");
+        let category = String::from_str(&env, "logic");
+
+        client.register_player(&player, &username, &100);
+        client.submit_puzzle(&player, &1, &category, &80);
+
+        // XP = 80 * 100 / 10 = 800
+        assert_eq!(client.get_xp(&player), 800);
+    }
+
+    // ── get_submission ────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_get_submission_none_before_submit() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Carol");
+        client.register_player(&player, &username, &100);
+
+        assert!(client.get_submission(&player, &42).is_none());
+    }
+
+    #[test]
+    fn test_get_submission_after_submit() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Dave");
+        let category = String::from_str(&env, "blockchain");
+
+        client.register_player(&player, &username, &100);
+        client.submit_puzzle(&player, &7, &category, &90);
+
+        let sub = client.get_submission(&player, &7).unwrap();
+        assert_eq!(sub.puzzle_id, 7);
+        assert_eq!(sub.score, 90);
+    }
+
+    // ── update_iq_level ───────────────────────────────────────────────────────
+
+    #[test]
+    fn test_update_iq_level() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Eve");
+
+        client.register_player(&player, &username, &100);
+        client.update_iq_level(&player, &150);
+
+        let data = client.get_player(&player).unwrap();
+        assert_eq!(data.iq_level, 150);
+    }
+
+    // ── streak management ─────────────────────────────────────────────────────
+
+    #[test]
+    fn test_streak_increments_within_24_hours() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Frank");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+
+        // First submission — streak becomes 1
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_player(&player).unwrap().current_streak, 1);
+
+        // Second submission within 24 h — streak becomes 2
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_player(&player).unwrap().current_streak, 2);
+    }
+
+    #[test]
+    fn test_streak_resets_after_24_hours_inactivity() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Grace");
+        let category = String::from_str(&env, "logic");
+
+        client.register_player(&player, &username, &100);
+
+        // Build streak to 2
+        client.submit_puzzle(&player, &1, &category, &70);
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_player(&player).unwrap().current_streak, 2);
+
+        // Advance ledger clock past 24 hours
+        env.ledger().with_mut(|l| {
+            l.timestamp += 86_401;
+        });
+
+        // Submit after inactivity — streak must reset to 0 then increment to 1
+        client.submit_puzzle(&player, &3, &category, &70);
+        assert_eq!(client.get_player(&player).unwrap().current_streak, 1);
+    }
+
+    #[test]
+    fn test_last_active_timestamp_updated_on_submission() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Heidi");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+
+        let ts_before = env.ledger().timestamp();
+        client.submit_puzzle(&player, &1, &category, &80);
+
+        let data = client.get_player(&player).unwrap();
+        assert_eq!(data.last_active_timestamp, ts_before);
+    }
+
+    // ── duplicate submission rejection (#294) ─────────────────────────────────
+
+    #[test]
+    #[should_panic]
+    fn test_duplicate_puzzle_submission_rejected() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Ivan");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+        client.submit_puzzle(&player, &1, &category, &80);
+
+        // Second submission with the same puzzle_id must panic
+        client.submit_puzzle(&player, &1, &category, &80);
+    }
+
+    /// Verify that stats are correct after a single submission and are not corrupted.
+    /// Duplicate rejection is already proven by test_duplicate_puzzle_submission_rejected.
+    #[test]
+    fn test_single_submission_stats_are_correct() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Judy");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+        let xp = client.submit_puzzle(&player, &1, &category, &80);
+
+        // XP = 80 * 100 / 10 = 800
+        assert_eq!(xp, 800);
+        let data = client.get_player(&player).unwrap();
+        assert_eq!(data.xp, 800);
+        assert_eq!(data.puzzles_solved, 1);
+        assert_eq!(data.current_streak, 1);
+    }
+
+    // ── leaderboard ───────────────────────────────────────────────────────────
+
+    #[test]
+    fn test_leaderboard_returns_vec() {
+        let (env, _player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        // Current implementation is a stub; verify it returns without panicking
+        let board = client.get_leaderboard(&5);
+        assert_eq!(board.len(), 0);
     }
 }
