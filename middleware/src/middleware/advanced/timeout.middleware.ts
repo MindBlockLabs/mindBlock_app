@@ -1,4 +1,9 @@
-import { Injectable, NestMiddleware, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 
 export interface TimeoutMiddlewareOptions {
@@ -8,7 +13,8 @@ export interface TimeoutMiddlewareOptions {
 
 /**
  * Middleware that enforces a maximum request duration.
- * Returns 503 Service Unavailable when the threshold is exceeded.
+ * Uses Promise.race() to reject after the configured threshold,
+ * letting NestJS's exception filter handle the 503 response.
  *
  * @example
  * consumer.apply(new TimeoutMiddleware({ timeout: 3000 }).use.bind(timeoutMiddleware));
@@ -22,23 +28,37 @@ export class TimeoutMiddleware implements NestMiddleware {
     this.timeout = options.timeout ?? 5000;
   }
 
-  use(req: Request, res: Response, next: NextFunction): void {
-    const timer = setTimeout(() => {
-      if (!res.headersSent) {
+  async use(req: Request, res: Response, next: NextFunction): Promise<void> {
+    let timeoutId: NodeJS.Timeout;
+
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => {
         this.logger.warn(
           `Request timed out after ${this.timeout}ms: ${req.method} ${req.path}`,
         );
-        res.status(503).json({
-          statusCode: 503,
-          message: `Request timed out after ${this.timeout}ms`,
-          error: 'Service Unavailable',
-        });
+        reject(
+          new ServiceUnavailableException(
+            `Request timed out after ${this.timeout}ms`,
+          ),
+        );
+      }, this.timeout);
+    });
+
+    const nextPromise = new Promise((resolve) => {
+      res.on('finish', () => resolve(true));
+      res.on('close', () => resolve(true));
+      next();
+    });
+
+    try {
+      await Promise.race([nextPromise, timeoutPromise]);
+    } catch (error) {
+      if (!res.headersSent) {
+        next(error);
       }
-    }, this.timeout);
-
-    res.on('finish', () => clearTimeout(timer));
-    res.on('close', () => clearTimeout(timer));
-
-    next();
+    } finally {
+      clearTimeout(timeoutId!);
+    }
   }
 }
+

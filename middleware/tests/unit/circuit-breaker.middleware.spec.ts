@@ -25,7 +25,8 @@ describe('CircuitBreakerService', () => {
   beforeEach(() => {
     svc = new CircuitBreakerService({
       failureThreshold: 3,
-      resetTimeout: 5000,
+      timeoutWindow: 10000,
+      halfOpenRetryInterval: 5000,
     });
   });
 
@@ -39,14 +40,23 @@ describe('CircuitBreakerService', () => {
     expect(svc.getState()).toBe(CircuitState.CLOSED);
   });
 
-  it('transitions CLOSED → OPEN at failure threshold', () => {
+  it('transitions CLOSED → OPEN at failure threshold within window', () => {
     svc.recordFailure();
     svc.recordFailure();
     svc.recordFailure();
     expect(svc.getState()).toBe(CircuitState.OPEN);
   });
 
-  it('transitions OPEN → HALF_OPEN after resetTimeout', () => {
+  it('does not transition CLOSED → OPEN if failures are outside window', () => {
+    svc.recordFailure();
+    svc.recordFailure();
+    jest.advanceTimersByTime(10001);
+    svc.recordFailure();
+    // One failure dropped, count is 1. One more added, count is 2.
+    expect(svc.getState()).toBe(CircuitState.CLOSED);
+  });
+
+  it('transitions OPEN → HALF_OPEN after halfOpenRetryInterval', () => {
     svc.recordFailure();
     svc.recordFailure();
     svc.recordFailure();
@@ -78,17 +88,7 @@ describe('CircuitBreakerService', () => {
     expect(svc.getState()).toBe(CircuitState.OPEN);
   });
 
-  it('resets failure count on success', () => {
-    svc.recordFailure();
-    svc.recordFailure();
-    svc.recordSuccess();
-    // Still 2 more failures before threshold of 3
-    svc.recordFailure();
-    svc.recordFailure();
-    expect(svc.getState()).toBe(CircuitState.CLOSED);
-  });
-
-  it('reset() restores CLOSED state', () => {
+  it('resets state correctly with reset()', () => {
     svc.recordFailure();
     svc.recordFailure();
     svc.recordFailure();
@@ -145,3 +145,4 @@ describe('CircuitBreakerMiddleware', () => {
     expect(recordSuccess).toHaveBeenCalledTimes(1);
   });
 });
+
