@@ -8,86 +8,99 @@ export enum CircuitState {
 }
 
 export interface CircuitBreakerOptions {
-  /** Number of consecutive failures before opening the circuit. Default: 5 */
+  /** Number of failures before opening the circuit. Default: 5 */
   failureThreshold?: number;
+  /** Window in ms for counting failures. Default: 60000 (1 minute) */
+  timeoutWindow?: number;
   /** Time in ms to wait before moving from OPEN to HALF_OPEN. Default: 30000 */
-  resetTimeout?: number;
+  halfOpenRetryInterval?: number;
   /** HTTP status codes considered failures. Default: [500, 502, 503, 504] */
   failureStatusCodes?: number[];
 }
 
 /**
  * Tracks circuit breaker state and exposes it for health checks.
- *
- * State machine:
- *   CLOSED  → (N failures) → OPEN
- *   OPEN    → (resetTimeout elapsed) → HALF_OPEN
- *   HALF_OPEN → (success) → CLOSED | (failure) → OPEN
  */
 @Injectable()
 export class CircuitBreakerService {
   private readonly logger = new Logger('CircuitBreakerService');
   private state: CircuitState = CircuitState.CLOSED;
-  private failureCount = 0;
+  private failureTimestamps: number[] = [];
   private lastFailureTime: number | null = null;
 
   readonly failureThreshold: number;
-  readonly resetTimeout: number;
+  readonly timeoutWindow: number;
+  readonly halfOpenRetryInterval: number;
   readonly failureStatusCodes: number[];
 
   constructor(options: CircuitBreakerOptions = {}) {
     this.failureThreshold = options.failureThreshold ?? 5;
-    this.resetTimeout = options.resetTimeout ?? 30_000;
-    this.failureStatusCodes = options.failureStatusCodes ?? [500, 502, 503, 504];
+    this.timeoutWindow = options.timeoutWindow ?? 60_000;
+    this.halfOpenRetryInterval = options.halfOpenRetryInterval ?? 30_000;
+    this.failureStatusCodes = options.failureStatusCodes ?? [
+      500, 502, 503, 504,
+    ];
   }
 
   getState(): CircuitState {
+    const now = Date.now();
+
     if (
       this.state === CircuitState.OPEN &&
       this.lastFailureTime !== null &&
-      Date.now() - this.lastFailureTime >= this.resetTimeout
+      now - this.lastFailureTime >= this.halfOpenRetryInterval
     ) {
       this.logger.log('Circuit transitioning OPEN → HALF_OPEN');
       this.state = CircuitState.HALF_OPEN;
     }
+
     return this.state;
   }
 
   recordSuccess(): void {
     if (this.state === CircuitState.HALF_OPEN) {
       this.logger.log('Circuit transitioning HALF_OPEN → CLOSED');
+      this.state = CircuitState.CLOSED;
+      this.failureTimestamps = [];
+      this.lastFailureTime = null;
     }
-    this.state = CircuitState.CLOSED;
-    this.failureCount = 0;
-    this.lastFailureTime = null;
   }
 
   recordFailure(): void {
-    this.failureCount++;
-    this.lastFailureTime = Date.now();
+    const now = Date.now();
+    this.lastFailureTime = now;
 
-    if (
-      this.state === CircuitState.HALF_OPEN ||
-      this.failureCount >= this.failureThreshold
-    ) {
+    if (this.state === CircuitState.HALF_OPEN) {
+      this.logger.warn('Circuit transitioning HALF_OPEN → OPEN');
+      this.state = CircuitState.OPEN;
+      return;
+    }
+
+    this.failureTimestamps.push(now);
+
+    // Filter failures outside the window
+    this.failureTimestamps = this.failureTimestamps.filter(
+      (t) => now - t <= this.timeoutWindow,
+    );
+
+    if (this.failureTimestamps.length >= this.failureThreshold) {
       this.logger.warn(
-        `Circuit transitioning → OPEN (failures: ${this.failureCount})`,
+        `Circuit transitioning → OPEN (failures: ${this.failureTimestamps.length})`,
       );
       this.state = CircuitState.OPEN;
     }
   }
 
-  /** Reset to initial CLOSED state (useful for testing). */
   reset(): void {
     this.state = CircuitState.CLOSED;
-    this.failureCount = 0;
+    this.failureTimestamps = [];
     this.lastFailureTime = null;
   }
 }
 
 /**
- * Middleware that short-circuits requests when the circuit is OPEN,
- * returning 503 immediately without hitting downstream handlers.
+ * Middleware that short-circuits requests when the circuit is OPEN.
+ * Returns 503 Service Unavailable immediately.
  */
 @Injectable()
 export class CircuitBreakerMiddleware implements NestMiddleware {
@@ -113,7 +126,7 @@ export class CircuitBreakerMiddleware implements NestMiddleware {
     res.send = (body?: any): Response => {
       if (this.circuitBreaker.failureStatusCodes.includes(res.statusCode)) {
         this.circuitBreaker.recordFailure();
-      } else {
+      } else if (res.statusCode >= 200 && res.statusCode < 300) {
         this.circuitBreaker.recordSuccess();
       }
       return originalSend(body);
@@ -122,3 +135,4 @@ export class CircuitBreakerMiddleware implements NestMiddleware {
     next();
   }
 }
+
