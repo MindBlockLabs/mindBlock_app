@@ -2,3 +2,4 @@ export * from './correlation-id.middleware';
 export * from './correlation-id.storage';
 export * from './correlation-logger.service';
 export * from './correlation.module';
+export * from './correlation-exception-filter';
