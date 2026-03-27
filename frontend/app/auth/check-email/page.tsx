@@ -1,6 +1,8 @@
 "use client";
 
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { useToast } from "@/components/ui/ToastProvider";
 import { useState } from "react";
 import Button from "@/components/ui/Button";
@@ -48,19 +50,35 @@ const CheckEmail = () => {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#050C16] text-white flex flex-col">
+      <div className="min-h-screen bg-[#050C16] text-white md:flex md:flex-col">
+        {/* Back Arrow - desktop */}
+        <div className="hidden md:flex md:items-start md:p-6">
+          <Link href="/auth/forgot-password">
+            <ArrowLeft size={20} />
+          </Link>
+        </div>
         {/* Main Content */}
-        <div className="flex flex-col items-center justify-center flex-1 px-4 md:px-6">
+        <div className="flex flex-col items-center px-4 md:px-6 pt-4 md:pt-0 md:justify-center md:flex-1">
           <div className="w-full max-w-sm md:max-w-[408px]">
-            <div className='flex flex-row mb-4 justify-center h-[33px]'>
+            {/* Mobile header with back arrow */}
+            <div className='flex flex-row mb-4 gap-20 h-[33px] md:hidden'>
+              <div className='flex items-center'>
+                <Link href="/auth/forgot-password" className="mr-2">
+                  <ArrowLeft size={20} />
+                </Link>
+              </div>
               <h1 className="text-xl md:text-2xl font-semibold text-center text-[#E6E6E6]">
                 Check your Email
               </h1>
             </div>
+            {/* Desktop title */}
+            <h1 className="hidden md:block text-xl md:text-2xl font-semibold text-center text-[#E6E6E6] mb-4">
+              Check your Email
+            </h1>
 
             {/* Message */}
-            <div className="text-center mb-8 space-y-3">
-              <p className="text-[#E6E6E6CC] text-sm leading-relaxed">
+            <div className="text-center mb-8 space-y-3 px-8">
+              <p className="text-[#E6E6E6CC]">
                 We&apos;ve sent you a link to your email address to reset your password. Click the link in your inbox to continue.
               </p>
             </div>

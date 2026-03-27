@@ -3,6 +3,7 @@ import React from "react";
 import { StreakHeader } from "./StreakHeader";
 import { WeeklyCalendar, DayData } from "./WeeklyCalendar";
 import { StreakFooter } from "./StreakFooter";
+import { StreakCalendar } from "./StreakCalendar";
 
 interface StreakScreenProps {
     streakCount: number;
@@ -20,6 +21,7 @@ export const StreakScreen: React.FC<StreakScreenProps> = ({
             <div className="max-w-[566px] w-full space-y-6 md:space-y-10 flex flex-col items-center justify-center h-full md:h-auto">
                 <StreakHeader streakCount={streakCount} />
                 <WeeklyCalendar days={weekData} />
+                <StreakCalendar currentMonth={new Date()} streakData={{}} />
                 <StreakFooter onContinue={onContinue} />
             </div>
         </div>
