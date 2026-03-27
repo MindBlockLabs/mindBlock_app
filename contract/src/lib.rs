@@ -66,7 +66,9 @@ impl MindBlockContract {
 
         if !exists {
             index.push_back(player);
-            env.storage().persistent().set(&DataKey::PlayerIndex, &index);
+            env.storage()
+                .persistent()
+                .set(&DataKey::PlayerIndex, &index);
         }
 
         new_player
