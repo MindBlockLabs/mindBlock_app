@@ -35,10 +35,12 @@ export class CorrelationLoggerService implements LoggerService {
 
   private printLog(level: string, message: any, context?: string, trace?: string) {
     const correlationId = CorrelationIdStorage.getCorrelationId();
+    const userId = CorrelationIdStorage.getUserId();
     const logOutput = {
       timestamp: new Date().toISOString(),
       level,
       correlationId: correlationId || 'N/A',
+      userId: userId || 'N/A',
       context: context || this.context,
       message: typeof message === 'string' ? message : JSON.stringify(message),
       ...(trace ? { trace } : {}),

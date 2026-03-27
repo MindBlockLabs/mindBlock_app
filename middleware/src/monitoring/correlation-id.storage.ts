@@ -8,11 +8,15 @@ export interface CorrelationContext {
 export class CorrelationIdStorage {
   private static readonly storage = new AsyncLocalStorage<CorrelationContext>();
 
-  static run<R>(correlationId: string, fn: () => R): R {
-    return this.storage.run({ correlationId }, fn);
+  static run<R>(correlationId: string, userId: string | undefined, fn: () => R): R {
+    return this.storage.run({ correlationId, userId }, fn);
   }
 
   static getCorrelationId(): string | undefined {
     return this.storage.getStore()?.correlationId;
+  }
+
+  static getUserId(): string | undefined {
+    return this.storage.getStore()?.userId;
   }
 }

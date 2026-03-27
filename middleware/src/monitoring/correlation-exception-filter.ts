@@ -19,11 +19,13 @@ export class CorrelationExceptionFilter implements ExceptionFilter {
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
     const correlationId = CorrelationIdStorage.getCorrelationId();
+    const userId = CorrelationIdStorage.getUserId();
 
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       correlationId: correlationId || 'N/A',
+      userId: userId || 'N/A',
       message: exception?.message || 'Internal server error',
       path: ctx.getRequest().url,
     });

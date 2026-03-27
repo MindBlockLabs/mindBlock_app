@@ -20,10 +20,11 @@ export const getCorrelationHeaders = (headers: Record<string, string> = {}) => {
  */
 export const withCorrelation = <T extends (...args: any[]) => any>(fn: T): T => {
   const correlationId = CorrelationIdStorage.getCorrelationId();
+  const userId = CorrelationIdStorage.getUserId();
   if (!correlationId) {
     return fn;
   }
   return ((...args: any[]) => {
-    return CorrelationIdStorage.run(correlationId, () => fn(...args));
+    return CorrelationIdStorage.run(correlationId, userId, () => fn(...args));
   }) as T;
 };
