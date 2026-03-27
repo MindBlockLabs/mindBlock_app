@@ -8,3 +8,10 @@ export * from './monitoring';
 export * from './validation';
 export * from './common';
 export * from './config';
+
+// Conditional execution helpers (#381)
+export * from './middleware/utils/conditional.middleware';
+
+// Advanced reliability middleware (#379)
+export * from './middleware/advanced/timeout.middleware';
+export * from './middleware/advanced/circuit-breaker.middleware';
