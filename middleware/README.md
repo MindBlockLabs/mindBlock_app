@@ -55,6 +55,42 @@ app.use(middlewares['com.yourorg.plugin.example']);
 
 See [PLUGINS.md](docs/PLUGINS.md) for complete documentation on creating and using plugins.
 
+### First-Party Plugins
+
+The middleware package includes several production-ready first-party plugins:
+
+#### 1. Request Logger Plugin (`@mindblock/plugin-request-logger`)
+
+HTTP request logging middleware with configurable verbosity, path filtering, and request ID correlation.
+
+**Features:**
+- Structured request logging with timing information
+- Configurable log levels (debug, info, warn, error)
+- Exclude paths from logging (health checks, metrics, etc.)
+- Request ID correlation and propagation
+- Sensitive header filtering (automatically excludes auth, cookies, API keys)
+- Color-coded terminal output
+- Runtime configuration changes
+
+**Quick Start:**
+```typescript
+const registry = new PluginRegistry();
+await registry.init();
+
+const logger = await registry.load('@mindblock/plugin-request-logger', {
+  enabled: true,
+  options: {
+    logLevel: 'info',
+    excludePaths: ['/health', '/metrics'],
+    colorize: true
+  }
+});
+
+app.use(logger.plugin.getMiddleware());
+```
+
+**Documentation:** See [REQUEST-LOGGER.md](docs/REQUEST-LOGGER.md)
+
 ### Getting Started with Plugins
 
 To quickly start developing a plugin:

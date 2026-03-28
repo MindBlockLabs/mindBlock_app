@@ -24,3 +24,6 @@ export * from './common/utils/plugin-loader';
 export * from './common/utils/plugin-registry';
 export * from './common/interfaces/plugin.interface';
 export * from './common/interfaces/plugin.errors';
+
+// First-Party Plugins
+export * from './plugins';
