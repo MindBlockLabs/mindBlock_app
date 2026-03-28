@@ -10,12 +10,14 @@ import { GetProgressHistoryProvider } from './providers/get-progress-history.pro
 import { GetCategoryStatsProvider } from './providers/get-category-stats.provider';
 import { GetOverallStatsProvider } from './providers/get-overall-stats.provider';
 import { ProgressCalculationProvider } from './providers/progress-calculation.provider';
+import { BlockchainModule } from '../blockchain/blockchain.module';
 import { Puzzle } from '../puzzles/entities/puzzle.entity';
 import { XpLevelService } from '../users/providers/xp-level.service';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserProgress, User, Puzzle, Streak, DailyQuest]),
+    BlockchainModule,
   ],
   controllers: [ProgressController],
   providers: [

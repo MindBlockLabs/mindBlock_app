@@ -1,9 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { GetPlayerProvider } from '../providers/get-player.provider';
+import { SubmitPuzzleProvider } from '../providers/submit-puzzle.provider';
 
 @Injectable()
 export class BlockchainService {
-  constructor(private readonly getPlayerProvider: GetPlayerProvider) {}
+  constructor(private readonly submitPuzzleProvider: SubmitPuzzleProvider) {}
+
+  async submitPuzzleOnChain(
+    stellarWallet: string,
+    puzzleId: string,
+    category: string,
+    score: number,
+  ): Promise<void> {
+    return this.submitPuzzleProvider.submitPuzzleOnChain(
+      stellarWallet,
+      puzzleId,
+      category,
+      score,
+    );
+  }
 
   getHello(): string {
     return 'Hello from Blockchain Service';
