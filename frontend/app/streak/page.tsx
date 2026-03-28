@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ShareOptionsSheet from "../../components/ShareOptionsSheet";
 import ShareStreakCard from "@/components/ShareStreakCard";
 
 export interface StreakData {
@@ -398,6 +399,54 @@ export default function StreakPage() {
                 </button> */}
             </main>
 
+            {/* Share Options Sheet */}
+            <ShareOptionsSheet
+                isOpen={showShare}
+                onClose={() => setShowShare(false)}
+                onShare={(platform) => {
+                    console.log(`Sharing streak to ${platform}`);
+                    // Handle sharing logic here
+                    switch (platform) {
+                        case 'contacts':
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: `I'm on a ${streakCount} day streak!`,
+                                    text: `Check out my ${streakCount} day streak on MindBlock! 🔥`,
+                                    url: window.location.href,
+                                });
+                            }
+                            break;
+                        case 'telegram':
+                            const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(`I'm on a ${streakCount} day streak on MindBlock! 🔥`)}`;
+                            window.open(telegramUrl, '_blank');
+                            break;
+                        case 'twitter':
+                            const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`I'm on a ${streakCount} day streak on MindBlock! 🔥`)}&url=${encodeURIComponent(window.location.href)}`;
+                            window.open(twitterUrl, '_blank');
+                            break;
+                        case 'whatsapp':
+                            const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`I'm on a ${streakCount} day streak on MindBlock! 🔥 ${window.location.href}`)}`;
+                            window.open(whatsappUrl, '_blank');
+                            break;
+                        case 'email':
+                            const emailUrl = `mailto:?subject=${encodeURIComponent('Check out my MindBlock streak!')}&body=${encodeURIComponent(`I'm on a ${streakCount} day streak on MindBlock! Check it out: ${window.location.href}`)}`;
+                            window.location.href = emailUrl;
+                            break;
+                        case 'more':
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: 'My MindBlock Streak',
+                                    text: `I'm on a ${streakCount} day streak!`,
+                                    url: window.location.href,
+                                });
+                            } else {
+                                navigator.clipboard.writeText(window.location.href);
+                                alert('Link copied to clipboard!');
+                            }
+                            break;
+                    }
+                }}
+            />
             {/* Share Modal */}
             {showShare && (
                 <ShareStreakCard

@@ -40,12 +40,15 @@ const Dashboard = () => {
           </div>
 
           <div className="flex flex-wrap items-center gap-4 text-xs md:text-sm">
-            <div className="flex items-center gap-2 text-amber-300">
+            <button 
+              onClick={() => router.push('/streak')}
+              className="flex items-center gap-2 text-amber-300 hover:text-amber-200 transition-colors cursor-pointer"
+            >
               <Flame className="h-4 w-4" />
               <span className="text-slate-200 md:inline hidden">
                 {streak} Day Streak
               </span>
-            </div>
+            </button>
             <div className="flex items-center gap-2 text-blue-300">
               <Gem className="h-4 w-4" />
               <span className="text-slate-200 md:inline hidden">
@@ -75,10 +78,13 @@ const Dashboard = () => {
 
         <div className="flex flex-col items-center gap-4">
           <div className="flex items-center gap-6 text-xs text-slate-300">
-            <div className="flex items-center gap-2">
+            <button 
+              onClick={() => router.push('/streak')}
+              className="flex items-center gap-2 hover:text-amber-200 transition-colors cursor-pointer"
+            >
               <Flame className="h-4 w-4 text-amber-300" />
               <span>{streak} Day Streak</span>
-            </div>
+            </button>
             <div className="flex items-center gap-2">
               <Gem className="h-4 w-4 text-blue-300" />
               <span>{points} Points</span>
