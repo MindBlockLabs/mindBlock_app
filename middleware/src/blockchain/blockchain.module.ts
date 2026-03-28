@@ -6,6 +6,7 @@ import { RegisterPlayerProvider } from './providers/register-player.provider';
 import { SubmitPuzzleProvider } from './providers/submit-puzzle.provider';
 import { SyncXpMilestoneProvider } from './providers/sync-xp-milestone.provider';
 import { SyncStreakProvider } from './providers/sync-streak.provider';
+import { ScoreSubmissionBridge } from './score-submission.bridge';
 
 /**
  * BlockchainModule — Issue #307
@@ -37,7 +38,8 @@ import { SyncStreakProvider } from './providers/sync-streak.provider';
     SubmitPuzzleProvider,
     SyncXpMilestoneProvider,
     SyncStreakProvider,
+    ScoreSubmissionBridge,
   ],
-  exports: [BlockchainService],
+  exports: [BlockchainService, ScoreSubmissionBridge],
 })
 export class BlockchainModule {}

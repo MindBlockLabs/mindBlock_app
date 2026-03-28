@@ -11,3 +11,6 @@ export * from './providers/sync-streak.provider';
 
 // Issue #308 — Wallet linking provider and its interfaces
 export * from './link-wallet.provider';
+
+// Issue #301 — Score submission bridge (Oracle/Admin → Stellar contract)
+export * from './score-submission.bridge';
