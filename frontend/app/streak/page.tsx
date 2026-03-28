@@ -162,7 +162,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                 <div className="flex items-center justify-between mb-[20px]">
                     <button
                         onClick={handlePreviousMonth}
-                        className="p-2 rounded-lg hover:bg-[#FACC15]/10 transition-colors"
+                        className="p-2 rounded-lg hover:bg-[#FACC15]/10 transition-colors cursor-pointer"
                         aria-label="Previous month"
                     >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-[#FACC15]">
@@ -175,7 +175,7 @@ const StreakCalendar: React.FC<StreakCalendarProps> = ({
                     </h2>
                     <button
                         onClick={handleNextMonth}
-                        className="p-2 rounded-lg hover:bg-[#FACC15]/10 transition-colors"
+                        className="p-2 rounded-lg hover:bg-[#FACC15]/10 transition-colors cursor-pointer"
                         aria-label="Next month"
                     >
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-[#FACC15]">
@@ -333,7 +333,8 @@ const DEMO_STREAK_DATA: StreakData = (() => {
 
 export default function StreakPage() {
     const router = useRouter();
-    const [showShare, setShowShare] = useState(false);
+    const [showShareCard, setShowShareCard] = useState(false);
+    const [showShareSheet, setShowShareSheet] = useState(false);
 
     const streakCount = 4;
     const points = 1100;
@@ -344,7 +345,7 @@ export default function StreakPage() {
             <StreakNavbar
                 streakCount={streakCount}
                 points={points}
-                onShare={() => setShowShare(true)}
+                onShare={() => setShowShareCard(true)}
                 onClose={() => router.push("/dashboard")}
             />
 
@@ -352,7 +353,7 @@ export default function StreakPage() {
             <div className="w-full flex items-center justify-between px-[16px] md:px-8 pt-6 pb-2 max-w-[700px] mx-auto">
                 <button
                     onClick={() => router.push("/dashboard")}
-                    className="p-2 rounded-lg text-white/60 hover:text-white transition-colors"
+                    className="p-2 rounded-lg text-white/60 hover:text-white transition-colors cursor-pointer"
                     aria-label="Close"
                 >
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -361,8 +362,8 @@ export default function StreakPage() {
                 </button>
                 <h1 className="font-nunito font-bold text-white text-lg tracking-wide">Streak</h1>
                 <button
-                    onClick={() => setShowShare(true)}
-                    className="p-2 rounded-lg text-white/60 hover:text-white transition-colors"
+                    onClick={() => setShowShareCard(true)}
+                    className="p-2 rounded-lg text-white/60 hover:text-white transition-colors cursor-pointer"
                     aria-label="Share"
                 >
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -401,8 +402,8 @@ export default function StreakPage() {
 
             {/* Share Options Sheet */}
             <ShareOptionsSheet
-                isOpen={showShare}
-                onClose={() => setShowShare(false)}
+                isOpen={showShareSheet}
+                onClose={() => setShowShareSheet(false)}
                 onShare={(platform) => {
                     console.log(`Sharing streak to ${platform}`);
                     // Handle sharing logic here
@@ -448,10 +449,14 @@ export default function StreakPage() {
                 }}
             />
             {/* Share Modal */}
-            {showShare && (
+            {showShareCard && (
                 <ShareStreakCard
                     streakCount={streakCount}
-                    onClose={() => setShowShare(false)}
+                    onClose={() => setShowShareCard(false)}
+                    onShare={() => {
+                        setShowShareCard(false);
+                        setShowShareSheet(true);
+                    }}
                 />
             )}
         </div>
