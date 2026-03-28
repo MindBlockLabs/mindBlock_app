@@ -17,13 +17,15 @@
   },
   "dependencies": {
     "@nestjs/common": "^11.0.12",
+    "@nestjs/config": "^4.0.0",
     "@types/micromatch": "^4.0.10",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "micromatch": "^4.0.8"
+    "micromatch": "^4.0.8",
+    "stellar-sdk": "^13.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",

@@ -15,3 +15,6 @@ export * from './middleware/utils/conditional.middleware';
 // Advanced reliability middleware (#379)
 export * from './middleware/advanced/timeout.middleware';
 export * from './middleware/advanced/circuit-breaker.middleware';
+
+// Blockchain module — Issues #307, #308, #309, #310
+export * from './blockchain';

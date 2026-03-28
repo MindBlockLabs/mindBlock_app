@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import ShareOptionsSheet from "../../components/ShareOptionsSheet";
+import ShareStreakCard from "@/components/ShareStreakCard";
 
 export interface StreakData {
     [date: string]: {
@@ -267,6 +268,7 @@ const StreakSummaryCard: React.FC<StreakSummaryCardProps> = ({
 };
 
 
+
 interface StreakNavbarProps {
     streakCount: number;
     points: number;
@@ -445,6 +447,13 @@ export default function StreakPage() {
                     }
                 }}
             />
+            {/* Share Modal */}
+            {showShare && (
+                <ShareStreakCard
+                    streakCount={streakCount}
+                    onClose={() => setShowShare(false)}
+                />
+            )}
         </div>
     );
 }
