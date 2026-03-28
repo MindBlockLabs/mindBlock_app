@@ -18,9 +18,3 @@ export * from './middleware/advanced/circuit-breaker.middleware';
 
 // Blockchain module — Issues #307, #308, #309, #310
 export * from './blockchain';
-
-// External Plugin Loader System
-export * from './common/utils/plugin-loader';
-export * from './common/utils/plugin-registry';
-export * from './common/interfaces/plugin.interface';
-export * from './common/interfaces/plugin.errors';
