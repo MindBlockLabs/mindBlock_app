@@ -73,22 +73,32 @@ export class RegisterPlayerProvider {
 
       // 5. Assemble and sign the transaction
       // We need to add the footprint and other resources from simulation
-      const assembledTransaction = StellarSdk.rpc.assembleTransaction(
+      const assembledTransaction: any = StellarSdk.rpc.assembleTransaction(
         transaction,
         simulation,
       );
       
-      assembledTransaction.sign(adminKeypair);
+      // Some versions return a TransactionBuilder, some return a Transaction
+      let txToSign: any;
+      if (typeof assembledTransaction.sign === 'function') {
+        txToSign = assembledTransaction;
+      } else if (typeof assembledTransaction.build === 'function') {
+        txToSign = assembledTransaction.build();
+      } else {
+        throw new Error('Assembled transaction is neither a Transaction nor a TransactionBuilder');
+      }
+
+      txToSign.sign(adminKeypair);
 
       // 6. Submit the transaction
-      const result = await this.server.sendTransaction(assembledTransaction);
+      const result: any = await this.server.sendTransaction(txToSign);
 
       if (result.status === 'PENDING') {
         const txHash = result.hash;
         this.logger.log(`Transaction submitted successfully. Hash: ${txHash}`);
         
         // Poll for result
-        let txResult = await this.server.getTransaction(txHash);
+        let txResult: any = await this.server.getTransaction(txHash);
         while (txResult.status === 'NOT_FOUND' || txResult.status === 'PENDING') {
           await new Promise((resolve) => setTimeout(resolve, 1000));
           txResult = await this.server.getTransaction(txHash);
