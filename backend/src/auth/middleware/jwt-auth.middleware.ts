@@ -77,8 +77,12 @@ export class JwtAuthMiddleware implements NestMiddleware {
 
     // 1. Allow certain routes to bypass authentication (public endpoints)
     const isPublic = publicRoutes.some((route) => req.path.startsWith(route));
-    if (isPublic) {
-      if (logging) this.logger.debug(`Public route accessed: ${req.path}`);
+    
+    // Special case: Allow POST /users for user registration
+    const isUserRegistration = req.method === 'POST' && req.path === '/users';
+    
+    if (isPublic || isUserRegistration) {
+      if (logging) this.logger.debug(`Public route accessed: ${req.method} ${req.path}`);
       return next();
     }
 
