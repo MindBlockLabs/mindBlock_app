@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
@@ -8,6 +8,7 @@ import { User } from '../../users/user.entity';
 import { Streak } from '../../streak/entities/streak.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 import { getPointsByDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
+import { BlockchainService } from '../../blockchain/provider/blockchain.service';
 
 export interface AnswerValidationResult {
   isCorrect: boolean;
@@ -29,6 +30,8 @@ interface ProgressStatsRaw {
 
 @Injectable()
 export class ProgressCalculationProvider {
+  private readonly logger = new Logger(ProgressCalculationProvider.name);
+
   constructor(
     @InjectRepository(Puzzle)
     private readonly puzzleRepository: Repository<Puzzle>,
@@ -40,6 +43,7 @@ export class ProgressCalculationProvider {
     private readonly streakRepository: Repository<Streak>,
     @InjectRepository(DailyQuest)
     private readonly dailyQuestRepository: Repository<DailyQuest>,
+    private readonly blockchainService: BlockchainService,
   ) {}
 
   /**
@@ -228,6 +232,23 @@ export class ProgressCalculationProvider {
 
     // Save to database
     await this.userProgressRepository.save(userProgress);
+
+    // Non-blocking on-chain record for correct answers with a linked Stellar wallet
+    if (validation.isCorrect && user?.stellarWallet) {
+      void this.blockchainService
+        .submitPuzzleOnChain(
+          user.stellarWallet,
+          submitAnswerDto.puzzleId,
+          submitAnswerDto.categoryId,
+          pointsEarned,
+        )
+        .catch((err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.error(
+            `Unexpected error in submitPuzzleOnChain — wallet: ${user.stellarWallet}, puzzleId: ${submitAnswerDto.puzzleId}. Error: ${msg}`,
+          );
+        });
+    }
 
     return {
       userProgress,

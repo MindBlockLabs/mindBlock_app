@@ -7,10 +7,12 @@ import { Streak } from '../streak/entities/streak.entity';
 import { DailyQuest } from '../quests/entities/daily-quest.entity';
 import { ProgressService } from './progress.service';
 import { ProgressCalculationProvider } from './providers/progress-calculation.provider';
+import { BlockchainModule } from '../blockchain/blockchain.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserProgress, User, Puzzle, Streak, DailyQuest]),
+    BlockchainModule,
   ],
   providers: [ProgressService, ProgressCalculationProvider],
   exports: [ProgressService, ProgressCalculationProvider, TypeOrmModule],
