@@ -20,6 +20,48 @@ Keeping middleware in its own workspace package makes it:
 - Monitoring
 - Validation
 - Common utilities
+- **Plugin System** - Load custom middleware from npm packages
+
+## Plugin System
+
+The package includes an **External Plugin Loader** system that allows you to dynamically load and manage middleware plugins from npm packages.
+
+```typescript
+import { PluginRegistry } from '@mindblock/middleware';
+
+// Create and initialize registry
+const registry = new PluginRegistry();
+await registry.init();
+
+// Load a plugin
+const plugin = await registry.load('@yourorg/plugin-example');
+
+// Activate it
+await registry.activate(plugin.metadata.id);
+
+// Use plugin middleware
+const middlewares = registry.getAllMiddleware();
+app.use(middlewares['com.yourorg.plugin.example']);
+```
+
+**Key Features:**
+- ✅ Dynamic plugin discovery and loading from npm
+- ✅ Plugin lifecycle management (load, init, activate, deactivate, unload)
+- ✅ Configuration validation with JSON Schema support
+- ✅ Dependency resolution between plugins
+- ✅ Version compatibility checking
+- ✅ Plugin registry and search capabilities
+- ✅ Comprehensive error handling
+
+See [PLUGINS.md](docs/PLUGINS.md) for complete documentation on creating and using plugins.
+
+### Getting Started with Plugins
+
+To quickly start developing a plugin:
+
+1. Read the [Plugin Quick Start Guide](docs/PLUGIN_QUICKSTART.md)
+2. Check out the [Example Plugin](src/plugins/example.plugin.ts)
+3. Review plugin [API Reference](src/common/interfaces/plugin.interface.ts)
 
 ## Installation
 

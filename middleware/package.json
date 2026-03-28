@@ -27,12 +27,14 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "micromatch": "^4.0.8",
+    "semver": "^7.6.0",
     "stellar-sdk": "^13.1.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
+    "@types/semver": "^7.5.8",
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "autocannon": "^7.15.0",
