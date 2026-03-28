@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import ShareStreakCard from "@/components/ShareStreakCard";
 
 export interface StreakData {
     [date: string]: {
@@ -265,86 +266,7 @@ const StreakSummaryCard: React.FC<StreakSummaryCardProps> = ({
     );
 };
 
-interface ShareStreakModalProps {
-    streakCount: number;
-    onClose: () => void;
-}
 
-const ShareStreakModal: React.FC<ShareStreakModalProps> = ({ streakCount, onClose }) => {
-    const shareOptions = [
-        { label: "Contacts", icon: "👤" },
-        { label: "Telegram", icon: "✈️" },
-        { label: "Twitter", icon: "𝕏" },
-        { label: "Whatsapp", icon: "💬" },
-        { label: "E-mail", icon: "✉️", highlight: true },
-        { label: "More", icon: "⋯" },
-    ];
-
-    return (
-        <div className="fixed inset-0 z-50 flex flex-col justify-end">
-            {/* Backdrop */}
-            <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-
-            {/* Share card preview */}
-            <div className="relative z-10 flex justify-center mb-4 px-4">
-                <div className="bg-white rounded-2xl p-6 w-full max-w-[320px] flex items-center gap-4 shadow-2xl">
-                    <div className="flex-1">
-                        <p className="text-[#050C16] font-bold text-lg">I'm on a</p>
-                        <div className="flex items-center gap-2 my-1">
-                            <div className="bg-[#FACC15] rounded-[8px] w-[44px] h-[44px] flex items-center justify-center">
-                                <span className="font-extrabold text-[22px] text-[#050C16]">{streakCount}</span>
-                            </div>
-                        </div>
-                        <p className="text-[#050C16] font-bold text-lg">day streak!</p>
-                        <p className="text-[#3B82F6] text-sm mt-2 font-medium">mind block</p>
-                    </div>
-                    <div className="w-[80px] h-[80px]">
-                        <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                            <path d="M40 5C40 5 54 22 54 38C54 46 49.5 53 43 57C45 49 41 41 36 37C36.6 45 32 53 26 57C23.5 52 22.5 46 22.5 41C22.5 32 26 23 31 18C29 24 29.5 31 33 35C33 23 40 5 40 5Z" fill="#FACC15"/>
-                            <path d="M40 12C40 12 60 34 60 52C60 68 51 76 40 76C29 76 20 68 20 52C20 40 25 29 33 20C30 27 30.5 35 34 40C34 28 40 12 40 12Z" fill="#FACC15" fillOpacity="0.7"/>
-                            <ellipse cx="40" cy="62" rx="11" ry="13" fill="#FDE68A" fillOpacity="0.5"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-
-            {/* Bottom sheet */}
-            <div className="relative z-10 bg-[#0D1829] rounded-t-3xl px-6 pt-6 pb-10">
-                <div className="flex items-center justify-between mb-6">
-                    <button
-                        onClick={onClose}
-                        className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors"
-                    >
-                        ✕
-                    </button>
-                    <h3 className="font-nunito font-bold text-white text-lg">Share Your Streak</h3>
-                    <div className="w-8" />
-                </div>
-
-                <div className="grid grid-cols-6 gap-3">
-                    {shareOptions.map((opt) => (
-                        <button key={opt.label} className="flex flex-col items-center gap-2">
-                            <div
-                                className={`w-12 h-12 rounded-full flex items-center justify-center text-xl transition-colors ${
-                                    opt.highlight
-                                        ? "bg-[#EF4444]/20 border border-[#EF4444]/40"
-                                        : "bg-[#1E2D45] hover:bg-[#FACC15]/10"
-                                }`}
-                            >
-                                <span className={opt.highlight ? "text-[#EF4444]" : "text-white/80"}>
-                                    {opt.icon}
-                                </span>
-                            </div>
-                            <span className={`text-xs font-nunito ${opt.highlight ? "text-[#EF4444]" : "text-white/60"}`}>
-                                {opt.label}
-                            </span>
-                        </button>
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 interface StreakNavbarProps {
     streakCount: number;
@@ -478,7 +400,7 @@ export default function StreakPage() {
 
             {/* Share Modal */}
             {showShare && (
-                <ShareStreakModal
+                <ShareStreakCard
                     streakCount={streakCount}
                     onClose={() => setShowShare(false)}
                 />
