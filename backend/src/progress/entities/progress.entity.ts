@@ -11,7 +11,7 @@ import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { Category } from '../../categories/entities/category.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 
-@Entity()
+@Entity('user_progress')
 @Index(['userId', 'attemptedAt'])
 @Index(['userId', 'puzzleId'])
 @Index(['categoryId'])
