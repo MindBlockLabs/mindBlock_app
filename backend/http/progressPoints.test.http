@@ -1,0 +1,257 @@
+### ============================================
+### STEP 1: Get Today's Daily Quest
+### ============================================
+GET http://localhost:3000/daily-quest
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+### Expected Response:
+# {
+#   "id": 123,
+#   "questDate": "2026-01-29",
+#   "totalQuestions": 5,
+#   "completedQuestions": 0,
+#   "isCompleted": false,
+#   "pointsEarned": 0,
+#   "puzzles": [...]
+# }
+
+### Save puzzle IDs from response for next steps
+@puzzleId1 = 658c343d-147d-48f7-a130-46d7c0c3020a
+@categoryId1 = 397b1a88-3a41-4c14-afee-20f57554368b
+
+
+### ============================================
+### STEP 2: Submit Answer - Maximum Bonus (50% time)
+### ============================================
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+{
+  "userId": "1",
+  "puzzleId": "1",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "A piano",
+  "timeSpent": 30
+}
+
+### Expected Response:
+# {
+#   "validation": {
+#     "isCorrect": true,
+#     "pointsEarned": 300
+#   }
+# }
+
+
+### ============================================
+### STEP 3: Submit Answer - Medium Bonus (75% time)
+### ============================================
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "userId": "1",
+  "puzzleId": "",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "A piano",
+  "timeSpent": 45
+}
+
+### Expected Points: 275 (250 * 1.1)
+
+
+### ============================================
+### STEP 4: Submit Answer - No Bonus (90% time)
+### ============================================
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+{
+  "userId": "`",
+  "puzzleId": "`",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "A piano",
+  "timeSpent": 55
+}
+
+### Expected Points: 250 (250 * 1.0)
+
+
+### ============================================
+### STEP 5: Submit Answer - Time Penalty
+### ============================================
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+{
+  "userId": "1",
+  "puzzleId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "A piano",
+  "timeSpent": 75
+}
+
+### Expected Points: 225 (250 * 0.9)
+
+
+### ============================================
+### STEP 6: Submit Incorrect Answer
+### ============================================
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "userId": "1",
+  "puzzleId": "",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "Wrong answer",
+  "timeSpent": 10
+}
+
+### Expected Points: 0
+
+
+### ============================================
+### STEP 7: Get Daily Quest Status
+### ============================================
+GET http://localhost:3000/daily-quest/status
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+### Expected Response:
+# {
+#   "questDate": "2026-01-29",
+#   "totalQuestions": 5,
+#   "completedQuestions": 1,
+#   "remainingQuestions": 4,
+#   "isCompleted": false,
+#   "progress": 20
+# }
+
+
+### ============================================
+### STEP 8: Get Progress History
+### ============================================
+GET http://localhost:3000/progress?page=1&limit=10
+Authorization: Bearer 
+
+
+### ============================================
+### STEP 9: Get Overall Stats
+### ============================================
+GET http://localhost:3000/progress/stats
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+
+### ============================================
+### Get Progress History (Paginated)
+### ============================================
+GET http://localhost:3000/progress?page=1&limit=10
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+
+### 6. Get Category-Specific Stats
+GET http://localhost:3000/progress/category/397b1a88-3a41-4c14-afee-20f57554368b
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+
+### Expected Response:
+# {
+#   "totalAttempts": 5,
+#   "totalCorrect": 4,
+#   "accuracy": 80,
+#   "totalPointsEarned": 1050,
+#   "totalTimeSpent": 215
+# }
+
+
+### ============================================
+### STEP 10: Get Category Stats
+### ============================================
+GET http://localhost:3000/progress/category/397b1a88-3a41-4c14-afee-20f57554368b
+Authorization: Bearer 
+
+
+### ============================================
+### STEP 11: Complete Daily Quest (after all puzzles done)
+### ============================================
+POST http://localhost:3000/daily-quest/complete
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+### Expected Response:
+# {
+#   "success": true,
+#   "message": "Daily quest completed successfully!",
+#   "bonusXp": 100,
+#   "totalXp": 850,
+#   "streakInfo": {
+#     "currentStreak": 5,
+#     "longestStreak": 10,
+#     "lastActivityDate": "2026-01-29"
+#   },
+#   "completedAt": "2026-01-29T15:30:00Z"
+# }
+
+
+### ============================================
+### STEP 12: Try to complete again (idempotency test)
+### ============================================
+POST http://localhost:3000/daily-quest/complete
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOjEsImVtYWlsIjoiYW1pbnVmYXRpbWFAZ21haWwuY29tIiwiaWF0IjoxNzY5NzIxNDg4LCJleHAiOjE3Njk3MjUwODgsImF1ZCI6ImxvY2FsaG9zdDozMDAwIiwiaXNzIjoibG9jYWxob3N0OjMwMDAifQ.alBy7FMOPM1kOgK5DSMOfFRePO0oOhh3Izkx1bqQkwY
+
+### Should return same result, no duplicate rewards
+
+
+### ============================================
+### TEST DIFFERENT DIFFICULTY LEVELS
+### ============================================
+
+### BEGINNER (100 points)
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "userId": "1",
+  "puzzleId": "dcebf04a-542f-464d-92e4-3ad983cde9ba",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "Correct Answer",
+  "timeSpent": 15
+}
+### Expected with 50% bonus: 120 points
+
+###
+
+### ADVANCED (500 points)
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "userId": "1",
+  "puzzleId": "advanced-puzzle-id",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "Correct Answer",
+  "timeSpent": 45
+}
+### Expected with 50% bonus: 600 points
+
+###
+
+### EXPERT (1000 points)
+POST http://localhost:3000/puzzles/submit
+Content-Type: application/json
+Authorization: Bearer 
+
+{
+  "userId": "1",
+  "puzzleId": "expert-puzzle-id",
+  "categoryId": "397b1a88-3a41-4c14-afee-20f57554368b",
+  "userAnswer": "Correct Answer",
+  "timeSpent": 90
+}
+### Expected with 50% bonus: 1200 points

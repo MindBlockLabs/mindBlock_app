@@ -24,7 +24,6 @@ export class UsersService {
     private readonly createUserService: CreateUserService,
     private readonly deleteUserService: DeleteUserService, // <-- injected delete a user
     private readonly findOneByGoogleIdProvider: FindOneByGoogleIdProvider,
-
     private readonly createGoogleUserProvider: CreateGoogleUserProvider,
     private readonly updateUserService: UpdateUserService,
   ) {}
@@ -35,9 +34,9 @@ export class UsersService {
     return this.findAll.findAll(dto);
   }
 
-  // public async findOne(): Promise<any> {
-  //   return null;
-  // }
+  public async findOneById(id: string): Promise<User | null> {
+    return await this.updateUserService.getUserById(id);
+  }
 
   public async GetOneByEmail(email: string) {
     return this.findOneByEmail.findOneByEmail(email);

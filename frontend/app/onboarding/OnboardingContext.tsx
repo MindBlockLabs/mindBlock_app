@@ -5,39 +5,21 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 interface OnboardingData {
     challengeLevel: string;
     challengeTypes: string[];
-    additionalInfo: {
-        country: string;
-        occupation: string;
-        interests: string[];
-        goals: string[];
-    };
-    availability: {
-        availableHours: string[];
-        bio: string;
-    };
+    referralSource: string;
+    ageGroup: string;
 }
 
 interface OnboardingContextType {
     data: OnboardingData;
-    updateData: (section: keyof OnboardingData, payload: any) => void;
-    // Specialized updaters for deep nesting
-    updateAdditionalInfo: (field: keyof OnboardingData['additionalInfo'], value: any) => void;
-    updateAvailability: (field: keyof OnboardingData['availability'], value: any) => void;
+    updateData: <K extends keyof OnboardingData>(section: K, payload: OnboardingData[K]) => void;
+    resetData: () => void;
 }
 
 const defaultData: OnboardingData = {
     challengeLevel: '',
     challengeTypes: [],
-    additionalInfo: {
-        country: '',
-        occupation: '',
-        interests: [],
-        goals: []
-    },
-    availability: {
-        availableHours: [],
-        bio: ''
-    }
+    referralSource: '',
+    ageGroup: '',
 };
 
 const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
@@ -45,35 +27,19 @@ const OnboardingContext = createContext<OnboardingContextType | undefined>(undef
 export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
     const [data, setData] = useState<OnboardingData>(defaultData);
 
-    const updateData = (section: keyof OnboardingData, payload: any) => {
+    const updateData = <K extends keyof OnboardingData>(section: K, payload: OnboardingData[K]) => {
         setData((prev) => ({
             ...prev,
             [section]: payload,
         }));
     };
 
-    const updateAdditionalInfo = (field: keyof OnboardingData['additionalInfo'], value: any) => {
-        setData((prev) => ({
-            ...prev,
-            additionalInfo: {
-                ...prev.additionalInfo,
-                [field]: value
-            }
-        }));
-    };
-
-    const updateAvailability = (field: keyof OnboardingData['availability'], value: any) => {
-        setData((prev) => ({
-            ...prev,
-            availability: {
-                ...prev.availability,
-                [field]: value
-            }
-        }));
+    const resetData = () => {
+        setData(defaultData);
     };
 
     return (
-        <OnboardingContext.Provider value={{ data, updateData, updateAdditionalInfo, updateAvailability }}>
+        <OnboardingContext.Provider value={{ data, updateData, resetData }}>
             {children}
         </OnboardingContext.Provider>
     );

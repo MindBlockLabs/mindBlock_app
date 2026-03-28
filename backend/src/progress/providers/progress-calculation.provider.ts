@@ -1,11 +1,11 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
+import { XpLevelService } from '../../users/providers/xp-level.service';
 import { User } from '../../users/user.entity';
-import { Streak } from '../../streak/entities/streak.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 import { getPointsByDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
 import { BlockchainService } from '../../blockchain/provider/blockchain.service';
@@ -21,13 +21,6 @@ export interface ProgressCalculationResult {
   validation: AnswerValidationResult;
 }
 
-interface ProgressStatsRaw {
-  totalAttempts: string;
-  correctAttempts: string;
-  totalPoints: string;
-  averageTimeSpent: string;
-}
-
 @Injectable()
 export class ProgressCalculationProvider {
   private readonly logger = new Logger(ProgressCalculationProvider.name);
@@ -37,10 +30,9 @@ export class ProgressCalculationProvider {
     private readonly puzzleRepository: Repository<Puzzle>,
     @InjectRepository(UserProgress)
     private readonly userProgressRepository: Repository<UserProgress>,
+    private readonly xpLevelService: XpLevelService,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(Streak)
-    private readonly streakRepository: Repository<Streak>,
     @InjectRepository(DailyQuest)
     private readonly dailyQuestRepository: Repository<DailyQuest>,
     private readonly blockchainService: BlockchainService,
@@ -260,30 +252,48 @@ export class ProgressCalculationProvider {
    * Gets user progress statistics for a category
    */
   async getUserProgressStats(userId: string, categoryId: string) {
-    const stats = await this.userProgressRepository
-      .createQueryBuilder('progress')
-      .select('COUNT(*)', 'totalAttempts')
-      .addSelect(
-        'SUM(CASE WHEN progress.isCorrect = true THEN 1 ELSE 0 END)',
-        'correctAttempts',
-      )
-      .addSelect('SUM(progress.pointsEarned)', 'totalPoints')
-      .addSelect('AVG(progress.timeSpent)', 'averageTimeSpent')
-      .where('progress.userId = :userId', { userId })
-      .andWhere('progress.categoryId = :categoryId', { categoryId })
-      .getRawOne<ProgressStatsRaw>();
+    const where: FindOptionsWhere<UserProgress> = {
+      userId,
+      categoryId,
+    };
+
+    const progressRecords = await this.userProgressRepository.find({ where });
+
+    if (progressRecords.length === 0) {
+      return {
+        totalAttempts: 0,
+        correctAttempts: 0,
+        totalPoints: 0,
+        averageTimeSpent: 0,
+        accuracy: 0,
+      };
+    }
+
+    const totalAttempts = progressRecords.length;
+    const correctAttempts = progressRecords.reduce(
+      (sum, record) => sum + (record.isCorrect ? 1 : 0),
+      0,
+    );
+    const totalPoints = progressRecords.reduce(
+      (sum, record) => sum + record.pointsEarned,
+      0,
+    );
+    const totalTimeSpent = progressRecords.reduce(
+      (sum, record) => sum + record.timeSpent,
+      0,
+    );
+    const averageTimeSpent =
+      totalAttempts > 0 ? totalTimeSpent / totalAttempts : 0;
+
+    const accuracy =
+      totalAttempts > 0 ? (correctAttempts / totalAttempts) * 100 : 0;
 
     return {
-      totalAttempts: Number(stats?.totalAttempts) || 0,
-      correctAttempts: parseInt(stats?.correctAttempts || '0', 10),
-      totalPoints: parseInt(stats?.totalPoints || '0', 10),
-      averageTimeSpent: parseFloat(stats?.averageTimeSpent || '0'),
-      accuracy:
-        stats && Number(stats.totalAttempts) > 0
-          ? (parseInt(stats.correctAttempts, 10) /
-              Number(stats.totalAttempts)) *
-            100
-          : 0,
+      totalAttempts,
+      correctAttempts,
+      totalPoints,
+      averageTimeSpent,
+      accuracy,
     };
   }
 }

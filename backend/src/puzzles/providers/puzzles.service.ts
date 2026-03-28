@@ -42,15 +42,22 @@ export class PuzzlesService {
   // GET /puzzles/daily-quest
   // -------------------------------
   async getDailyQuestPuzzles(): Promise<Puzzle[]> {
-    const puzzles = await this.puzzleRepo
-      .createQueryBuilder('puzzle')
-      .innerJoinAndSelect('puzzle.category', 'category')
-      .where('category.isActive = true')
-      .orderBy('RANDOM()') // PostgreSQL-safe randomness
-      .limit(5)
-      .getMany();
+    const puzzles = await this.puzzleRepo.find({
+      where: {
+        category: {
+          isActive: true,
+        },
+      },
+      relations: ['category'],
+    });
 
-    return puzzles;
+    // Fisher-Yates shuffle for randomized order similar to ORDER BY RANDOM()
+    for (let i = puzzles.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [puzzles[i], puzzles[j]] = [puzzles[j], puzzles[i]];
+    }
+
+    return puzzles.slice(0, 5);
   }
 
   public async findAll(query: PuzzleQueryDto) {

@@ -2,6 +2,8 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp } from '../lib/animations/variants';
 
 const MindBlockLanding = () => {
   const router = useRouter();
@@ -54,6 +56,19 @@ const MindBlockLanding = () => {
         <div className="w-32 h-1 bg-gray-600 rounded-full"></div>
       </div>
     </div>
+  );
+};
+
+const PageTransition = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      variants={fadeIn}
+    >
+      {children}
+    </motion.div>
   );
 };
 

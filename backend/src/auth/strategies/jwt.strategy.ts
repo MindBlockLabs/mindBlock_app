@@ -3,7 +3,6 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigType } from '@nestjs/config';
 import jwtConfig from '../authConfig/jwt.config';
-
 interface JwtPayload {
   sub: string;
   email: string;

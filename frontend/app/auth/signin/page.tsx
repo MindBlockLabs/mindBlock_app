@@ -7,12 +7,26 @@ import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Wallet } from 'lucide-react';
 import Image from 'next/image';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import ErrorBoundary from '@/components/error/ErrorBoundary';
 import { useToast } from '@/components/ui/ToastProvider';
+import { useStellarWalletAuth } from '@/hooks/useStellarWalletAuth';
+import { useAuth } from '@/hooks/useAuth';
+import { WalletType } from '@/lib/stellar/types';
+import WalletModal, { WalletType as ModalWalletType } from '@/components/ui/WalletModal';
+import { useWalletModal } from '@/hooks/useWalletModal';
 
 const SignInPage = () => {
   const router = useRouter();
-  const { showSuccess, showError, showInfo } = useToast();
+  const { showSuccess, showError, showInfo, showWarning } = useToast();
+  const {
+    isConnecting,
+    isSigning,
+    isLoggingIn,
+    connectAndLogin,
+    clearError,
+  } = useStellarWalletAuth();
+  const { loginSuccess, loginFailure, setLoading } = useAuth();
+  const { isOpen: isWalletModalOpen, openModal: openWalletModal, closeModal: closeWalletModal } = useWalletModal();
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -38,11 +52,13 @@ const SignInPage = () => {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setLoading(true);
 
     // Validate email before submission
     if (!validateEmail(formData.username)) {
       showError('Invalid Email', 'Please enter a valid email address');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
@@ -50,17 +66,19 @@ const SignInPage = () => {
     if (!formData.username.trim()) {
       showError('Email Required', 'Please enter your email address');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
     if (!formData.password.trim()) {
       showError('Password Required', 'Please enter your password');
       setIsLoading(false);
+      setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch('https://mindblock-webaapp.onrender.com/auth/signIn', {
+      const response = await fetch('http://localhost:3000/auth/signIn', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,41 +97,58 @@ const SignInPage = () => {
           if (response.status === 401) {
             const errorMsg = 'Invalid email or password.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 404) {
             const errorMsg = 'Account not found.';
             showError('Account Not Found', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 400) {
             const errorMsg = errorData.message || 'Invalid input.';
             showError('Invalid Input', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status >= 500) {
             const errorMsg = 'Server error. Please try again later.';
             showError('Server Error', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else {
             const errorMsg = errorData.message || 'Login failed. Please try again.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           }
         } catch {
           // If response isn't JSON, use status text or default message
           if (response.status === 401) {
             const errorMsg = 'Invalid email or password.';
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else if (response.status === 404) {
             const errorMsg = 'Account not found.';
             showError('Account Not Found', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           } else {
             const errorMsg = `Login failed: ${response.statusText || 'Please try again.'}`;
             showError('Login Failed', errorMsg);
+            loginFailure(errorMsg);
             setIsLoading(false);
+            setLoading(false);
           }
         }
         setIsLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -124,30 +159,86 @@ const SignInPage = () => {
         // Store token in localStorage
         localStorage.setItem('accessToken', data.accessToken);
         
+        // Update Redux state
+        const user = {
+          id: data.user?.id || formData.username,
+          email: formData.username,
+          username: data.user?.username || formData.username.split('@')[0],
+        };
+        
+        loginSuccess(user, data.accessToken);
+        
         // Show success toast
         showSuccess('Login Successful', 'Welcome back!');
         setIsLoading(false);
+        setLoading(false);
         
         // Redirect to dashboard
         router.push('/dashboard');
       } else {
         const errorMsg = 'Invalid response from server. Please try again.';
         showError('Invalid Response', errorMsg);
+        loginFailure(errorMsg);
         setIsLoading(false);
+        setLoading(false);
       }
     } catch (error) {
       console.error('Sign in error:', error);
       const errorMsg = 'Network error.';
       showError('Network Error', errorMsg);
+      loginFailure(errorMsg);
       setIsLoading(false);
+      setLoading(false);
     } finally {
       setIsLoading(false);
+      setLoading(false);
     }
   };
 
   const handleGoogleSignIn = () => {
     showInfo('Google Sign-In', 'Redirecting to Google authentication...');
-    window.location.href = "https://mindblock-webaapp.onrender.com/auth/google-authentication";
+    window.location.href = "http://localhost:3000/auth/google-authentication";
+  };
+
+  const handleWalletSelect = async (walletType: ModalWalletType) => {
+    closeWalletModal();
+
+    if (walletType !== 'freighter') {
+      showInfo('Coming Soon', `${walletType.charAt(0).toUpperCase() + walletType.slice(1)} wallet support is coming soon!`);
+      return;
+    }
+
+    clearError();
+
+    try {
+      await connectAndLogin('freighter' as WalletType);
+      showSuccess('Login Successful', 'Welcome back!');
+      router.push('/dashboard');
+    } catch (error) {
+      console.error("Wallet Connection Error:", error);
+
+      const isErrorWithCode = (e: unknown): e is { code?: string; message?: string } => {
+        return typeof e === 'object' && e !== null;
+      };
+      if (isErrorWithCode(error)) {
+        if (error?.code === 'WALLET_NOT_INSTALLED') {
+          showError(
+            'Wallet Not Installed',
+            'Please install Freighter wallet from freighter.app to continue'
+          );
+        } else if (error?.code === 'USER_REJECTED') {
+          showWarning('Request Cancelled', 'You cancelled the wallet request');
+        } else if (error?.code === 'NONCE_EXPIRED') {
+          showError('Authentication Expired', 'Please try again');
+        } else if (error?.code === 'INVALID_SIGNATURE') {
+          showError('Authentication Failed', 'Invalid signature or expired nonce');
+        } else if (error?.code === 'NETWORK_ERROR') {
+          showError('Network Error', 'Unable to connect to server. Please try again.');
+        } else {
+          showError('Login Failed', error?.message || 'An unexpected error occurred');
+        }
+      }
+    }
   };
 
   return (
@@ -241,10 +332,15 @@ const SignInPage = () => {
             </button>
 
             <button
-              className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors"
+              onClick={openWalletModal}
+              disabled={isConnecting || isSigning || isLoggingIn}
+              className="w-full h-12 border-2 border-blue-500 text-blue-400 rounded-lg flex items-center justify-center gap-3 hover:bg-blue-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Wallet size={20} />
-              Connect Wallet
+              {isConnecting && 'Connecting Wallet...'}
+              {isSigning && 'Sign Message in Wallet...'}
+              {isLoggingIn && 'Verifying...'}
+              {!isConnecting && !isSigning && !isLoggingIn && 'Connect Wallet'}
             </button>
           </div>
 
@@ -262,6 +358,11 @@ const SignInPage = () => {
         </div>
       </div>
     </div>
+      <WalletModal
+        isOpen={isWalletModalOpen}
+        onClose={closeWalletModal}
+        onSelect={handleWalletSelect}
+      />
     </ErrorBoundary>
   );
 };

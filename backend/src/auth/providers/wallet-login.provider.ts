@@ -1,19 +1,15 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
 import { UsersService } from '../../users/providers/users.service';
 import jwtConfig from '../authConfig/jwt.config';
-import { AuthService } from './auth.service';
+import { NonceService } from './nonce.service';
 import * as StellarSdk from 'stellar-sdk';
 import * as crypto from 'crypto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { ChallengeLevel } from '../../users/enums/challengeLevel.enum';
 import { AgeGroup } from '../../users/enums/ageGroup.enum';
+import { User } from '../../users/user.entity';
 
 @Injectable()
 export class StellarWalletLoginProvider {
@@ -24,8 +20,7 @@ export class StellarWalletLoginProvider {
     // inject jwt service
     private readonly jwtService: JwtService,
 
-    @Inject(forwardRef(() => AuthService))
-    private readonly authService: AuthService,
+    private readonly nonceService: NonceService,
 
     // inject jwt
     @Inject(jwtConfig.KEY)
@@ -35,7 +30,7 @@ export class StellarWalletLoginProvider {
   public async StellarWalletLogin(dto: StellarWalletLoginDto) {
     try {
       // 1. Verify nonce hasn't been used and use it (synchronous method)
-      this.authService.verifyAndUseNonce(dto.nonce, dto.walletAddress);
+      this.nonceService.verifyAndUseNonce(dto.nonce, dto.walletAddress);
 
       // 2. Create proper message to sign
       const message = this.createLoginMessage(dto.walletAddress, dto.nonce);
@@ -59,19 +54,30 @@ export class StellarWalletLoginProvider {
     }
 
     // Check if user exists in db
-    let user = await this.userService.getOneByWallet(dto.walletAddress);
+    let user: User | null = null;
+    try {
+      user = await this.userService.getOneByWallet(dto.walletAddress);
+    } catch {
+      // If user doesn't exist, getOneByWallet throws UnauthorizedException
+      // We catch it here so we can proceed to auto-create the user
+      console.log(
+        `User not found for wallet ${dto.walletAddress}, will attempt auto-creation.`,
+      );
+    }
 
     if (!user) {
       // Auto-create a new user
       user = await this.userService.create({
         walletAddress: dto.walletAddress,
         publicKey: dto.publicKey,
-        username: `stellar_user_${dto.walletAddress.slice(0, 6)}`,
-        provider: 'stellar_wallet',
+        username: `stellar_user_${dto.walletAddress.slice(-6)}`,
+        fullname: `Stellar User ${dto.walletAddress.slice(0, 4)}...${dto.walletAddress.slice(-4)}`,
+        provider: 'wallet',
         challengeLevel: ChallengeLevel.BEGINNER,
         challengeTypes: [],
         ageGroup: AgeGroup.TEENS,
       });
+      console.log(`Successfully created new wallet user: ${user.id}`);
     }
 
     const accessToken = await this.jwtService.signAsync(
@@ -90,8 +96,8 @@ export class StellarWalletLoginProvider {
   }
 
   private createLoginMessage(walletAddress: string, nonce: string): string {
-    // Create a standardized message format for Stellar
-    return `Login to MyApp\nWallet: ${walletAddress}\nNonce: ${nonce}\nTimestamp: ${Date.now()}`;
+    // Simply sign the nonce to ensure determinism between frontend and backend
+    return nonce;
   }
 
   private verifySignature(
@@ -99,41 +105,43 @@ export class StellarWalletLoginProvider {
     signature: string,
     publicKey: string,
   ): boolean {
-    try {
-      // Convert message to buffer
-      const messageBuffer = Buffer.from(message, 'utf8');
+    const prefix = 'Stellar Signed Message:\n';
+    const fullMessage = prefix + message;
 
-      // Convert signature from base64 to buffer
+    console.log(`[Signature Verification] 
+      Public Key: ${publicKey}
+      Raw Message: ${message}
+      Full Message (SEP-0053): ${JSON.stringify(fullMessage)}
+      Signature (base64): ${signature}`);
+
+    try {
+      // 1. Convert combined message to UTF-8 bytes
+      const messageBuffer = Buffer.from(fullMessage, 'utf8');
+
+      // 2. Compute SHA-256 hash of the prefixed message (Standard for SEP-0053)
+      const messageHash = crypto
+        .createHash('sha256')
+        .update(messageBuffer)
+        .digest();
+
+      // 3. Convert signature from base64 to buffer
       const signatureBuffer = Buffer.from(signature, 'base64');
 
-      // Convert public key from Stellar format to PEM encoded ed25519 public key
-      const stellarKeypair = StellarSdk.Keypair.fromPublicKey(publicKey);
-      const publicKeyBuffer = stellarKeypair.rawPublicKey();
+      // 4. Use Stellar SDK's native verification on the HASH
+      const keypair = StellarSdk.Keypair.fromPublicKey(publicKey);
+      const isValid = keypair.verify(messageHash, signatureBuffer);
 
-      // Convert raw public key to PEM format
-      const publicKeyPem =
-        '-----BEGIN PUBLIC KEY-----\n' +
-        Buffer.from(publicKeyBuffer)
-          .toString('base64')
-          .match(/.{1,64}/g)
-          ?.join('\n') +
-        '\n-----END PUBLIC KEY-----\n';
-
-      // Verify signature using ed25519
-      const isValid = crypto.verify(
-        null, // algorithm is null for ed25519
-        messageBuffer,
-        {
-          key: publicKeyPem,
-          format: 'pem',
-          type: 'spki',
-        },
-        signatureBuffer,
-      );
+      if (!isValid) {
+        console.error(
+          `[Signature Verification Result] FAILED for ${publicKey}`,
+        );
+      } else {
+        console.log(`[Signature Verification Result] SUCCESS for ${publicKey}`);
+      }
 
       return isValid;
     } catch (error) {
-      console.error('Signature verification error:', error);
+      console.error('[Signature Verification Error]', error);
       return false;
     }
   }

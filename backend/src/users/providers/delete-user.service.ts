@@ -23,8 +23,8 @@ export class DeleteUserService {
 
     try {
       await this.userRepository.delete(id);
-    } catch (error) {
-      throw new InternalServerErrorException(`Failed to delete user: ${error}`);
+    } catch {
+      throw new InternalServerErrorException('Failed to delete user.');
     }
   }
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import ErrorBoundary from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/error/ErrorBoundary";
 
 import { useRouter, useParams } from "next/navigation";
 import Input from "@/components/ui/Input";

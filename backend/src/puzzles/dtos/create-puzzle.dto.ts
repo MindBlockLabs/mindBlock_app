@@ -20,9 +20,7 @@ import {
 } from '../enums/puzzle-difficulty.enum';
 
 @ValidatorConstraint({ name: 'correctAnswerInOptions', async: false })
-export class CorrectAnswerInOptionsConstraint
-  implements ValidatorConstraintInterface
-{
+export class CorrectAnswerInOptionsConstraint implements ValidatorConstraintInterface {
   validate(correctAnswer: string, args: ValidationArguments) {
     const object = args.object as CreatePuzzleDto;
     return object.options?.includes(correctAnswer) || false;
@@ -34,9 +32,7 @@ export class CorrectAnswerInOptionsConstraint
 }
 
 @ValidatorConstraint({ name: 'optionsMinimumLength', async: false })
-export class OptionsMinimumLengthConstraint
-  implements ValidatorConstraintInterface
-{
+export class OptionsMinimumLengthConstraint implements ValidatorConstraintInterface {
   validate(options: string[]) {
     return options?.length >= 2;
   }
