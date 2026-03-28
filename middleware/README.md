@@ -43,6 +43,22 @@ You can also import by category (once the exports exist):
 import { /* future exports */ } from '@mindblock/middleware/auth';
 ```
 
+## Performance Benchmarking
+
+This package includes automated performance benchmarks to measure the latency
+overhead of each middleware component individually.
+
+```bash
+# Run performance benchmarks
+npm run benchmark
+
+# Run with CI-friendly output
+npm run benchmark:ci
+```
+
+See [PERFORMANCE.md](docs/PERFORMANCE.md) for detailed benchmarking documentation
+and optimization techniques.
+
 ## Quick Start
 
 Example placeholder usage (actual middleware implementations will be added in later issues):
