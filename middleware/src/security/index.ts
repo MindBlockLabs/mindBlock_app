@@ -1,4 +1,3 @@
-// Security middleware exports
+// Placeholder: security middleware exports will live here.
 
-export * from './security-headers.middleware';
-export * from './security-headers.config';
+export const __securityPlaceholder = true;
