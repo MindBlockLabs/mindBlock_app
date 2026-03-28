@@ -91,6 +91,48 @@ app.use(logger.plugin.getMiddleware());
 
 **Documentation:** See [REQUEST-LOGGER.md](docs/REQUEST-LOGGER.md)
 
+## Lifecycle Error Handling and Timeouts
+
+The plugin system includes comprehensive error handling and timeout management for plugin lifecycle operations.
+
+**Features:**
+- ⏱️ Configurable timeouts for each lifecycle hook
+- 🔄 Automatic retry with exponential backoff
+- 🎯 Four recovery strategies (retry, fail-fast, graceful, rollback)
+- 📊 Execution history and diagnostics
+- 🏥 Plugin health monitoring
+
+**Quick Start:**
+```typescript
+import { LifecycleTimeoutManager, RecoveryStrategy } from '@mindblock/middleware';
+
+const timeoutManager = new LifecycleTimeoutManager();
+
+// Configure timeouts
+timeoutManager.setTimeoutConfig('my-plugin', {
+  onLoad: 5000,
+  onActivate: 3000
+});
+
+// Configure recovery strategy
+timeoutManager.setRecoveryConfig('my-plugin', {
+  strategy: RecoveryStrategy.RETRY,
+  maxRetries: 2,
+  retryDelayMs: 100,
+  backoffMultiplier: 2
+});
+
+// Execute hook with timeout protection
+await timeoutManager.executeWithTimeout(
+  'my-plugin',
+  'onActivate',
+  () => plugin.onActivate(),
+  3000
+);
+```
+
+**Documentation:** See [LIFECYCLE-TIMEOUTS.md](docs/LIFECYCLE-TIMEOUTS.md) and [LIFECYCLE-TIMEOUTS-QUICKSTART.md](docs/LIFECYCLE-TIMEOUTS-QUICKSTART.md)
+
 ### Getting Started with Plugins
 
 To quickly start developing a plugin:
