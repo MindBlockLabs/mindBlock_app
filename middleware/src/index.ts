@@ -25,5 +25,8 @@ export * from './common/utils/plugin-registry';
 export * from './common/interfaces/plugin.interface';
 export * from './common/interfaces/plugin.errors';
 
+// Lifecycle Error Handling and Timeouts
+export * from './common/utils/lifecycle-timeout-manager';
+
 // First-Party Plugins
 export * from './plugins';
