@@ -1,6 +1,8 @@
 import {
   Controller,
   Get,
+  Post,
+  Body,
   Param,
   Query,
   UseGuards,
@@ -17,11 +19,14 @@ import { paginationQueryDto } from '../../common/pagination/paginationQueryDto';
 import { GetProgressHistoryProvider } from '../providers/get-progress-history.provider';
 import { GetCategoryStatsProvider } from '../providers/get-category-stats.provider';
 import { GetOverallStatsProvider } from '../providers/get-overall-stats.provider';
+import { ProgressService } from '../progress.service';
+import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
 import { PaginatedProgressDto } from '../dtos/paginated-progress.dto';
 import { CategoryStatsDto } from '../dtos/category-stats.dto';
 import { OverallStatsDto } from '../dtos/overall-stats.dto';
 import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
 import { ActiveUserData } from '../../auth/interfaces/activeInterface';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('progress')
 @ApiTags('Progress')
@@ -32,7 +37,26 @@ export class ProgressController {
     private readonly getProgressHistoryProvider: GetProgressHistoryProvider,
     private readonly getCategoryStatsProvider: GetCategoryStatsProvider,
     private readonly getOverallStatsProvider: GetOverallStatsProvider,
+    private readonly progressService: ProgressService,
   ) {}
+
+  @Post('submit')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @ApiOperation({ summary: 'Submit a puzzle answer' })
+  @ApiResponse({ status: 200, description: 'Answer processed successfully' })
+  async submitAnswer(
+    @ActiveUser() user: ActiveUserData,
+    @Body() submitAnswerDto: SubmitAnswerDto,
+  ) {
+    if (!user || !user.sub) {
+      throw new BadRequestException('User not found');
+    }
+
+    // Ensure the userId in DTO matches the authenticated user
+    submitAnswerDto.userId = user.sub;
+
+    return this.progressService.submitAnswer(submitAnswerDto);
+  }
 
   @Get()
   @ApiOperation({

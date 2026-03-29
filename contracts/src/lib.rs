@@ -13,6 +13,7 @@ pub struct Player {
     /// Unix timestamp (seconds) of the player's last successful puzzle submission.
     /// Used to automatically reset streak after 24+ hours of inactivity (#293).
     pub last_active_timestamp: u64,
+    pub reputation: u32,
 }
 
 #[derive(Clone)]
@@ -48,6 +49,7 @@ impl MindBlockContract {
             puzzles_solved: 0,
             current_streak: 0,
             last_active_timestamp: 0,
+            reputation: 0,
         };
 
         env.storage().instance().set(&player, &new_player);
@@ -105,17 +107,35 @@ impl MindBlockContract {
             panic!("Puzzle already submitted");
         }
 
-        // #293: Auto-reset streak when the player has been inactive for more than 24 hours.
+        // Streak Tracking Strategy:
+        // We use the ledger timestamp (seconds) divided by 86,400 to get a day index.
+        // 1. If same day (day_index == last_day_index): Keep streak.
+        // 2. If next day (day_index == last_day_index + 1): Increment streak.
+        // 3. If missed day(s) (day_index > last_day_index + 1): Reset streak to 1.
+        // 4. If first submission ever: Start streak at 1.
+
         let current_timestamp = env.ledger().timestamp();
         const SECONDS_IN_A_DAY: u64 = 86_400;
-        // Guard on puzzles_solved > 0 rather than last_active_timestamp != 0,
-        // because the test environment starts the ledger clock at 0, making
-        // timestamp == 0 an ambiguous sentinel for "never submitted".
-        if player_data.puzzles_solved > 0
-            && current_timestamp > player_data.last_active_timestamp
-            && current_timestamp - player_data.last_active_timestamp > SECONDS_IN_A_DAY
-        {
-            player_data.current_streak = 0;
+        let day_index = current_timestamp / SECONDS_IN_A_DAY;
+
+        if player_data.puzzles_solved == 0 {
+            player_data.current_streak = 1;
+            player_data.reputation += 5; // First submission gain
+        } else {
+            let last_day_index = player_data.last_active_timestamp / SECONDS_IN_A_DAY;
+
+            if day_index == last_day_index + 1 {
+                player_data.current_streak += 1;
+                player_data.reputation += 15; // Submission (5) + Consecutive Bonus (10)
+            } else if day_index > last_day_index + 1 {
+                player_data.current_streak = 1;
+                // Penalize for missed days: -20, but keep the +5 for this submission
+                // Net change: -15 (sub 20, add 5)
+                player_data.reputation = player_data.reputation.saturating_sub(20).saturating_add(5);
+            } else {
+                // Same day: just submission gain
+                player_data.reputation += 5;
+            }
         }
 
         // Calculate XP based on score and IQ level
@@ -124,8 +144,7 @@ impl MindBlockContract {
         // Update player stats
         player_data.xp += xp_reward;
         player_data.puzzles_solved += 1;
-        player_data.current_streak += 1;
-        player_data.last_active_timestamp = current_timestamp; // #293: track last activity
+        player_data.last_active_timestamp = current_timestamp;
 
         // Save updated player data
         env.storage().instance().set(&player, &player_data);
@@ -142,6 +161,65 @@ impl MindBlockContract {
         env.storage().instance().set(&submission_key, &submission);
 
         player_data.xp
+    }
+
+    /// Get current streak for a player
+    /// Automatically returns 0 if the streak has expired (missed >= 1 day)
+    pub fn get_streak(env: Env, player: Address) -> u32 {
+        let player_data: Player = match env.storage().instance().get(&player) {
+            Some(data) => data,
+            None => return 0,
+        };
+
+        let current_timestamp = env.ledger().timestamp();
+        const SECONDS_IN_A_DAY: u64 = 86_400;
+        let day_index = current_timestamp / SECONDS_IN_A_DAY;
+        let last_day_index = player_data.last_active_timestamp / SECONDS_IN_A_DAY;
+
+        // If it's more than 1 day after the last activity, the streak is broken
+        if day_index > last_day_index + 1 {
+            0
+        } else {
+            player_data.current_streak
+        }
+    }
+
+    /// Sync streak with an external source of truth (e.g. backend)
+    pub fn sync_streak(env: Env, player: Address, streak: u32) {
+        player.require_auth();
+
+        let mut player_data: Player = match env.storage().instance().get(&player) {
+            Some(data) => data,
+            None => panic!("Player not registered"),
+        };
+
+        player_data.current_streak = streak;
+        player_data.last_active_timestamp = env.ledger().timestamp();
+
+        env.storage().instance().set(&player, &player_data);
+    }
+
+    /// Get player's reputation score
+    pub fn get_reputation(env: Env, player: Address) -> u32 {
+        let player_data: Player = match env.storage().instance().get(&player) {
+            Some(data) => data,
+            None => return 0,
+        };
+
+        player_data.reputation
+    }
+
+    /// Increase player's reputation (requires auth)
+    pub fn increase_reputation(env: Env, player: Address, value: u32) {
+        player.require_auth();
+
+        let mut player_data: Player = match env.storage().instance().get(&player) {
+            Some(data) => data,
+            None => panic!("Player not registered"),
+        };
+
+        player_data.reputation = player_data.reputation.saturating_add(value);
+        env.storage().instance().set(&player, &player_data);
     }
 
     /// Get top players by XP (leaderboard)
@@ -373,7 +451,7 @@ mod test {
     // ── streak management ─────────────────────────────────────────────────────
 
     #[test]
-    fn test_streak_increments_within_24_hours() {
+    fn test_streak_stays_same_within_same_day() {
         let (env, player, contract_id) = setup();
         let client = MindBlockContractClient::new(&env, &contract_id);
         let username = String::from_str(&env, "Frank");
@@ -381,17 +459,18 @@ mod test {
 
         client.register_player(&player, &username, &100);
 
-        // First submission — streak becomes 1
+        // First submission (T=0, day=0) — streak becomes 1
         client.submit_puzzle(&player, &1, &category, &70);
-        assert_eq!(client.get_player(&player).unwrap().current_streak, 1);
+        assert_eq!(client.get_streak(&player), 1);
 
-        // Second submission within 24 h — streak becomes 2
+        // Second submission within same day (T=1000) — streak stays 1
+        env.ledger().with_mut(|l| l.timestamp = 1000);
         client.submit_puzzle(&player, &2, &category, &70);
-        assert_eq!(client.get_player(&player).unwrap().current_streak, 2);
+        assert_eq!(client.get_streak(&player), 1);
     }
 
     #[test]
-    fn test_streak_resets_after_24_hours_inactivity() {
+    fn test_streak_increments_on_consecutive_day() {
         let (env, player, contract_id) = setup();
         let client = MindBlockContractClient::new(&env, &contract_id);
         let username = String::from_str(&env, "Grace");
@@ -399,23 +478,19 @@ mod test {
 
         client.register_player(&player, &username, &100);
 
-        // Build streak to 2
+        // Day 0 (T=40000)
+        env.ledger().with_mut(|l| l.timestamp = 40000);
         client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_streak(&player), 1);
+
+        // Day 1 (T=100000) -> 100000 / 86400 = 1. 40000 / 86400 = 0.
+        env.ledger().with_mut(|l| l.timestamp = 100000);
         client.submit_puzzle(&player, &2, &category, &70);
-        assert_eq!(client.get_player(&player).unwrap().current_streak, 2);
-
-        // Advance ledger clock past 24 hours
-        env.ledger().with_mut(|l| {
-            l.timestamp += 86_401;
-        });
-
-        // Submit after inactivity — streak must reset to 0 then increment to 1
-        client.submit_puzzle(&player, &3, &category, &70);
-        assert_eq!(client.get_player(&player).unwrap().current_streak, 1);
+        assert_eq!(client.get_streak(&player), 2);
     }
 
     #[test]
-    fn test_last_active_timestamp_updated_on_submission() {
+    fn test_streak_resets_after_missed_day() {
         let (env, player, contract_id) = setup();
         let client = MindBlockContractClient::new(&env, &contract_id);
         let username = String::from_str(&env, "Heidi");
@@ -423,11 +498,69 @@ mod test {
 
         client.register_player(&player, &username, &100);
 
-        let ts_before = env.ledger().timestamp();
-        client.submit_puzzle(&player, &1, &category, &80);
+        // Day 0
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_streak(&player), 1);
 
-        let data = client.get_player(&player).unwrap();
-        assert_eq!(data.last_active_timestamp, ts_before);
+        // Day 2 (T=172801) -> day_index=2. last_day_index=0.
+        // 2 > 0 + 1, so streak resets to 1.
+        env.ledger().with_mut(|l| l.timestamp = 172801);
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_streak(&player), 1);
+    }
+
+    #[test]
+    fn test_get_streak_returns_zero_on_expiry() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Ivan");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+
+        // Day 0
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_streak(&player), 1);
+
+        // Wait until Day 2 without submitting
+        env.ledger().with_mut(|l| l.timestamp = 172801);
+        
+        // get_streak should return 0 because a day was missed
+        assert_eq!(client.get_streak(&player), 0);
+    }
+
+    #[test]
+    fn test_last_active_timestamp_updated_on_every_submission() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "Judy");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+
+        env.ledger().with_mut(|l| l.timestamp = 1000);
+        client.submit_puzzle(&player, &1, &category, &80);
+        assert_eq!(client.get_player(&player).unwrap().last_active_timestamp, 1000);
+
+        env.ledger().with_mut(|l| l.timestamp = 2000);
+        client.submit_puzzle(&player, &2, &category, &80);
+        assert_eq!(client.get_player(&player).unwrap().last_active_timestamp, 2000);
+    }
+
+    #[test]
+    fn test_sync_streak() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "SyncTester");
+
+        client.register_player(&player, &username, &100);
+
+        // Sync streak to 5
+        client.sync_streak(&player, &5);
+        assert_eq!(client.get_streak(&player), 5);
+        
+        // Verify last_active_timestamp was updated
+        assert_eq!(client.get_player(&player).unwrap().last_active_timestamp, env.ledger().timestamp());
     }
 
     // ── duplicate submission rejection (#294) ─────────────────────────────────
@@ -511,5 +644,96 @@ mod test {
         let leaderboard_limit = client.get_leaderboard(&1);
         assert_eq!(leaderboard_limit.len(), 1);
         assert_eq!(leaderboard_limit.get(0).unwrap().address, p3);
+    }
+
+    // ── reputation system ─────────────────────────────────────────────────────
+
+    #[test]
+    fn test_get_reputation_unregistered_returns_zero() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        assert_eq!(client.get_reputation(&player), 0);
+    }
+
+    #[test]
+    fn test_get_reputation_registered_initial_is_zero() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "ReputationUser");
+
+        client.register_player(&player, &username, &100);
+        assert_eq!(client.get_reputation(&player), 0);
+    }
+
+    #[test]
+    fn test_reputation_gain_on_submission() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "RepUser");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+        
+        // First submission (+5)
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_reputation(&player), 5);
+        
+        // Same day submission (+5)
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_reputation(&player), 10);
+    }
+
+    #[test]
+    fn test_reputation_bonus_and_penalty() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "StreakRepUser");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+        
+        // Day 0 (T=0) — Submit: +5
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_reputation(&player), 5);
+        
+        // Day 1 (T=86400) — Submit: +15 (+5 sub, +10 streak)
+        env.ledger().with_mut(|l| l.timestamp = 86400);
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_reputation(&player), 20);
+        
+        // Day 3 (T=259200) — Missed day! Submit: -20 penalty + 5 sub = -15
+        env.ledger().with_mut(|l| l.timestamp = 259200);
+        client.submit_puzzle(&player, &3, &category, &70);
+        assert_eq!(client.get_reputation(&player), 5); // 20 - 15 = 5
+    }
+
+    #[test]
+    fn test_reputation_saturating_behavior() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "PoorUser");
+        let category = String::from_str(&env, "coding");
+
+        client.register_player(&player, &username, &100);
+        
+        // First submission (+5)
+        client.submit_puzzle(&player, &1, &category, &70);
+        assert_eq!(client.get_reputation(&player), 5);
+        
+        // Skip to day 2 — Missed day! 5 - 20 = 0 (saturating), then +5 = 5
+        env.ledger().with_mut(|l| l.timestamp = 172801);
+        client.submit_puzzle(&player, &2, &category, &70);
+        assert_eq!(client.get_reputation(&player), 5);
+    }
+
+    #[test]
+    fn test_increase_reputation_manual() {
+        let (env, player, contract_id) = setup();
+        let client = MindBlockContractClient::new(&env, &contract_id);
+        let username = String::from_str(&env, "ManualUser");
+
+        client.register_player(&player, &username, &100);
+        client.increase_reputation(&player, &50);
+        assert_eq!(client.get_reputation(&player), 50);
     }
 }

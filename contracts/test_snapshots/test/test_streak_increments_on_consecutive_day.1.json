@@ -19,7 +19,7 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "string": "Ivan"
+                  "string": "Grace"
                 },
                 {
                   "u32": 100
@@ -47,10 +47,39 @@
                   "u64": "1"
                 },
                 {
-                  "string": "coding"
+                  "string": "logic"
                 },
                 {
-                  "u32": 80
+                  "u32": 70
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
+    [],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "submit_puzzle",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                },
+                {
+                  "u64": "2"
+                },
+                {
+                  "string": "logic"
+                },
+                {
+                  "u32": 70
                 }
               ]
             }
@@ -64,7 +93,7 @@
   "ledger": {
     "protocol_version": 23,
     "sequence_number": 0,
-    "timestamp": 0,
+    "timestamp": 100000,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
     "min_persistent_entry_ttl": 4096,
@@ -155,7 +184,7 @@
                                 "symbol": "category"
                               },
                               "val": {
-                                "string": "coding"
+                                "string": "logic"
                               }
                             },
                             {
@@ -179,7 +208,7 @@
                                 "symbol": "score"
                               },
                               "val": {
-                                "u32": 80
+                                "u32": 70
                               }
                             },
                             {
@@ -187,7 +216,63 @@
                                 "symbol": "timestamp"
                               },
                               "val": {
-                                "u64": "0"
+                                "u64": "40000"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                            },
+                            {
+                              "u64": "2"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "category"
+                              },
+                              "val": {
+                                "string": "logic"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "player"
+                              },
+                              "val": {
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "puzzle_id"
+                              },
+                              "val": {
+                                "u64": "2"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "score"
+                              },
+                              "val": {
+                                "u32": 70
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "timestamp"
+                              },
+                              "val": {
+                                "u64": "100000"
                               }
                             }
                           ]
@@ -212,7 +297,7 @@
                                 "symbol": "current_streak"
                               },
                               "val": {
-                                "u32": 1
+                                "u32": 2
                               }
                             },
                             {
@@ -228,7 +313,7 @@
                                 "symbol": "last_active_timestamp"
                               },
                               "val": {
-                                "u64": "0"
+                                "u64": "100000"
                               }
                             },
                             {
@@ -236,7 +321,7 @@
                                 "symbol": "puzzles_solved"
                               },
                               "val": {
-                                "u64": "1"
+                                "u64": "2"
                               }
                             },
                             {
@@ -244,7 +329,7 @@
                                 "symbol": "reputation"
                               },
                               "val": {
-                                "u32": 5
+                                "u32": 20
                               }
                             },
                             {
@@ -252,7 +337,7 @@
                                 "symbol": "username"
                               },
                               "val": {
-                                "string": "Ivan"
+                                "string": "Grace"
                               }
                             },
                             {
@@ -260,7 +345,7 @@
                                 "symbol": "xp"
                               },
                               "val": {
-                                "u64": "800"
+                                "u64": "1400"
                               }
                             }
                           ]
@@ -298,6 +383,39 @@
                 "key": {
                   "ledger_key_nonce": {
                     "nonce": "801925984706572462"
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          6311999
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "1033654523790656264"
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": "1033654523790656264"
                   }
                 },
                 "durability": "temporary",

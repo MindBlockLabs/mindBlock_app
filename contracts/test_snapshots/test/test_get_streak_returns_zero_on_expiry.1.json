@@ -50,7 +50,7 @@
                   "string": "coding"
                 },
                 {
-                  "u32": 80
+                  "u32": 70
                 }
               ]
             }
@@ -59,12 +59,13 @@
         }
       ]
     ],
+    [],
     []
   ],
   "ledger": {
     "protocol_version": 23,
     "sequence_number": 0,
-    "timestamp": 0,
+    "timestamp": 172801,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
     "min_persistent_entry_ttl": 4096,
@@ -179,7 +180,7 @@
                                 "symbol": "score"
                               },
                               "val": {
-                                "u32": 80
+                                "u32": 70
                               }
                             },
                             {
@@ -260,7 +261,7 @@
                                 "symbol": "xp"
                               },
                               "val": {
-                                "u64": "800"
+                                "u64": "700"
                               }
                             }
                           ]

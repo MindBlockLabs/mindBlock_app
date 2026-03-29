@@ -19,7 +19,7 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "string": "Ivan"
+                  "string": "ManualUser"
                 },
                 {
                   "u32": 100
@@ -38,19 +38,13 @@
           "function": {
             "contract_fn": {
               "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
-              "function_name": "submit_puzzle",
+              "function_name": "increase_reputation",
               "args": [
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "u64": "1"
-                },
-                {
-                  "string": "coding"
-                },
-                {
-                  "u32": 80
+                  "u32": 50
                 }
               ]
             }
@@ -139,62 +133,6 @@
                     "storage": [
                       {
                         "key": {
-                          "vec": [
-                            {
-                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                            },
-                            {
-                              "u64": "1"
-                            }
-                          ]
-                        },
-                        "val": {
-                          "map": [
-                            {
-                              "key": {
-                                "symbol": "category"
-                              },
-                              "val": {
-                                "string": "coding"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "player"
-                              },
-                              "val": {
-                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "puzzle_id"
-                              },
-                              "val": {
-                                "u64": "1"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "score"
-                              },
-                              "val": {
-                                "u32": 80
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "timestamp"
-                              },
-                              "val": {
-                                "u64": "0"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "key": {
                           "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                         },
                         "val": {
@@ -212,7 +150,7 @@
                                 "symbol": "current_streak"
                               },
                               "val": {
-                                "u32": 1
+                                "u32": 0
                               }
                             },
                             {
@@ -236,7 +174,7 @@
                                 "symbol": "puzzles_solved"
                               },
                               "val": {
-                                "u64": "1"
+                                "u64": "0"
                               }
                             },
                             {
@@ -244,7 +182,7 @@
                                 "symbol": "reputation"
                               },
                               "val": {
-                                "u32": 5
+                                "u32": 50
                               }
                             },
                             {
@@ -252,7 +190,7 @@
                                 "symbol": "username"
                               },
                               "val": {
-                                "string": "Ivan"
+                                "string": "ManualUser"
                               }
                             },
                             {
@@ -260,7 +198,7 @@
                                 "symbol": "xp"
                               },
                               "val": {
-                                "u64": "800"
+                                "u64": "0"
                               }
                             }
                           ]

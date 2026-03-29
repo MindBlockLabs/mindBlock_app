@@ -19,7 +19,7 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "string": "Ivan"
+                  "string": "RepUser"
                 },
                 {
                   "u32": 100
@@ -50,7 +50,36 @@
                   "string": "coding"
                 },
                 {
-                  "u32": 80
+                  "u32": 70
+                }
+              ]
+            }
+          },
+          "sub_invocations": []
+        }
+      ]
+    ],
+    [],
+    [
+      [
+        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+        {
+          "function": {
+            "contract_fn": {
+              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+              "function_name": "submit_puzzle",
+              "args": [
+                {
+                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                },
+                {
+                  "u64": "2"
+                },
+                {
+                  "string": "coding"
+                },
+                {
+                  "u32": 70
                 }
               ]
             }
@@ -179,7 +208,63 @@
                                 "symbol": "score"
                               },
                               "val": {
-                                "u32": 80
+                                "u32": 70
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "timestamp"
+                              },
+                              "val": {
+                                "u64": "0"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "key": {
+                          "vec": [
+                            {
+                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                            },
+                            {
+                              "u64": "2"
+                            }
+                          ]
+                        },
+                        "val": {
+                          "map": [
+                            {
+                              "key": {
+                                "symbol": "category"
+                              },
+                              "val": {
+                                "string": "coding"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "player"
+                              },
+                              "val": {
+                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "puzzle_id"
+                              },
+                              "val": {
+                                "u64": "2"
+                              }
+                            },
+                            {
+                              "key": {
+                                "symbol": "score"
+                              },
+                              "val": {
+                                "u32": 70
                               }
                             },
                             {
@@ -236,7 +321,7 @@
                                 "symbol": "puzzles_solved"
                               },
                               "val": {
-                                "u64": "1"
+                                "u64": "2"
                               }
                             },
                             {
@@ -244,7 +329,7 @@
                                 "symbol": "reputation"
                               },
                               "val": {
-                                "u32": 5
+                                "u32": 10
                               }
                             },
                             {
@@ -252,7 +337,7 @@
                                 "symbol": "username"
                               },
                               "val": {
-                                "string": "Ivan"
+                                "string": "RepUser"
                               }
                             },
                             {
@@ -260,7 +345,7 @@
                                 "symbol": "xp"
                               },
                               "val": {
-                                "u64": "800"
+                                "u64": "1400"
                               }
                             }
                           ]
@@ -298,6 +383,39 @@
                 "key": {
                   "ledger_key_nonce": {
                     "nonce": "801925984706572462"
+                  }
+                },
+                "durability": "temporary",
+                "val": "void"
+              }
+            },
+            "ext": "v0"
+          },
+          6311999
+        ]
+      ],
+      [
+        {
+          "contract_data": {
+            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+            "key": {
+              "ledger_key_nonce": {
+                "nonce": "1033654523790656264"
+              }
+            },
+            "durability": "temporary"
+          }
+        },
+        [
+          {
+            "last_modified_ledger_seq": 0,
+            "data": {
+              "contract_data": {
+                "ext": "v0",
+                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
+                "key": {
+                  "ledger_key_nonce": {
+                    "nonce": "1033654523790656264"
                   }
                 },
                 "durability": "temporary",
