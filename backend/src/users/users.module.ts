@@ -17,12 +17,14 @@ import { UserProgress } from '../progress/entities/progress.entity';
 import { Streak } from '../streak/entities/streak.entity';
 import { DailyQuest } from '../quests/entities/daily-quest.entity';
 import { XpLevelService } from './providers/xp-level.service';
+import { BlockchainModule } from '../blockchain/blockchain.module';
 
 @Module({
   imports: [
     forwardRef(() => AuthModule),
     TypeOrmModule.forFeature([User, UserProgress, Streak, DailyQuest]),
     PaginationModule,
+    BlockchainModule,
   ],
   controllers: [UsersController],
   providers: [
