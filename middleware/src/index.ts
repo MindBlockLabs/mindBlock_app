@@ -9,6 +9,9 @@ export * from './validation';
 export * from './common';
 export * from './config';
 
+// Centralized error handling (#issue)
+export * from './errors';
+
 // Conditional execution helpers (#381)
 export * from './middleware/utils/conditional.middleware';
 
