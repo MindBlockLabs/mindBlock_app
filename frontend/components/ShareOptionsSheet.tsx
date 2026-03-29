@@ -77,6 +77,27 @@ const ShareOptionsSheet: React.FC<ShareOptionsSheetProps> = ({
     };
   }, [isOpen, onClose]);
 
+  const handleTabKey = (event: React.KeyboardEvent) => {
+    if (event.key !== 'Tab' || !sheetRef.current) return;
+
+    const focusable = sheetRef.current.querySelectorAll<HTMLElement>(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+
+    if (focusable.length === 0) return;
+
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+
   // Prevent body scroll when sheet is open
   useEffect(() => {
     if (isOpen) {
@@ -101,7 +122,7 @@ const ShareOptionsSheet: React.FC<ShareOptionsSheetProps> = ({
     <div className="fixed inset-0 z-50 flex flex-col justify-end">
       {/* Backdrop */}
       <div 
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
         onClick={onClose}
         aria-label="Close share options"
       />
@@ -113,12 +134,13 @@ const ShareOptionsSheet: React.FC<ShareOptionsSheetProps> = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby="share-sheet-title"
+        onKeyDown={handleTabKey}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <Button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors bg-transparent p-0"
+            className="w-8 h-8 flex items-center justify-center text-white/60 hover:text-white transition-colors bg-transparent p-0 cursor-pointer"
             aria-label="Close share options"
           >
             <svg 
@@ -153,7 +175,7 @@ const ShareOptionsSheet: React.FC<ShareOptionsSheetProps> = ({
             <button
               key={option.id}
               onClick={() => handleShare(option.id)}
-              className="flex flex-col items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-lg p-2 transition-all duration-200"
+              className="flex flex-col items-center gap-2 group focus:outline-none focus:ring-2 focus:ring-blue-500/50 rounded-lg p-2 transition-all duration-200 cursor-pointer"
               aria-label={`Share via ${option.label}`}
             >
               {/* Circular Icon Button */}
