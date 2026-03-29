@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
@@ -109,23 +109,45 @@ export class ProgressCalculationProvider {
       where: { id: submitAnswerDto.puzzleId },
     });
 
-    // In processAnswerSubmission, check for recent duplicate:
+    // 1. Check for any existing correct attempt by this user for THIS puzzle
+    // (Prevents double-rewarding/XP exploitation)
+    const existingCorrectAttempt = await this.userProgressRepository.findOne({
+      where: {
+        userId: submitAnswerDto.userId,
+        puzzleId: submitAnswerDto.puzzleId,
+        isCorrect: true,
+      },
+    });
+
+    if (existingCorrectAttempt) {
+      // If already solved, return success but with 0 additional points
+      return {
+        userProgress: existingCorrectAttempt,
+        validation: {
+          isCorrect: true,
+          pointsEarned: 0,
+          normalizedAnswer: submitAnswerDto.userAnswer.trim().toLowerCase(),
+        },
+      };
+    }
+
+    // 2. Check for very recent attempts (idempotency / spam prevention)
     const recentAttempt = await this.userProgressRepository.findOne({
       where: {
         userId: submitAnswerDto.userId,
         puzzleId: submitAnswerDto.puzzleId,
-        attemptedAt: MoreThan(new Date(Date.now() - 5000)), // 5 second window
+        attemptedAt: MoreThan(new Date(Date.now() - 10000)), // 10 second window
       },
     });
+
+    if (recentAttempt) {
+      throw new BadRequestException('Duplicate submission detected. Please wait 10 seconds.');
+    }
 
     if (!puzzle) {
       throw new NotFoundException(
         `Puzzle with ID ${submitAnswerDto.puzzleId} not found`,
       );
-    }
-
-    if (recentAttempt) {
-      throw new Error('Duplicate submission detected');
     }
 
     // Validate answer

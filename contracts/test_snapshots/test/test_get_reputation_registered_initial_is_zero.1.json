@@ -19,38 +19,10 @@
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                 },
                 {
-                  "string": "Ivan"
+                  "string": "ReputationUser"
                 },
                 {
                   "u32": 100
-                }
-              ]
-            }
-          },
-          "sub_invocations": []
-        }
-      ]
-    ],
-    [
-      [
-        "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-        {
-          "function": {
-            "contract_fn": {
-              "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
-              "function_name": "submit_puzzle",
-              "args": [
-                {
-                  "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                },
-                {
-                  "u64": "1"
-                },
-                {
-                  "string": "coding"
-                },
-                {
-                  "u32": 80
                 }
               ]
             }
@@ -139,62 +111,6 @@
                     "storage": [
                       {
                         "key": {
-                          "vec": [
-                            {
-                              "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                            },
-                            {
-                              "u64": "1"
-                            }
-                          ]
-                        },
-                        "val": {
-                          "map": [
-                            {
-                              "key": {
-                                "symbol": "category"
-                              },
-                              "val": {
-                                "string": "coding"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "player"
-                              },
-                              "val": {
-                                "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "puzzle_id"
-                              },
-                              "val": {
-                                "u64": "1"
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "score"
-                              },
-                              "val": {
-                                "u32": 80
-                              }
-                            },
-                            {
-                              "key": {
-                                "symbol": "timestamp"
-                              },
-                              "val": {
-                                "u64": "0"
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "key": {
                           "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
                         },
                         "val": {
@@ -212,7 +128,7 @@
                                 "symbol": "current_streak"
                               },
                               "val": {
-                                "u32": 1
+                                "u32": 0
                               }
                             },
                             {
@@ -236,7 +152,7 @@
                                 "symbol": "puzzles_solved"
                               },
                               "val": {
-                                "u64": "1"
+                                "u64": "0"
                               }
                             },
                             {
@@ -244,7 +160,7 @@
                                 "symbol": "reputation"
                               },
                               "val": {
-                                "u32": 5
+                                "u32": 0
                               }
                             },
                             {
@@ -252,7 +168,7 @@
                                 "symbol": "username"
                               },
                               "val": {
-                                "string": "Ivan"
+                                "string": "ReputationUser"
                               }
                             },
                             {
@@ -260,7 +176,7 @@
                                 "symbol": "xp"
                               },
                               "val": {
-                                "u64": "800"
+                                "u64": "0"
                               }
                             }
                           ]
@@ -298,39 +214,6 @@
                 "key": {
                   "ledger_key_nonce": {
                     "nonce": "801925984706572462"
-                  }
-                },
-                "durability": "temporary",
-                "val": "void"
-              }
-            },
-            "ext": "v0"
-          },
-          6311999
-        ]
-      ],
-      [
-        {
-          "contract_data": {
-            "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-            "key": {
-              "ledger_key_nonce": {
-                "nonce": "5541220902715666415"
-              }
-            },
-            "durability": "temporary"
-          }
-        },
-        [
-          {
-            "last_modified_ledger_seq": 0,
-            "data": {
-              "contract_data": {
-                "ext": "v0",
-                "contract": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4",
-                "key": {
-                  "ledger_key_nonce": {
-                    "nonce": "5541220902715666415"
                   }
                 },
                 "durability": "temporary",

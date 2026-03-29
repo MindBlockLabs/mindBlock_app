@@ -1,8 +1,13 @@
-node_modules
-contributoNote.md
+node_modules/
+**/node_modules/
+dist/
+**/dist/
 
 # Rust build artifacts
-contract/target/
-contract/Cargo.lock
+contracts/target/
+# contracts/Cargo.lock  <-- Keep this committed for reproducibility
 
 .DS_Store
+*.log
+.env
+.env.local

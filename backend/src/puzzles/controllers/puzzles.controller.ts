@@ -2,7 +2,7 @@ import { Controller, Post, Body, Get, Query, Param } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { PuzzlesService } from '../providers/puzzles.service';
 import { CreatePuzzleDto } from '../dtos/create-puzzle.dto';
-import { Puzzle } from '../entities/puzzle.entity';
+import { PuzzleResponseDto } from '../dtos/puzzle-response.dto';
 import { PuzzleQueryDto } from '../dtos/puzzle-query.dto';
 
 @Controller('puzzles')
@@ -15,7 +15,7 @@ export class PuzzlesController {
   @ApiResponse({
     status: 201,
     description: 'Puzzle created successfully',
-    type: Puzzle,
+    type: PuzzleResponseDto,
   })
   @ApiResponse({
     status: 400,
@@ -25,7 +25,7 @@ export class PuzzlesController {
     status: 500,
     description: 'Internal server error',
   })
-  async create(@Body() createPuzzleDto: CreatePuzzleDto): Promise<Puzzle> {
+  async create(@Body() createPuzzleDto: CreatePuzzleDto): Promise<PuzzleResponseDto> {
     return this.puzzlesService.create(createPuzzleDto);
   }
 
@@ -33,17 +33,17 @@ export class PuzzlesController {
   @ApiResponse({
     status: 200,
     description: 'Daily quest puzzles retrieved successfully',
-    type: Puzzle,
+    type: PuzzleResponseDto,
+    isArray: true,
   })
   @Get('daily-quest')
-  getDailyQuest() {
+  getDailyQuest(): Promise<PuzzleResponseDto[]> {
     return this.puzzlesService.getDailyQuestPuzzles();
   }
   @ApiOperation({ summary: 'Get all puzzles' })
   @ApiResponse({
-    status: 201,
-    description: 'Puzzle retrieved successfully',
-    type: Puzzle,
+    status: 200,
+    description: 'Puzzles retrieved successfully',
   })
   @Get()
   findAll(@Query() query: PuzzleQueryDto) {
@@ -54,10 +54,10 @@ export class PuzzlesController {
   @ApiResponse({
     status: 200,
     description: 'Puzzle retrieved successfully',
-    type: Puzzle,
+    type: PuzzleResponseDto,
   })
   @Get(':id')
-  getById(@Param('id') id: string) {
+  getById(@Param('id') id: string): Promise<PuzzleResponseDto> {
     return this.puzzlesService.getPuzzleById(id);
   }
 }
