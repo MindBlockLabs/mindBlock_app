@@ -1,0 +1,62 @@
+[
+  {
+    "filename": "heap-snapshot-1774735674577.heapsnapshot",
+    "timestamp": 1774735674577,
+    "size": 6160506,
+    "description": "after-security-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735673604.heapsnapshot",
+    "timestamp": 1774735673604,
+    "size": 6138310,
+    "description": "before-security-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735671355.heapsnapshot",
+    "timestamp": 1774735671355,
+    "size": 6131227,
+    "description": "after-idempotency-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735670512.heapsnapshot",
+    "timestamp": 1774735670512,
+    "size": 6090794,
+    "description": "before-idempotency-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735669050.heapsnapshot",
+    "timestamp": 1774735669050,
+    "size": 6082008,
+    "description": "before-correlation-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735666641.heapsnapshot",
+    "timestamp": 1774735666641,
+    "size": 6067857,
+    "description": "after-auth-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735664826.heapsnapshot",
+    "timestamp": 1774735664826,
+    "size": 5747444,
+    "description": "before-auth-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735645843.heapsnapshot",
+    "timestamp": 1774735645843,
+    "size": 5989305,
+    "description": "after-auth-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735643982.heapsnapshot",
+    "timestamp": 1774735643982,
+    "size": 5670805,
+    "description": "before-auth-test"
+  },
+  {
+    "filename": "heap-snapshot-1774735525470.heapsnapshot",
+    "timestamp": 1774735525470,
+    "size": 9793969,
+    "description": "after-circuit-breaker-test"
+  }
+]
