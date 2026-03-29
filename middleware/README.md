@@ -73,6 +73,28 @@ Common environment variables (expected across middleware in the future) may incl
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
 - `BCRYPT_SALT_ROUNDS`
+- `RATE_LIMIT_AUTH_LIMIT`
+- `RATE_LIMIT_AUTH_WINDOW_MS`
+- `RATE_LIMIT_PUZZLE_SUBMIT_LIMIT`
+- `RATE_LIMIT_DAILY_QUEST_LIMIT`
+- `RATE_LIMIT_READ_LIMIT`
+- `RATE_LIMIT_ADMIN_LIMIT`
+- `RATE_LIMIT_PUBLIC_LIMIT`
+- `RATE_LIMIT_WHITELIST_IPS`
+
+## Rate Limiting
+
+The `security` package now includes a Redis-backed `RateLimitMiddleware` with:
+
+- Per-tier limits for authentication, puzzle submission, daily quest generation, admin routes, read-only routes, and the public landing page
+- User ID tracking for authenticated requests, with IP fallback for anonymous traffic
+- Whitelisted IP exemptions
+- `429 Too Many Requests` responses with `Retry-After`
+- `X-RateLimit-Limit`, `X-RateLimit-Remaining`, and `X-RateLimit-Reset` headers
+- Configurable burst allowance per tier
+- Fail-open behavior when Redis is temporarily unavailable
+
+Use `createDefaultRateLimitConfig()` from `src/security/rate-limit.config.ts` to build tier settings from environment variables.
 
 ## Testing
 

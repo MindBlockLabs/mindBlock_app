@@ -22,6 +22,7 @@ import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
+import { RateLimitMiddleware } from './common/middleware/rate-limit.middleware';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -104,7 +105,7 @@ import { HealthModule } from './health/health.module';
     HealthModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, RateLimitMiddleware],
 })
 export class AppModule implements NestModule {
   /**
@@ -122,6 +123,16 @@ export class AppModule implements NestModule {
         { path: 'api', method: RequestMethod.GET },
         { path: 'docs', method: RequestMethod.GET },
         { path: 'health', method: RequestMethod.GET },
+      )
+      .forRoutes('*');
+
+    consumer
+      .apply(RateLimitMiddleware)
+      .exclude(
+        { path: 'health/(.*)', method: RequestMethod.ALL },
+        { path: 'health', method: RequestMethod.ALL },
+        { path: 'api', method: RequestMethod.ALL },
+        { path: 'docs', method: RequestMethod.ALL },
       )
       .forRoutes('*');
   }

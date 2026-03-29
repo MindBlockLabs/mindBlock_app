@@ -1,4 +1,4 @@
-import { Response, NextFunction } from 'express';
+import { NextFunction } from 'express';
 
 /**
  * Mock Express request object with proper typing
@@ -38,13 +38,14 @@ export function mockRequest(overrides?: Partial<MockRequest>): MockRequest {
 /**
  * Mock Express response object with proper typing
  */
-export interface MockResponse extends Partial<Response> {
+export interface MockResponse {
   statusCode: number;
   statusMessage: string;
   headersSent: boolean;
   json: jest.Mock<MockResponse, [any]>;
   send: jest.Mock<MockResponse, [any]>;
   set: jest.Mock<MockResponse, [string | Record<string, string>, string?]>;
+  setHeader: jest.Mock<MockResponse, [string, string]>;
   status: jest.Mock<MockResponse, [number]>;
   end: jest.Mock<MockResponse, [any?]>;
   on: jest.Mock;
@@ -61,6 +62,7 @@ export function mockResponse(overrides?: Partial<MockResponse>): MockResponse {
     json: jest.fn().mockReturnThis(),
     send: jest.fn().mockReturnThis(),
     set: jest.fn().mockReturnThis(),
+    setHeader: jest.fn().mockReturnThis(),
     status: jest.fn().mockReturnThis(),
     end: jest.fn().mockReturnThis(),
     on: jest.fn(),
