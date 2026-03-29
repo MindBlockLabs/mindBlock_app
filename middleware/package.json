@@ -25,10 +25,12 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "micromatch": "^4.0.8",
-    "stellar-sdk": "^13.1.0"
+    "stellar-sdk": "^13.1.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/uuid": "^9.0.0",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.7",
     "@typescript-eslint/eslint-plugin": "^8.20.0",

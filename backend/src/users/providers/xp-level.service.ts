@@ -1,15 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../user.entity';
+import { BlockchainService } from '../../blockchain/provider/blockchain.service';
 
 @Injectable()
 export class XpLevelService {
+  private readonly logger = new Logger(XpLevelService.name);
   private readonly XP_PER_LEVEL = 500;
 
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly blockchainService: BlockchainService,
   ) {}
 
   /**
@@ -47,6 +50,19 @@ export class XpLevelService {
     }
 
     await this.userRepository.save(user);
+
+    // Sync XP milestone to blockchain if level-up occurred
+    // This is fire-and-forget - failures are logged but don't affect the XP update
+    if (levelUp && user.stellarWallet) {
+      this.blockchainService
+        .syncXpMilestone(user.stellarWallet, user.level, user.xp)
+        .catch((error) => {
+          this.logger.error(
+            `Failed to sync XP milestone for user ${userId}: ${error.message}`,
+            error.stack,
+          );
+        });
+    }
 
     return {
       levelUp,
