@@ -4,15 +4,19 @@ import { Request, Response, NextFunction } from 'express';
 export enum UserRole {
   USER = 'USER',
   MODERATOR = 'MODERATOR',
+  /** Trusted score submitter — can call blockchain score endpoints (Issue #295). */
+  ORACLE = 'ORACLE',
   ADMIN = 'ADMIN',
 }
 
 /**
- * ADMIN inherits all MODERATOR and USER permissions.
- * MODERATOR inherits all USER permissions.
+ * ADMIN inherits all permissions.
+ * ORACLE can submit trusted scores (USER-level API access + score submission).
+ * MODERATOR inherits USER permissions.
  */
 const ROLE_HIERARCHY: Record<UserRole, UserRole[]> = {
-  [UserRole.ADMIN]: [UserRole.ADMIN, UserRole.MODERATOR, UserRole.USER],
+  [UserRole.ADMIN]: [UserRole.ADMIN, UserRole.ORACLE, UserRole.MODERATOR, UserRole.USER],
+  [UserRole.ORACLE]: [UserRole.ORACLE, UserRole.USER],
   [UserRole.MODERATOR]: [UserRole.MODERATOR, UserRole.USER],
   [UserRole.USER]: [UserRole.USER],
 };
