@@ -3,11 +3,12 @@ import { PaginationProvider } from './pagination/provider/pagination-provider';
 import { CorrelationIdMiddleware } from './middleware/correlation-id.middleware';
 import { GeolocationMiddleware } from './middleware/geolocation.middleware';
 import { RedisModule } from '../redis/redis.module';
+import { CircuitBreakerMiddleware } from './circuit-breaker/circuit-breaker.middleware';
 
 @Module({
   imports: [RedisModule],
-  providers: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware],
-  exports: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware],
+  providers: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware, CircuitBreakerMiddleware],
+  exports: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware, CircuitBreakerMiddleware],
 })
 export class CommonModule {}
 
