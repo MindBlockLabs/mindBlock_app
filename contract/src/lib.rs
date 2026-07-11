@@ -154,7 +154,7 @@ mod test {
     #[test]
     fn test_register_player() {
         let env = Env::default();
-        let contract_id = env.register(MindBlockContract, ());
+        let contract_id = env.register_contract(None, MindBlockContract);
         let client = MindBlockContractClient::new(&env, &contract_id);
 
         let player = Address::generate(&env);
@@ -171,7 +171,7 @@ mod test {
     #[test]
     fn test_submit_puzzle() {
         let env = Env::default();
-        let contract_id = env.register(MindBlockContract, ());
+        let contract_id = env.register_contract(None, MindBlockContract);
         let client = MindBlockContractClient::new(&env, &contract_id);
 
         let player = Address::generate(&env);
