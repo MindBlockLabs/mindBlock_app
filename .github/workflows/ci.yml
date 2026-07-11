@@ -108,6 +108,10 @@ jobs:
           workspaces: "contract"
       - name: Check formatting
         run: cargo fmt --all -- --check
+      - name: Pin ed25519-dalek to 2.x
+        run: |
+          cargo generate-lockfile
+          cargo update -p ed25519-dalek --precise 2.1.1
       - name: Run clippy
         run: cargo clippy --all-targets --all-features -- -D warnings
       - name: Build Contracts

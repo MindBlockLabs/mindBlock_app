@@ -5,12 +5,6 @@ edition = "2021"
 
 [dependencies]
 soroban-sdk = "21"
-# Pin ed25519-dalek to 2.x to prevent Cargo from resolving to 3.0.0.
-# soroban-env-host declares `ed25519-dalek = ">=2.0.0"` which Cargo would
-# otherwise satisfy with 3.0.0. But 3.0.0 uses rand_core ^0.10 while
-# soroban-env-host's rand_chacha 0.3.x uses rand_core 0.6, causing the
-# `ChaCha20Rng: CryptoRng` trait-bound conflict in clippy --all-features.
-ed25519-dalek = "=2.1.1"
 
 [dev-dependencies]
 soroban-sdk = { version = "21", features = ["testutils"] }
