@@ -8,6 +8,16 @@ soroban-sdk = "23"
 
 [dev-dependencies]
 soroban-sdk = { version = "23", features = ["testutils"] }
+# Pin ed25519-dalek explicitly. soroban-env-host 23.0.1 (pulled in as an exact
+# dependency of soroban-sdk 23.x) declares an unbounded
+# `ed25519-dalek = ">=2.0.0"` requirement. Without this pin, cargo is free to
+# resolve that edge to the newest ed25519-dalek release (currently 3.0.0),
+# which changed its RNG trait bounds (now requires the new rand_core 0.10
+# CryptoRng trait) in a way that soroban-env-host's own testutils
+# (testutils.rs, which still passes a rand_core 0.6-based ChaCha20Rng) cannot
+# satisfy. Pinning here forces cargo to unify every edge onto the
+# known-good, compatible 2.x release instead.
+ed25519-dalek = "=2.2.0"
 
 [profile.release]
 opt-level = "z"

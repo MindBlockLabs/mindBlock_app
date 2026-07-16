@@ -53,5 +53,5 @@ jobs:
         with:
           workspaces: "contract"
       - name: Build contract
-        run: cargo build --target wasm32-unknown-unknown --release
+        run: cargo build --locked --target wasm32-unknown-unknown --release
         working-directory: contract
