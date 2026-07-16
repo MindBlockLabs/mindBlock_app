@@ -31,7 +31,7 @@ This is a **monorepo** containing three main components:
 
 ### 🌍 Hosting
 - **Backend (NestJS)** → [Render](https://mindblock-webaapp.onrender.com)  
-- **Frontend (NextJS)** → (Coming soon on Vercel)  
+- **Frontend (NextJS)** → [Vercel](https://mind-block-app-frontend.vercel.app/)  
 - **Contracts (Rust)** → Stellar testnet  
 
 ---
