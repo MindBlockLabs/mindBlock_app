@@ -22,6 +22,7 @@ import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
 import { GeolocationMiddleware } from './common/middleware/geolocation.middleware';
 import { HealthModule } from './health/health.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -80,6 +81,7 @@ import { HealthModule } from './health/health.module';
     }),
     AuthModule,
     UsersModule,
+    AnalyticsModule,
     PuzzlesModule,
     ProgressModule,
     QuestsModule,

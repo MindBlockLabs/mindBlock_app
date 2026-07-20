@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { User } from '../user.entity';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class XpLevelService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   /**
@@ -47,6 +49,43 @@ export class XpLevelService {
     }
 
     await this.userRepository.save(user);
+
+    const eventTimestamp = new Date();
+    const xpAwardedEvent = {
+      userId: user.id,
+      entityId: user.id,
+      xpAmount,
+      previousLevel,
+      currentLevel: user.level,
+      timestamp: eventTimestamp,
+    };
+
+    // Fire-and-forget analytics event emission. Do not await to avoid blocking request path.
+    setImmediate(() => {
+      try {
+        this.eventEmitter.emit('xp_awarded', xpAwardedEvent);
+      } catch {
+        // swallow listener errors to keep request path safe
+      }
+    });
+
+    if (levelUp) {
+      const leveledUpEvent = {
+        userId: user.id,
+        entityId: user.id,
+        previousLevel,
+        currentLevel: user.level,
+        timestamp: eventTimestamp,
+      };
+
+      setImmediate(() => {
+        try {
+          this.eventEmitter.emit('user_leveled_up', leveledUpEvent);
+        } catch {
+          // swallow listener errors to keep request path safe
+        }
+      });
+    }
 
     return {
       levelUp,
