@@ -1,10 +1,15 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { UsersAnalyticsListener } from './listeners/users-analytics.listener';
-import { AnalyticsEvent } from './entities/analytics-event.entity';
+import { AnalyticsController } from './analytics.controller';
+import { AnalyticsService } from './analytics.service';
+import { TrackEventProvider } from './providers/track-event.provider';
+import { AnalyticsAdminGuard } from './guards/analytics-admin.guard';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([AnalyticsEvent])],
-  providers: [UsersAnalyticsListener],
+  controllers: [AnalyticsController],
+  providers: [
+    AnalyticsService,
+    TrackEventProvider,
+    AnalyticsAdminGuard,
+  ],
 })
 export class AnalyticsModule {}
