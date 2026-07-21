@@ -1,7 +1,9 @@
-import { IsDate, IsOptional, Validate } from 'class-validator';
+import { IsDate, IsIn, IsOptional, Validate } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ValidDateRangeConstraint } from '../validators/date-range.validator';
+
+export type RetentionGranularity = 'day' | 'week' | 'month';
 
 export class DateRangeDto {
   @ApiPropertyOptional({
@@ -24,4 +26,14 @@ export class DateRangeDto {
 
   @Validate(ValidDateRangeConstraint)
   _dateRange: boolean;
+
+  @ApiPropertyOptional({
+    example: 'day',
+    description: 'Time granularity for grouping results: day | week | month',
+    enum: ['day', 'week', 'month'],
+    default: 'day',
+  })
+  @IsOptional()
+  @IsIn(['day', 'week', 'month'])
+  granularity?: RetentionGranularity;
 }
