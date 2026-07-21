@@ -1,15 +1,22 @@
 import { Module } from '@nestjs/common';
-import { AnalyticsController } from './analytics.controller';
-import { AnalyticsService } from './analytics.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AnalyticsEvent } from './entities/analytics-event.entity';
+import { RetentionCohort } from './entities/retention-cohort.entity';
+import { UsersAnalyticsListener } from './listeners/users-analytics.listener';
+import { AnalyticsController } from './controllers/analytics.controller';
 import { TrackEventProvider } from './providers/track-event.provider';
-import { AnalyticsAdminGuard } from './guards/analytics-admin.guard';
+import { GetOnboardingFunnelProvider } from './providers/get-onboarding-funnel.provider';
+import { GetRetentionCurveProvider } from './providers/get-retention-curve.provider';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([AnalyticsEvent, RetentionCohort])],
   controllers: [AnalyticsController],
   providers: [
-    AnalyticsService,
+    UsersAnalyticsListener,
     TrackEventProvider,
-    AnalyticsAdminGuard,
+    GetOnboardingFunnelProvider,
+    GetRetentionCurveProvider,
   ],
+  exports: [TrackEventProvider, GetOnboardingFunnelProvider, GetRetentionCurveProvider, TypeOrmModule],
 })
 export class AnalyticsModule {}
