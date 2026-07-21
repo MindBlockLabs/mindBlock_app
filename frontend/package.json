@@ -24,6 +24,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-redux": "^9.2.0",
+    "recharts": "^3.10.0",
     "stellar-sdk": "^13.3.0",
     "tailwind-merge": "^3.4.0"
   },
