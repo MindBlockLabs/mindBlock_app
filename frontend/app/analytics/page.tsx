@@ -3,15 +3,9 @@ import DauMauChart from "@/components/analytics/DauMauChart";
 
 export default function AnalyticsPage() {
   return (
-    <div className="min-h-screen w-full bg-[#0A0F1A] px-4 py-8 text-slate-100 sm:px-6">
-      <div className="mx-auto w-full max-w-6xl">
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-white">Analytics</h1>
-          <p className="text-sm text-slate-400">
-            Player engagement overview for the Mind Block platform.
-          </p>
-        </div>
-
+    <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
+      {/* Full-width for now; future charts can sit alongside it in the grid */}
+      <div className="min-w-0 lg:col-span-2">
         <DauMauChart />
       </div>
     </div>
