@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { TrackEventProvider } from '../providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from '../providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from '../providers/get-retention-curve.provider';
+import { AnalyticsService } from '../analytics.service';
 import { TrackEventDto } from '../dtos/track-event.dto';
 import { DateRangeDto } from '../dtos/date-range.dto';
 import { AnalyticsMetricResult } from '../dtos/analytics-metric-result.dto';
@@ -15,7 +16,15 @@ export class AnalyticsController {
     private readonly trackEventProvider: TrackEventProvider,
     private readonly getOnboardingFunnelProvider: GetOnboardingFunnelProvider,
     private readonly getRetentionCurveProvider: GetRetentionCurveProvider,
+    private readonly analyticsService: AnalyticsService,
   ) {}
+
+  @Get('ping')
+  @ApiOperation({ summary: 'Health check for analytics module' })
+  @ApiResponse({ status: 200, description: 'Analytics module is healthy' })
+  ping() {
+    return this.analyticsService.ping();
+  }
 
   @Post('track')
   @ApiOperation({ summary: 'Track an analytics event' })
