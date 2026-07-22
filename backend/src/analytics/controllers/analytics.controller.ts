@@ -1,12 +1,22 @@
 import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { TrackEventProvider } from '../providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from '../providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from '../providers/get-retention-curve.provider';
+import { GetChurnRiskProvider } from '../providers/get-churn-risk.provider';
 import { AnalyticsService } from '../analytics.service';
 import { TrackEventDto } from '../dtos/track-event.dto';
 import { DateRangeDto } from '../dtos/date-range.dto';
-import { AnalyticsMetricResult } from '../dtos/analytics-metric-result.dto';
+import {
+  AnalyticsMetricResult,
+  ChurnRiskDataPoint,
+} from '../dtos/analytics-metric-result.dto';
 import { AnalyticsAdminGuard } from '../guards/analytics-admin.guard';
 
 @ApiTags('Analytics')
@@ -16,6 +26,7 @@ export class AnalyticsController {
     private readonly trackEventProvider: TrackEventProvider,
     private readonly getOnboardingFunnelProvider: GetOnboardingFunnelProvider,
     private readonly getRetentionCurveProvider: GetRetentionCurveProvider,
+    private readonly getChurnRiskProvider: GetChurnRiskProvider,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -45,5 +56,31 @@ export class AnalyticsController {
   @ApiResponse({ status: 200, type: AnalyticsMetricResult })
   async getRetentionCurve(@Query() query: DateRangeDto) {
     return this.getRetentionCurveProvider.getRetentionCurve(query);
+  }
+
+  @Get('users/churn-risk')
+  @UseGuards(AnalyticsAdminGuard)
+  @ApiOperation({ summary: 'Get per-user churn risk scores (admin only)' })
+  @ApiExtraModels(AnalyticsMetricResult, ChurnRiskDataPoint)
+  @ApiResponse({
+    status: 200,
+    // AnalyticsMetricResult is generic, so `data` is described explicitly
+    // here — the class decorator alone would advertise RetentionDataPoint.
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(AnalyticsMetricResult) },
+        {
+          properties: {
+            data: {
+              type: 'array',
+              items: { $ref: getSchemaPath(ChurnRiskDataPoint) },
+            },
+          },
+        },
+      ],
+    },
+  })
+  async getChurnRisk(@Query() query: DateRangeDto) {
+    return this.getChurnRiskProvider.getChurnRisk(query);
   }
 }
