@@ -1,6 +1,22 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+/**
+ * Raw analytics event row.
+ *
+ * Indexes exist to serve two distinct access patterns:
+ *  - `['timestamp', 'userId']` — range scan over a reporting window, grouped by
+ *    user (churn risk, and any future per-user rollup job).
+ *  - `['userId', 'timestamp']` — a single user's history, ordered in time.
+ */
 @Entity('analytics_events')
+@Index(['timestamp', 'userId'])
+@Index(['userId', 'timestamp'])
 export class AnalyticsEvent {
   @PrimaryGeneratedColumn('uuid')
   id: string;
