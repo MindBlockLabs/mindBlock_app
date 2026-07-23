@@ -25,3 +25,33 @@ export async function getDauMauMetrics(
   });
   return response.data;
 }
+
+export interface RetentionDataPoint {
+  cohortDate: string;
+  cohortSize: number;
+  day1RetentionPct: number | null;
+  day7RetentionPct: number | null;
+  day30RetentionPct: number | null;
+}
+
+export interface RetentionResponse {
+  startDate: string;
+  endDate: string;
+  granularity: string;
+  data: RetentionDataPoint[];
+  total: number;
+}
+
+export interface RetentionParams {
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+}
+
+export async function getRetentionMetrics(
+  params: RetentionParams,
+): Promise<RetentionResponse> {
+  const response = await api.get<RetentionResponse>('/analytics/users/retention', {
+    params,
+  });
+  return response.data;
+}
