@@ -8,6 +8,7 @@ import { AnalyticsService } from './analytics.service';
 import { TrackEventProvider } from './providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from './providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from './providers/get-retention-curve.provider';
+import { GetChurnRiskProvider } from './providers/get-churn-risk.provider';
 
 @Module({
   imports: [TypeOrmModule.forFeature([AnalyticsEvent, RetentionCohort])],
@@ -18,7 +19,15 @@ import { GetRetentionCurveProvider } from './providers/get-retention-curve.provi
     TrackEventProvider,
     GetOnboardingFunnelProvider,
     GetRetentionCurveProvider,
+    GetChurnRiskProvider,
   ],
-  exports: [AnalyticsService, TrackEventProvider, GetOnboardingFunnelProvider, GetRetentionCurveProvider, TypeOrmModule],
+  exports: [
+    AnalyticsService,
+    TrackEventProvider,
+    GetOnboardingFunnelProvider,
+    GetRetentionCurveProvider,
+    GetChurnRiskProvider,
+    TypeOrmModule,
+  ],
 })
 export class AnalyticsModule {}
