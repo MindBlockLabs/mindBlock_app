@@ -16,7 +16,6 @@ import {
  * on-the-fly from raw `AnalyticsEvent` rows.
  */
 @Entity('retention_cohorts')
-@Index(['cohortDate'])
 export class RetentionCohort {
   @PrimaryGeneratedColumn('uuid')
   id: string;
