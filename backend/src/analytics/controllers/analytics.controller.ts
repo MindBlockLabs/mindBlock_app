@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Res, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -6,13 +6,16 @@ import {
   ApiExtraModels,
   getSchemaPath,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { TrackEventProvider } from '../providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from '../providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from '../providers/get-retention-curve.provider';
 import { GetChurnRiskProvider } from '../providers/get-churn-risk.provider';
+import { ExportCsvProvider } from '../providers/export-csv.provider';
 import { AnalyticsService } from '../analytics.service';
 import { TrackEventDto } from '../dtos/track-event.dto';
 import { DateRangeDto } from '../dtos/date-range.dto';
+import { AnalyticsQueryDto } from '../dtos/analytics-query.dto';
 import {
   AnalyticsMetricResult,
   ChurnRiskDataPoint,
@@ -27,6 +30,7 @@ export class AnalyticsController {
     private readonly getOnboardingFunnelProvider: GetOnboardingFunnelProvider,
     private readonly getRetentionCurveProvider: GetRetentionCurveProvider,
     private readonly getChurnRiskProvider: GetChurnRiskProvider,
+    private readonly exportCsvProvider: ExportCsvProvider,
     private readonly analyticsService: AnalyticsService,
   ) {}
 
@@ -82,5 +86,27 @@ export class AnalyticsController {
   })
   async getChurnRisk(@Query() query: DateRangeDto) {
     return this.getChurnRiskProvider.getChurnRisk(query);
+  }
+
+  @Get('export')
+  @UseGuards(AnalyticsAdminGuard)
+  @ApiOperation({
+    summary: 'Export a chosen analytics metric over a date range (admin only)',
+  })
+  @ApiResponse({ status: 200, description: 'CSV or JSON export of the requested metric' })
+  async exportMetric(
+    @Query() query: AnalyticsQueryDto,
+    @Res() res: Response,
+  ) {
+    const result = await this.exportCsvProvider.export(query);
+
+    res.setHeader('Content-Type', result.contentType);
+    if (result.contentType === 'text/csv') {
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="${result.filename}"`,
+      );
+    }
+    res.status(200).send(result.body);
   }
 }
