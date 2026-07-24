@@ -1,20 +1,29 @@
-// frontend/components/analytics/DauMauChart.tsx
+// frontend/components/analytics/CategoryPopularityChart.tsx
 "use client";
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
 } from "recharts";
-import { TrendingUp, CalendarRange, SlidersHorizontal, X } from "lucide-react";
-import { getDauMauMetrics } from "@/lib/api/analyticsApi";
+import { CalendarRange, SlidersHorizontal, X } from "lucide-react";
+import {
+  getCategoryPopularity,
+  type CategoryPopularityDataPoint,
+} from "../../lib/api/analyticsApi";
+
+type Metric = "uniqueUsers" | "puzzlesSolved";
+
+const METRICS: { label: string; value: Metric }[] = [
+  { label: "Unique Users", value: "uniqueUsers" },
+  { label: "Puzzles Solved", value: "puzzlesSolved" },
+];
 
 function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -33,15 +42,16 @@ const PRESETS = [
   { label: "90D", days: 90 },
 ];
 
-export default function DauMauChart() {
+export default function CategoryPopularityChart() {
   const defaultRange = useMemo(getDefaultRange, []);
   const [startDate, setStartDate] = useState(defaultRange.startDate);
   const [endDate, setEndDate] = useState(defaultRange.endDate);
+  const [metric, setMetric] = useState<Metric>("uniqueUsers");
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const { data, isLoading, isFetching, isError, error, refetch } = useQuery({
-    queryKey: ["dau-mau", startDate, endDate],
-    queryFn: () => getDauMauMetrics({ startDate, endDate }),
+    queryKey: ["category-popularity", startDate, endDate],
+    queryFn: () => getCategoryPopularity({ startDate, endDate }),
   });
 
   function applyPreset(days: number) {
@@ -52,10 +62,13 @@ export default function DauMauChart() {
     setEndDate(formatDate(end));
   }
 
-  const series = data?.series ?? [];
-  const hasData = series.length > 0;
-  const stickinessPct =
-    data?.stickiness != null ? Math.round(data.stickiness * 100) : null;
+  const chartData: CategoryPopularityDataPoint[] = useMemo(() => {
+    const rows = data?.data ?? [];
+    return [...rows].sort((a, b) => b[metric] - a[metric]);
+  }, [data, metric]);
+
+  const hasData = chartData.length > 0;
+  const metricLabel = METRICS.find((m) => m.value === metric)?.label ?? "";
 
   const controls = (
     <div className="flex flex-wrap items-center gap-2">
@@ -98,9 +111,11 @@ export default function DauMauChart() {
     <div className="min-w-0 rounded-2xl border border-slate-800 bg-[#101B30] p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-lg font-semibold text-white">DAU / MAU</h2>
+          <h2 className="text-lg font-semibold text-white">
+            Category Popularity
+          </h2>
           <p className="text-xs text-slate-400">
-            Daily vs monthly active users
+            Categories ranked by {metricLabel.toLowerCase()}
           </p>
         </div>
 
@@ -129,26 +144,46 @@ export default function DauMauChart() {
         </div>
       )}
 
-      {stickinessPct !== null && hasData && (
-        <div className="mt-4 flex w-fit items-center gap-2 rounded-xl border border-blue-500/30 bg-blue-500/10 px-4 py-2">
-          <TrendingUp className="h-4 w-4 text-blue-300" />
-          <span className="text-sm text-blue-200">
-            Stickiness: <strong>{stickinessPct}%</strong> (avg DAU/MAU)
-          </span>
-        </div>
-      )}
+      <div
+        role="tablist"
+        aria-label="Ranking metric"
+        className="mt-4 inline-flex w-fit rounded-lg border border-slate-700 p-1"
+      >
+        {METRICS.map((option) => {
+          const isActive = option.value === metric;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="tab"
+              aria-selected={isActive}
+              onClick={() => setMetric(option.value)}
+              className={`rounded-md px-3 py-1.5 text-xs font-medium transition ${
+                isActive
+                  ? "bg-blue-500/20 text-blue-200"
+                  : "text-slate-400 hover:text-white"
+              }`}
+            >
+              {option.label}
+            </button>
+          );
+        })}
+      </div>
 
-      <div className="mt-6 h-64 w-full md:h-72">
+      <div
+        className="mt-6 w-full"
+        style={{ height: Math.max(256, chartData.length * 40) }}
+      >
         {isLoading && (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">
-            Loading engagement data...
+            Loading category data...
           </div>
         )}
 
         {!isLoading && isError && (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-sm text-red-400">
             <span>
-              Couldn&apos;t load DAU/MAU data
+              Couldn&apos;t load category popularity data
               {error instanceof Error ? `: ${error.message}` : "."}
             </span>
             <button
@@ -163,50 +198,54 @@ export default function DauMauChart() {
 
         {!isLoading && !isError && !hasData && (
           <div className="flex h-full items-center justify-center text-sm text-slate-400">
-            No activity data for this date range yet.
+            No category data for this date range yet.
           </div>
         )}
 
         {!isLoading && !isError && hasData && (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={series}
-              margin={{ top: 8, right: 8, left: 0, bottom: 0 }}
+            <BarChart
+              data={chartData}
+              layout="vertical"
+              margin={{ top: 8, right: 24, left: 0, bottom: 0 }}
+              barCategoryGap={12}
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-              <XAxis
-                dataKey="date"
-                stroke="#64748b"
-                tick={{ fontSize: 11 }}
-                interval="preserveStartEnd"
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#1e293b"
+                horizontal={false}
               />
-              <YAxis stroke="#64748b" tick={{ fontSize: 11 }} allowDecimals={false} width={36} />
+              <XAxis
+                type="number"
+                stroke="#64748b"
+                tick={{ fontSize: 12 }}
+                allowDecimals={false}
+              />
+              <YAxis
+                type="category"
+                dataKey="categoryName"
+                stroke="#64748b"
+                tick={{ fontSize: 12 }}
+                width={120}
+              />
               <Tooltip
+                cursor={{ fill: "rgba(148, 163, 184, 0.08)" }}
                 contentStyle={{
                   background: "#0A0F1A",
                   border: "1px solid #1e293b",
                   borderRadius: 8,
                   color: "#e2e8f0",
                 }}
+                formatter={(value) => [value, metricLabel]}
               />
-              <Legend wrapperStyle={{ fontSize: 12, color: "#94a3b8" }} />
-              <Line
-                type="monotone"
-                dataKey="dau"
-                name="DAU"
-                stroke="#3b82f6"
-                strokeWidth={2}
-                dot={false}
+              <Bar
+                dataKey={metric}
+                name={metricLabel}
+                fill="#3b82f6"
+                radius={[0, 4, 4, 0]}
+                maxBarSize={28}
               />
-              <Line
-                type="monotone"
-                dataKey="mau"
-                name="MAU"
-                stroke="#a855f7"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
+            </BarChart>
           </ResponsiveContainer>
         )}
 
