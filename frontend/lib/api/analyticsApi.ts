@@ -55,3 +55,33 @@ export async function getRetentionMetrics(
   });
   return response.data;
 }
+
+export interface CategoryPopularityDataPoint {
+  categoryId: string;
+  categoryName: string;
+  uniqueUsers: number;
+  puzzlesSolved: number;
+}
+
+export interface CategoryPopularityResponse {
+  startDate: string;
+  endDate: string;
+  granularity: string;
+  data: CategoryPopularityDataPoint[];
+  total: number;
+}
+
+export interface CategoryPopularityParams {
+  startDate: string; // YYYY-MM-DD
+  endDate: string; // YYYY-MM-DD
+}
+
+export async function getCategoryPopularity(
+  params: CategoryPopularityParams,
+): Promise<CategoryPopularityResponse> {
+  const response = await api.get<CategoryPopularityResponse>(
+    '/analytics/categories/popularity',
+    { params },
+  );
+  return response.data;
+}
