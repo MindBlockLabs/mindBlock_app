@@ -113,6 +113,15 @@ export class ExportCsvProvider {
       'retainedDay30',
     ],
     [ExportMetric.ONBOARDING_FUNNEL]: ['stage', 'eventType', 'count'],
+    [ExportMetric.PUZZLE_STATS]: [
+      'puzzleId',
+      'totalAttempts',
+      'successfulAttempts',
+      'failedAttempts',
+      'successRate',
+      'averageTimeSpent',
+      'uniqueUsers',
+    ],
   };
 
   private toCsv(
