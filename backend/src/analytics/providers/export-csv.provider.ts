@@ -137,17 +137,14 @@ export class ExportCsvProvider {
       'retainedDay30',
     ],
     [ExportMetric.ONBOARDING_FUNNEL]: ['stage', 'eventType', 'count'],
-    [ExportMetric.CHURN_RISK]: [
-      'userId',
-      'riskScore',
-      'riskBand',
-      'baselineMean',
-      'baselineStdDev',
-      'baselineBuckets',
-      'recentCount',
-      'consecutiveSilentBuckets',
-      'dropRatio',
-      'insufficientBaseline',
+    [ExportMetric.PUZZLE_STATS]: [
+      'puzzleId',
+      'totalAttempts',
+      'successfulAttempts',
+      'failedAttempts',
+      'successRate',
+      'averageTimeSpent',
+      'uniqueUsers',
     ],
   };
 
