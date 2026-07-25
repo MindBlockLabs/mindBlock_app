@@ -14,7 +14,10 @@ import { GetChurnRiskProvider } from '../src/analytics/providers/get-churn-risk.
 import { ExportCsvProvider } from '../src/analytics/providers/export-csv.provider';
 import { AnalyticsService } from '../src/analytics/analytics.service';
 import { AnalyticsAdminGuard } from '../src/analytics/guards/analytics-admin.guard';
-import { AnalyticsMetricResult } from '../src/analytics/dtos/analytics-metric-result.dto';
+import {
+  AnalyticsMetricResult,
+  ChurnRiskDataPoint,
+} from '../src/analytics/dtos/analytics-metric-result.dto';
 
 describe('GET /analytics/users/retention (e2e)', () => {
   let app: INestApplication<App>;
@@ -162,6 +165,150 @@ describe('GET /analytics/users/retention (e2e)', () => {
       .expect(400);
 
     expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+  });
+});
+
+describe('GET /analytics/users/churn-risk (e2e)', () => {
+  let app: INestApplication<App>;
+
+  const mockGetChurnRiskProvider = { getChurnRisk: jest.fn() };
+
+  const fakeChurnRiskResult: AnalyticsMetricResult<ChurnRiskDataPoint> = {
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+    granularity: 'day',
+    data: [
+      {
+        userId: 'user-123',
+        riskScore: 85,
+        riskBand: 'high',
+        baselineMean: 10,
+        baselineStdDev: 2,
+        baselineBuckets: 7,
+        recentCount: 1,
+        consecutiveSilentBuckets: 0,
+        dropRatio: 0.9,
+        insufficientBaseline: false,
+      },
+    ],
+    total: 1,
+  };
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      controllers: [AnalyticsController],
+      providers: [
+        { provide: TrackEventProvider, useValue: {} },
+        { provide: GetOnboardingFunnelProvider, useValue: {} },
+        { provide: GetRetentionCurveProvider, useValue: {} },
+        {
+          provide: GetChurnRiskProvider,
+          useValue: mockGetChurnRiskProvider,
+        },
+        { provide: ExportCsvProvider, useValue: {} },
+        { provide: AnalyticsService, useValue: {} },
+      ],
+    })
+      .overrideGuard(AnalyticsAdminGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext) => {
+          const req = context.switchToHttp().getRequest();
+          return req.headers['x-test-role'] === 'admin';
+        },
+      })
+      .compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns 200 with the documented response shape for an admin caller', async () => {
+    mockGetChurnRiskProvider.getChurnRisk.mockResolvedValue(
+      fakeChurnRiskResult,
+    );
+
+    const res = await request(app.getHttpServer())
+      .get('/analytics/users/churn-risk')
+      .set('x-test-role', 'admin')
+      .query({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-31T00:00:00.000Z',
+        granularity: 'day',
+      })
+      .expect(200);
+
+    expect(res.body).toEqual(fakeChurnRiskResult);
+    expect(mockGetChurnRiskProvider.getChurnRisk).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns 403 for a caller without the admin role', async () => {
+    await request(app.getHttpServer())
+      .get('/analytics/users/churn-risk')
+      .query({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-31T00:00:00.000Z',
+      })
+      .expect(403);
+
+    expect(mockGetChurnRiskProvider.getChurnRisk).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 with a clear validation message for an invalid granularity', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/analytics/users/churn-risk')
+      .set('x-test-role', 'admin')
+      .query({ granularity: 'century' })
+      .expect(400);
+
+    expect(res.body.message).toEqual(
+      expect.arrayContaining([expect.stringContaining('granularity')]),
+    );
+    expect(mockGetChurnRiskProvider.getChurnRisk).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when start is after end', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/analytics/users/churn-risk')
+      .set('x-test-role', 'admin')
+      .query({
+        start: '2024-02-01T00:00:00.000Z',
+        end: '2024-01-01T00:00:00.000Z',
+      })
+      .expect(400);
+
+    expect(res.body.message).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'start date must be before or equal to end date',
+        ),
+      ]),
+    );
+    expect(mockGetChurnRiskProvider.getChurnRisk).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for an unrecognized query param', async () => {
+    await request(app.getHttpServer())
+      .get('/analytics/users/churn-risk')
+      .set('x-test-role', 'admin')
+      .query({ unknownParam: 'nope' })
+      .expect(400);
+
+    expect(mockGetChurnRiskProvider.getChurnRisk).not.toHaveBeenCalled();
   });
 });
 

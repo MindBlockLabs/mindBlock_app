@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Optional } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Repository } from 'typeorm';
 import { format as formatCsv } from 'fast-csv';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
 import { RetentionCohort } from '../entities/retention-cohort.entity';
+import { GetChurnRiskProvider } from './get-churn-risk.provider';
 import {
   AnalyticsQueryDto,
   ExportMetric,
@@ -25,7 +26,7 @@ export interface ExportResult {
 }
 
 /**
- * Exports a chosen analytics metric (retention curve or onboarding funnel)
+ * Exports a chosen analytics metric (retention curve, onboarding funnel, or churn risk)
  * over a date range, as CSV or JSON.
  *
  * Queries the same underlying tables as GetRetentionCurveProvider /
@@ -40,6 +41,8 @@ export class ExportCsvProvider {
     private readonly retentionCohortRepo: Repository<RetentionCohort>,
     @InjectRepository(AnalyticsEvent)
     private readonly analyticsEventRepo: Repository<AnalyticsEvent>,
+    @Optional()
+    private readonly getChurnRiskProvider?: GetChurnRiskProvider,
   ) {}
 
   async export(query: AnalyticsQueryDto): Promise<ExportResult> {
@@ -48,7 +51,9 @@ export class ExportCsvProvider {
     const rows =
       metric === ExportMetric.RETENTION
         ? await this.getRetentionRows(query)
-        : await this.getFunnelRows(query);
+        : metric === ExportMetric.ONBOARDING_FUNNEL
+        ? await this.getFunnelRows(query)
+        : await this.getChurnRiskRows(query);
 
     const filename = `analytics-export-${metric}.${format}`;
 
@@ -104,6 +109,25 @@ export class ExportCsvProvider {
     return rows;
   }
 
+  private async getChurnRiskRows(
+    query: AnalyticsQueryDto,
+  ): Promise<Record<string, unknown>[]> {
+    if (!this.getChurnRiskProvider) return [];
+    const result = await this.getChurnRiskProvider.getChurnRisk(query);
+    return result.data.map((item) => ({
+      userId: item.userId,
+      riskScore: item.riskScore ?? '',
+      riskBand: item.riskBand ?? '',
+      baselineMean: item.baselineMean,
+      baselineStdDev: item.baselineStdDev,
+      baselineBuckets: item.baselineBuckets,
+      recentCount: item.recentCount,
+      consecutiveSilentBuckets: item.consecutiveSilentBuckets,
+      dropRatio: item.dropRatio ?? '',
+      insufficientBaseline: item.insufficientBaseline,
+    }));
+  }
+
   private static readonly CSV_HEADERS: Record<ExportMetric, string[]> = {
     [ExportMetric.RETENTION]: [
       'cohortDate',
@@ -113,6 +137,18 @@ export class ExportCsvProvider {
       'retainedDay30',
     ],
     [ExportMetric.ONBOARDING_FUNNEL]: ['stage', 'eventType', 'count'],
+    [ExportMetric.CHURN_RISK]: [
+      'userId',
+      'riskScore',
+      'riskBand',
+      'baselineMean',
+      'baselineStdDev',
+      'baselineBuckets',
+      'recentCount',
+      'consecutiveSilentBuckets',
+      'dropRatio',
+      'insufficientBaseline',
+    ],
   };
 
   private toCsv(
