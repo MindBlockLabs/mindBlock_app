@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Query, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Get, Query, Param, Res, UseGuards } from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -11,6 +11,7 @@ import { TrackEventProvider } from '../providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from '../providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from '../providers/get-retention-curve.provider';
 import { GetChurnRiskProvider } from '../providers/get-churn-risk.provider';
+import { PuzzleAnalyticsProvider } from '../providers/puzzle-analytics.provider';
 import { ExportCsvProvider } from '../providers/export-csv.provider';
 import { AnalyticsService } from '../analytics.service';
 import { TrackEventDto } from '../dtos/track-event.dto';
@@ -19,6 +20,7 @@ import { AnalyticsQueryDto } from '../dtos/analytics-query.dto';
 import {
   AnalyticsMetricResult,
   ChurnRiskDataPoint,
+  PuzzleStatsResult,
 } from '../dtos/analytics-metric-result.dto';
 import { AnalyticsAdminGuard } from '../guards/analytics-admin.guard';
 
@@ -30,6 +32,7 @@ export class AnalyticsController {
     private readonly getOnboardingFunnelProvider: GetOnboardingFunnelProvider,
     private readonly getRetentionCurveProvider: GetRetentionCurveProvider,
     private readonly getChurnRiskProvider: GetChurnRiskProvider,
+    private readonly puzzleAnalyticsProvider: PuzzleAnalyticsProvider,
     private readonly exportCsvProvider: ExportCsvProvider,
     private readonly analyticsService: AnalyticsService,
   ) {}
@@ -86,6 +89,17 @@ export class AnalyticsController {
   })
   async getChurnRisk(@Query() query: DateRangeDto) {
     return this.getChurnRiskProvider.getChurnRisk(query);
+  }
+
+  @Get('puzzles/:id/stats')
+  @UseGuards(AnalyticsAdminGuard)
+  @ApiOperation({ summary: 'Get detailed stats for a single puzzle (admin only)' })
+  @ApiResponse({ status: 200, type: PuzzleStatsResult })
+  async getPuzzleStats(
+    @Param('id') puzzleId: string,
+    @Query() query: DateRangeDto,
+  ) {
+    return this.puzzleAnalyticsProvider.getPuzzleStats(puzzleId, query);
   }
 
   @Get('export')

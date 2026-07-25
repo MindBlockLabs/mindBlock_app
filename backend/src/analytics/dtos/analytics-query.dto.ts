@@ -5,6 +5,7 @@ import { DateRangeDto } from './date-range.dto';
 export enum ExportMetric {
   RETENTION = 'retention',
   ONBOARDING_FUNNEL = 'onboarding_funnel',
+  PUZZLE_STATS = 'puzzle_stats',
 }
 
 export enum ExportFormat {

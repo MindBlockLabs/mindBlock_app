@@ -12,9 +12,13 @@ import { GetOnboardingFunnelProvider } from '../src/analytics/providers/get-onbo
 import { GetRetentionCurveProvider } from '../src/analytics/providers/get-retention-curve.provider';
 import { GetChurnRiskProvider } from '../src/analytics/providers/get-churn-risk.provider';
 import { ExportCsvProvider } from '../src/analytics/providers/export-csv.provider';
+import { PuzzleAnalyticsProvider } from '../src/analytics/providers/puzzle-analytics.provider';
 import { AnalyticsService } from '../src/analytics/analytics.service';
 import { AnalyticsAdminGuard } from '../src/analytics/guards/analytics-admin.guard';
-import { AnalyticsMetricResult } from '../src/analytics/dtos/analytics-metric-result.dto';
+import {
+  AnalyticsMetricResult,
+  PuzzleStatsResult,
+} from '../src/analytics/dtos/analytics-metric-result.dto';
 
 describe('GET /analytics/users/retention (e2e)', () => {
   let app: INestApplication<App>;
@@ -54,6 +58,7 @@ describe('GET /analytics/users/retention (e2e)', () => {
           useValue: mockGetRetentionCurveProvider,
         },
         { provide: GetChurnRiskProvider, useValue: {} },
+        { provide: PuzzleAnalyticsProvider, useValue: {} },
         { provide: ExportCsvProvider, useValue: mockExportCsvProvider },
         { provide: AnalyticsService, useValue: {} },
       ],
@@ -165,6 +170,143 @@ describe('GET /analytics/users/retention (e2e)', () => {
   });
 });
 
+describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
+  let app: INestApplication<App>;
+
+  const mockPuzzleAnalyticsProvider = { getPuzzleStats: jest.fn() };
+
+  const fakePuzzleStatsResult: PuzzleStatsResult = {
+    puzzleId: 'puzzle-uuid-100',
+    totalAttempts: 10,
+    successfulAttempts: 7,
+    failedAttempts: 3,
+    successRate: 70,
+    averageTimeSpent: 45.2,
+    uniqueUsers: 6,
+    startDate: '2024-01-01',
+    endDate: '2024-01-31',
+  };
+
+  beforeAll(async () => {
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      controllers: [AnalyticsController],
+      providers: [
+        { provide: TrackEventProvider, useValue: {} },
+        { provide: GetOnboardingFunnelProvider, useValue: {} },
+        { provide: GetRetentionCurveProvider, useValue: {} },
+        { provide: GetChurnRiskProvider, useValue: {} },
+        {
+          provide: PuzzleAnalyticsProvider,
+          useValue: mockPuzzleAnalyticsProvider,
+        },
+        { provide: ExportCsvProvider, useValue: {} },
+        { provide: AnalyticsService, useValue: {} },
+      ],
+    })
+      .overrideGuard(AnalyticsAdminGuard)
+      .useValue({
+        canActivate: (context: ExecutionContext) => {
+          const req = context.switchToHttp().getRequest();
+          return req.headers['x-test-role'] === 'admin';
+        },
+      })
+      .compile();
+
+    app = moduleFixture.createNestApplication();
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
+    );
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('returns 200 with the documented response shape for an admin caller', async () => {
+    mockPuzzleAnalyticsProvider.getPuzzleStats.mockResolvedValue(
+      fakePuzzleStatsResult,
+    );
+
+    const res = await request(app.getHttpServer())
+      .get('/analytics/puzzles/puzzle-uuid-100/stats')
+      .set('x-test-role', 'admin')
+      .query({
+        start: '2024-01-01T00:00:00.000Z',
+        end: '2024-01-31T00:00:00.000Z',
+      })
+      .expect(200);
+
+    expect(res.body).toEqual(fakePuzzleStatsResult);
+    expect(mockPuzzleAnalyticsProvider.getPuzzleStats).toHaveBeenCalledWith(
+      'puzzle-uuid-100',
+      expect.objectContaining({
+        start: new Date('2024-01-01T00:00:00.000Z'),
+        end: new Date('2024-01-31T00:00:00.000Z'),
+      }),
+    );
+  });
+
+  it('returns 403 for a caller without the admin role', async () => {
+    await request(app.getHttpServer())
+      .get('/analytics/puzzles/puzzle-uuid-100/stats')
+      .expect(403);
+
+    expect(mockPuzzleAnalyticsProvider.getPuzzleStats).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 with a clear validation message for an invalid granularity', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/analytics/puzzles/puzzle-uuid-100/stats')
+      .set('x-test-role', 'admin')
+      .query({ granularity: 'century' })
+      .expect(400);
+
+    expect(res.body.message).toEqual(
+      expect.arrayContaining([expect.stringContaining('granularity')]),
+    );
+    expect(mockPuzzleAnalyticsProvider.getPuzzleStats).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 when start is after end', async () => {
+    const res = await request(app.getHttpServer())
+      .get('/analytics/puzzles/puzzle-uuid-100/stats')
+      .set('x-test-role', 'admin')
+      .query({
+        start: '2024-02-01T00:00:00.000Z',
+        end: '2024-01-01T00:00:00.000Z',
+      })
+      .expect(400);
+
+    expect(res.body.message).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining(
+          'start date must be before or equal to end date',
+        ),
+      ]),
+    );
+    expect(mockPuzzleAnalyticsProvider.getPuzzleStats).not.toHaveBeenCalled();
+  });
+
+  it('returns 400 for an unrecognized query param', async () => {
+    await request(app.getHttpServer())
+      .get('/analytics/puzzles/puzzle-uuid-100/stats')
+      .set('x-test-role', 'admin')
+      .query({ unknownParam: 'nope' })
+      .expect(400);
+
+    expect(mockPuzzleAnalyticsProvider.getPuzzleStats).not.toHaveBeenCalled();
+  });
+});
+
 describe('GET /analytics/export (e2e)', () => {
   let app: INestApplication<App>;
 
@@ -178,6 +320,7 @@ describe('GET /analytics/export (e2e)', () => {
         { provide: GetOnboardingFunnelProvider, useValue: {} },
         { provide: GetRetentionCurveProvider, useValue: {} },
         { provide: GetChurnRiskProvider, useValue: {} },
+        { provide: PuzzleAnalyticsProvider, useValue: {} },
         { provide: ExportCsvProvider, useValue: mockExportCsvProvider },
         { provide: AnalyticsService, useValue: {} },
       ],
