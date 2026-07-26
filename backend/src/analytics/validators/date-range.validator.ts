@@ -1,4 +1,8 @@
-import { ValidatorConstraint, ValidatorConstraintInterface, ValidationArguments } from 'class-validator';
+import {
+  ValidatorConstraint,
+  ValidatorConstraintInterface,
+  ValidationArguments,
+} from 'class-validator';
 
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 

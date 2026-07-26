@@ -4,7 +4,16 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+import request from 'supertest';
 import { App } from 'supertest/types';
 import { AnalyticsController } from '../src/analytics/controllers/analytics.controller';
 import { TrackEventProvider } from '../src/analytics/providers/track-event.provider';
@@ -16,7 +25,14 @@ import { AnalyticsMetricResult } from '../src/analytics/dtos/analytics-metric-re
 describe('GET /analytics/users/retention (e2e)', () => {
   let app: INestApplication<App>;
 
-  const mockGetRetentionCurveProvider = { getRetentionCurve: jest.fn() };
+  const mockGetRetentionCurveProvider: {
+    getRetentionCurve: jest.MockedFunction<
+      (...args: any[]) => Promise<AnalyticsMetricResult>
+    >;
+  } = {
+    getRetentionCurve:
+      jest.fn<(...args: any[]) => Promise<AnalyticsMetricResult>>(),
+  };
 
   const fakeResult: AnalyticsMetricResult = {
     startDate: '2024-01-01',
@@ -97,9 +113,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
       .expect(200);
 
     expect(res.body).toEqual(fakeResult);
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('returns 403 for a caller without the admin role', async () => {
@@ -111,7 +127,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
       })
       .expect(403);
 
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 with a clear validation message for an invalid granularity', async () => {
@@ -124,7 +142,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
     expect(res.body.message).toEqual(
       expect.arrayContaining([expect.stringContaining('granularity')]),
     );
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 when start is after end', async () => {
@@ -144,7 +164,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
         ),
       ]),
     );
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 for an unrecognized query param', async () => {
@@ -154,6 +176,8 @@ describe('GET /analytics/users/retention (e2e)', () => {
       .query({ unknownParam: 'nope' })
       .expect(400);
 
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 });

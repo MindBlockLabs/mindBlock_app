@@ -14,7 +14,10 @@ describe('GetRetentionCurveProvider', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetRetentionCurveProvider,
-        { provide: getRepositoryToken(RetentionCohort), useValue: mockRetentionCohortRepo },
+        {
+          provide: getRepositoryToken(RetentionCohort),
+          useValue: mockRetentionCohortRepo,
+        },
       ],
     }).compile();
     provider = module.get<GetRetentionCurveProvider>(GetRetentionCurveProvider);
@@ -81,9 +84,36 @@ describe('GetRetentionCurveProvider', () => {
         _dateRange: true,
       };
       const cohorts: Partial<RetentionCohort>[] = [
-        { id: 'uuid-1', cohortDate: '2024-01-01', cohortSize: 200, retainedDay1: 130, retainedDay7: 100, retainedDay30: 60, createdAt: new Date(), updatedAt: new Date() },
-        { id: 'uuid-2', cohortDate: '2024-01-02', cohortSize: 150, retainedDay1: 90, retainedDay7: 75, retainedDay30: 45, createdAt: new Date(), updatedAt: new Date() },
-        { id: 'uuid-3', cohortDate: '2024-01-03', cohortSize: 180, retainedDay1: 126, retainedDay7: 90, retainedDay30: 54, createdAt: new Date(), updatedAt: new Date() },
+        {
+          id: 'uuid-1',
+          cohortDate: '2024-01-01',
+          cohortSize: 200,
+          retainedDay1: 130,
+          retainedDay7: 100,
+          retainedDay30: 60,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'uuid-2',
+          cohortDate: '2024-01-02',
+          cohortSize: 150,
+          retainedDay1: 90,
+          retainedDay7: 75,
+          retainedDay30: 45,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'uuid-3',
+          cohortDate: '2024-01-03',
+          cohortSize: 180,
+          retainedDay1: 126,
+          retainedDay7: 90,
+          retainedDay30: 54,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
       mockRetentionCohortRepo.find.mockResolvedValue(cohorts);
 
@@ -105,8 +135,14 @@ describe('GetRetentionCurveProvider', () => {
         _dateRange: true,
       };
       const cohort: Partial<RetentionCohort> = {
-        id: 'uuid-zero', cohortDate: '2024-01-10', cohortSize: 0,
-        retainedDay1: 0, retainedDay7: 0, retainedDay30: 0, createdAt: new Date(), updatedAt: new Date(),
+        id: 'uuid-zero',
+        cohortDate: '2024-01-10',
+        cohortSize: 0,
+        retainedDay1: 0,
+        retainedDay7: 0,
+        retainedDay30: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockRetentionCohortRepo.find.mockResolvedValue([cohort]);
 
@@ -118,7 +154,11 @@ describe('GetRetentionCurveProvider', () => {
     });
 
     it('should default granularity to "day" when not specified', async () => {
-      const query: DateRangeDto = { start: new Date('2024-02-01'), end: new Date('2024-02-05'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-02-01'),
+        end: new Date('2024-02-05'),
+        _dateRange: true,
+      };
       mockRetentionCohortRepo.find.mockResolvedValue([]);
 
       const result = await provider.getRetentionCurve(query);
@@ -127,7 +167,11 @@ describe('GetRetentionCurveProvider', () => {
     });
 
     it('should query using Between on cohortDate (index-backed)', async () => {
-      const query: DateRangeDto = { start: new Date('2024-03-01'), end: new Date('2024-03-31'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-03-01'),
+        end: new Date('2024-03-31'),
+        _dateRange: true,
+      };
       mockRetentionCohortRepo.find.mockResolvedValue([]);
 
       await provider.getRetentionCurve(query);
@@ -141,11 +185,20 @@ describe('GetRetentionCurveProvider', () => {
     });
 
     it('should round retention percentages to two decimal places', async () => {
-      const query: DateRangeDto = { start: new Date('2024-04-01'), end: new Date('2024-04-01'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-04-01'),
+        end: new Date('2024-04-01'),
+        _dateRange: true,
+      };
       const cohort: Partial<RetentionCohort> = {
-        id: 'uuid-frac', cohortDate: '2024-04-01', cohortSize: 300,
-        retainedDay1: 199, retainedDay7: 151, retainedDay30: 99,
-        createdAt: new Date(), updatedAt: new Date(),
+        id: 'uuid-frac',
+        cohortDate: '2024-04-01',
+        cohortSize: 300,
+        retainedDay1: 199,
+        retainedDay7: 151,
+        retainedDay30: 99,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockRetentionCohortRepo.find.mockResolvedValue([cohort]);
 

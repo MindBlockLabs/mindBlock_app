@@ -56,7 +56,9 @@ describe('HealthController', () => {
     it('should return 403 when app is shutting down', async () => {
       mockHealthService.isAppShuttingDown.mockReturnValue(true);
 
-      await expect(controller.getBasicHealth()).rejects.toThrow('Application is shutting down');
+      await expect(controller.getBasicHealth()).rejects.toThrow(
+        'Application is shutting down',
+      );
       expect(healthService.isAppShuttingDown).toHaveBeenCalled();
       expect(healthService.getBasicHealth).not.toHaveBeenCalled();
     });
@@ -84,7 +86,9 @@ describe('HealthController', () => {
     it('should return 403 when app is shutting down', async () => {
       mockHealthService.isAppShuttingDown.mockReturnValue(true);
 
-      await expect(controller.getLivenessHealth()).rejects.toThrow('Application is shutting down');
+      await expect(controller.getLivenessHealth()).rejects.toThrow(
+        'Application is shutting down',
+      );
       expect(healthService.isAppShuttingDown).toHaveBeenCalled();
       expect(healthService.getLivenessHealth).not.toHaveBeenCalled();
     });
@@ -118,7 +122,9 @@ describe('HealthController', () => {
     it('should return 403 when app is shutting down', async () => {
       mockHealthService.isAppShuttingDown.mockReturnValue(true);
 
-      await expect(controller.getReadinessHealth()).rejects.toThrow('Application is shutting down');
+      await expect(controller.getReadinessHealth()).rejects.toThrow(
+        'Application is shutting down',
+      );
       expect(healthService.isAppShuttingDown).toHaveBeenCalled();
       expect(healthService.getReadinessHealth).not.toHaveBeenCalled();
     });
@@ -140,7 +146,9 @@ describe('HealthController', () => {
       mockHealthService.isAppShuttingDown.mockReturnValue(false);
       mockHealthService.getReadinessHealth.mockResolvedValue(expectedResult);
 
-      await expect(controller.getReadinessHealth()).rejects.toThrow('Service not ready');
+      await expect(controller.getReadinessHealth()).rejects.toThrow(
+        'Service not ready',
+      );
       expect(healthService.isAppShuttingDown).toHaveBeenCalled();
       expect(healthService.getReadinessHealth).toHaveBeenCalled();
     });
@@ -164,10 +172,26 @@ describe('HealthController', () => {
         uptime: 3600,
         timestamp: '2023-01-01T00:00:00.000Z',
         checks: {
-          database: { status: 'healthy', responseTime: 5, details: { connected: true } },
-          redis: { status: 'healthy', responseTime: 2, details: { connected: true } },
-          memory: { status: 'healthy', responseTime: 1, details: { usagePercent: '45%' } },
-          filesystem: { status: 'healthy', responseTime: 1, details: { writable: true } },
+          database: {
+            status: 'healthy',
+            responseTime: 5,
+            details: { connected: true },
+          },
+          redis: {
+            status: 'healthy',
+            responseTime: 2,
+            details: { connected: true },
+          },
+          memory: {
+            status: 'healthy',
+            responseTime: 1,
+            details: { usagePercent: '45%' },
+          },
+          filesystem: {
+            status: 'healthy',
+            responseTime: 1,
+            details: { writable: true },
+          },
         },
       };
 
@@ -182,7 +206,9 @@ describe('HealthController', () => {
     });
 
     it('should return 403 with invalid admin key', async () => {
-      await expect(controller.getDetailedHealth('invalid-key')).rejects.toThrow('Admin access required');
+      await expect(controller.getDetailedHealth('invalid-key')).rejects.toThrow(
+        'Admin access required',
+      );
       expect(healthService.isAppShuttingDown).not.toHaveBeenCalled();
       expect(healthService.getDetailedHealth).not.toHaveBeenCalled();
     });
@@ -190,7 +216,9 @@ describe('HealthController', () => {
     it('should return 403 when app is shutting down', async () => {
       mockHealthService.isAppShuttingDown.mockReturnValue(true);
 
-      await expect(controller.getDetailedHealth('test-admin-key')).rejects.toThrow('Application is shutting down');
+      await expect(
+        controller.getDetailedHealth('test-admin-key'),
+      ).rejects.toThrow('Application is shutting down');
       expect(healthService.isAppShuttingDown).toHaveBeenCalled();
       expect(healthService.getDetailedHealth).not.toHaveBeenCalled();
     });

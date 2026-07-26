@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
-import { FunnelResult, FunnelStage } from '../interfaces/funnel-result.interface';
+import {
+  FunnelResult,
+  FunnelStage,
+} from '../interfaces/funnel-result.interface';
 
 const ONBOARDING_EVENTS = [
   { name: 'Onboarding Started', eventType: 'onboarding_started' },

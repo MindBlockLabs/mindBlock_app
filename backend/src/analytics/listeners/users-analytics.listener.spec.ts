@@ -6,7 +6,9 @@ import { AnalyticsEvent } from '../entities/analytics-event.entity';
 
 describe('UsersAnalyticsListener', () => {
   let listener: UsersAnalyticsListener;
-  let analyticsRepository: Partial<Record<keyof Repository<AnalyticsEvent>, jest.Mock>>;
+  let analyticsRepository: Partial<
+    Record<keyof Repository<AnalyticsEvent>, jest.Mock>
+  >;
 
   beforeEach(async () => {
     analyticsRepository = {
@@ -17,7 +19,10 @@ describe('UsersAnalyticsListener', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersAnalyticsListener,
-        { provide: getRepositoryToken(AnalyticsEvent), useValue: analyticsRepository },
+        {
+          provide: getRepositoryToken(AnalyticsEvent),
+          useValue: analyticsRepository,
+        },
       ],
     }).compile();
 

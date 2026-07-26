@@ -19,6 +19,12 @@ import { GetRetentionCurveProvider } from './providers/get-retention-curve.provi
     GetOnboardingFunnelProvider,
     GetRetentionCurveProvider,
   ],
-  exports: [AnalyticsService, TrackEventProvider, GetOnboardingFunnelProvider, GetRetentionCurveProvider, TypeOrmModule],
+  exports: [
+    AnalyticsService,
+    TrackEventProvider,
+    GetOnboardingFunnelProvider,
+    GetRetentionCurveProvider,
+    TypeOrmModule,
+  ],
 })
 export class AnalyticsModule {}

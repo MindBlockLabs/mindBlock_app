@@ -1,4 +1,9 @@
-import { Module, NestModule, MiddlewareConsumer, RequestMethod } from '@nestjs/common';
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  RequestMethod,
+} from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
@@ -16,7 +21,10 @@ import { PuzzlesModule } from './puzzles/puzzles.module';
 import { QuestsModule } from './quests/quests.module';
 import { StreakModule } from './streak/strerak.module';
 import { CategoriesModule } from './categories/categories.module';
-import { JwtAuthModule, JwtAuthMiddleware } from './auth/middleware/jwt-auth.module';
+import {
+  JwtAuthModule,
+  JwtAuthMiddleware,
+} from './auth/middleware/jwt-auth.module';
 import { REDIS_CLIENT } from './redis/redis.constants';
 import jwtConfig from './auth/authConfig/jwt.config';
 import { UsersService } from './users/providers/users.service';
@@ -95,10 +103,15 @@ import { AnalyticsModule } from './analytics/analytics.module';
     JwtAuthModule.registerAsync({
       imports: [ConfigModule, UsersModule, RedisModule],
       inject: [ConfigService, UsersService, REDIS_CLIENT],
-      useFactory: (configService: ConfigService, usersService: UsersService, redisClient: any) => ({
+      useFactory: (
+        configService: ConfigService,
+        usersService: UsersService,
+        redisClient: any,
+      ) => ({
         secret: configService.get<string>('jwt.secret') || '',
         redisClient: redisClient,
-        validateUser: async (userId: string) => await usersService.findOneById(userId),
+        validateUser: async (userId: string) =>
+          await usersService.findOneById(userId),
         logging: true,
         publicRoutes: ['/auth', '/api', '/docs', '/health'],
       }),
@@ -113,9 +126,7 @@ export class AppModule implements NestModule {
    * Apply the JWT Authentication Middleware to all routes except public ones.
    */
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(GeolocationMiddleware)
-      .forRoutes('*');
+    consumer.apply(GeolocationMiddleware).forRoutes('*');
 
     consumer
       .apply(JwtAuthMiddleware)

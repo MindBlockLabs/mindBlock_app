@@ -6,7 +6,11 @@ import { RedisModule } from '../redis/redis.module';
 
 @Module({
   imports: [RedisModule],
-  providers: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware],
+  providers: [
+    PaginationProvider,
+    CorrelationIdMiddleware,
+    GeolocationMiddleware,
+  ],
   exports: [PaginationProvider, CorrelationIdMiddleware, GeolocationMiddleware],
 })
 export class CommonModule {}
@@ -18,4 +22,3 @@ export * from './middleware/correlation-id.middleware';
 export * from './middleware/geolocation.middleware';
 export * from './interfaces/geolocation.interface';
 export * from './decorators/geolocation.decorator';
-

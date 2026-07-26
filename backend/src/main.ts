@@ -19,7 +19,9 @@ async function bootstrap() {
   );
 
   // Stamp every request with a correlation ID before any other handler runs
-  app.use(new CorrelationIdMiddleware().use.bind(new CorrelationIdMiddleware()));
+  app.use(
+    new CorrelationIdMiddleware().use.bind(new CorrelationIdMiddleware()),
+  );
 
   // Enable global exception handling (catches ALL errors, not just HttpExceptions)
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -42,13 +44,13 @@ async function bootstrap() {
 
   // Graceful shutdown handling
   const healthService = app.get(HealthService);
-  
+
   const gracefulShutdown = async (signal: string) => {
     console.log(`\n🛑 Received ${signal}. Starting graceful shutdown...`);
-    
+
     // Signal health checks that we're shutting down
     healthService.setIsShuttingDown();
-    
+
     // Wait a moment for load balancers to detect the unhealthy state
     setTimeout(async () => {
       console.log('🔄 Closing HTTP server...');

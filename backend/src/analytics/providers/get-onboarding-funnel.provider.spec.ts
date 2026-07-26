@@ -21,7 +21,9 @@ describe('GetOnboardingFunnelProvider', () => {
       ],
     }).compile();
 
-    provider = module.get<GetOnboardingFunnelProvider>(GetOnboardingFunnelProvider);
+    provider = module.get<GetOnboardingFunnelProvider>(
+      GetOnboardingFunnelProvider,
+    );
   });
 
   afterEach(() => {

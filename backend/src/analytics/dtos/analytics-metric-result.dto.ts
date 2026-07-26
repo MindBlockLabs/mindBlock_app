@@ -1,19 +1,34 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RetentionDataPoint {
-  @ApiProperty({ example: '2024-01-15', description: 'Cohort date (YYYY-MM-DD)' })
+  @ApiProperty({
+    example: '2024-01-15',
+    description: 'Cohort date (YYYY-MM-DD)',
+  })
   cohortDate: string;
 
   @ApiProperty({ example: 200, description: 'Total users in this cohort' })
   cohortSize: number;
 
-  @ApiProperty({ example: 65.5, description: 'Day-1 retention %', nullable: true })
+  @ApiProperty({
+    example: 65.5,
+    description: 'Day-1 retention %',
+    nullable: true,
+  })
   day1RetentionPct: number | null;
 
-  @ApiProperty({ example: 42.0, description: 'Day-7 retention %', nullable: true })
+  @ApiProperty({
+    example: 42.0,
+    description: 'Day-7 retention %',
+    nullable: true,
+  })
   day7RetentionPct: number | null;
 
-  @ApiProperty({ example: 28.5, description: 'Day-30 retention %', nullable: true })
+  @ApiProperty({
+    example: 28.5,
+    description: 'Day-30 retention %',
+    nullable: true,
+  })
   day30RetentionPct: number | null;
 }
 
