@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import DauMauChart from "@/components/analytics/DauMauChart";
+import OnboardingFunnelChart from "@/src/components/analytics/OnboardingFunnelChart";
 import { useAuth } from "@/hooks/useAuth";
 
 function AnalyticsPageSkeleton() {
@@ -70,6 +71,9 @@ export default function AnalyticsPage() {
     <div className="grid w-full grid-cols-1 gap-6 lg:grid-cols-2">
       <div className="min-w-0 lg:col-span-2">
         <DauMauChart />
+      </div>
+      <div className="min-w-0">
+        <OnboardingFunnelChart />
       </div>
     </div>
   );
