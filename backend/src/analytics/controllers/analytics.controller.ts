@@ -23,6 +23,7 @@ import {
   PuzzleStatsResult,
 } from '../dtos/analytics-metric-result.dto';
 import { AnalyticsAdminGuard } from '../guards/analytics-admin.guard';
+import { AnalyticsAdmin } from '../../roles/roles.decorator';
 
 @ApiTags('Analytics')
 @Controller('analytics')
@@ -58,6 +59,7 @@ export class AnalyticsController {
   }
 
   @Get('users/retention')
+  @AnalyticsAdmin()
   @UseGuards(AnalyticsAdminGuard)
   @ApiOperation({ summary: 'Get the user retention curve (admin only)' })
   @ApiResponse({ status: 200, type: AnalyticsMetricResult })
@@ -66,6 +68,7 @@ export class AnalyticsController {
   }
 
   @Get('users/churn-risk')
+  @AnalyticsAdmin()
   @UseGuards(AnalyticsAdminGuard)
   @ApiOperation({ summary: 'Get per-user churn risk scores (admin only)' })
   @ApiExtraModels(AnalyticsMetricResult, ChurnRiskDataPoint)
@@ -92,6 +95,7 @@ export class AnalyticsController {
   }
 
   @Get('puzzles/:id/stats')
+  @AnalyticsAdmin()
   @UseGuards(AnalyticsAdminGuard)
   @ApiOperation({ summary: 'Get detailed stats for a single puzzle (admin only)' })
   @ApiResponse({ status: 200, type: PuzzleStatsResult })
@@ -103,6 +107,7 @@ export class AnalyticsController {
   }
 
   @Get('export')
+  @AnalyticsAdmin()
   @UseGuards(AnalyticsAdminGuard)
   @ApiOperation({
     summary: 'Export a chosen analytics metric over a date range (admin only)',
