@@ -64,3 +64,25 @@ http://localhost:3000/api
 3. Commit your changes (`git commit -m 'Add feature X'`)
 4. Push to the branch (`git push origin feature-name`)
 5. Open a Pull Request
+
+---
+
+## 📈 Analytics Module Contributions
+When working on the analytics module, keep all new code inside `backend/src/analytics/` and follow the existing module/controller/service/provider pattern used by modules such as `progress`, `streak`, and `quests`.
+
+### Checklist for a new metric provider
+1. **Add an entity if the metric needs persistence**
+   - Place new database entities under `backend/src/analytics/entities/`.
+   - Keep the model aligned with the current analytics schema and naming conventions.
+2. **Add a provider**
+   - Implement the provider under `backend/src/analytics/providers/`.
+   - Register it in the analytics module so it is available to the service layer.
+3. **Add an endpoint**
+   - Expose the metric through the analytics controller under `backend/src/analytics/controllers/`.
+   - Use the existing DTOs and validation patterns so the request contract stays consistent.
+4. **Add tests before opening a PR**
+   - Include unit tests for the provider/service logic.
+   - Add endpoint or integration coverage when the change affects API behavior.
+   - For event-based or listener-driven work, cover the related listener or job behavior as well.
+
+Before a PR is merged, contributors should confirm that the change is documented in [backend/src/analytics/README.md](src/analytics/README.md) and that any new event names or payloads follow the taxonomy defined in [backend/src/analytics/EVENT_TAXONOMY.md](src/analytics/EVENT_TAXONOMY.md).

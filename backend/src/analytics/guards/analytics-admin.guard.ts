@@ -4,20 +4,23 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { ANALYTICS_ADMIN_KEY } from '../../roles/roles.decorator';
 import { userRole } from '../../users/enums/userRole.enum';
 import { DecodedUserPayload } from '../../auth/middleware/jwt-auth.middleware';
 
-/**
- * Restricts analytics routes that expose sensitive aggregate data
- * (e.g. retention curves) to admin users.
- *
- * Relies on `JwtAuthMiddleware`, which runs globally and attaches
- * the decoded token payload to `req.user` before any guard executes.
- * This guard does not re-verify the token -- it only checks role.
- */
 @Injectable()
 export class AnalyticsAdminGuard implements CanActivate {
+  constructor(private reflector: Reflector) {}
+
   canActivate(context: ExecutionContext): boolean {
+    const requiredRoles = this.reflector.getAllAndOverride<boolean>(
+      ANALYTICS_ADMIN_KEY,
+      [context.getHandler(), context.getClass()],
+    );
+
+    if (!requiredRoles) return true;
+
     const request = context
       .switchToHttp()
       .getRequest<{ user?: DecodedUserPayload }>();
