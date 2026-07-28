@@ -116,3 +116,32 @@ export class AnalyticsMetricResult<T = RetentionDataPoint> {
   @ApiProperty({ example: 15, description: 'Total rows returned' })
   total?: number;
 }
+
+export class PuzzleStatsResult {
+  @ApiProperty({ example: 'puzzle-123', description: 'Puzzle identifier' })
+  puzzleId?: string;
+
+  @ApiProperty({ example: 150, description: 'Total attempts recorded' })
+  totalAttempts?: number;
+
+  @ApiProperty({ example: 90, description: 'Attempts marked correct' })
+  successfulAttempts?: number;
+
+  @ApiProperty({ example: 60, description: 'Attempts marked incorrect' })
+  failedAttempts?: number;
+
+  @ApiProperty({ example: 60.0, description: 'Success rate as a percentage' })
+  successRate?: number;
+
+  @ApiProperty({ example: 45.5, description: 'Average time spent per attempt' })
+  averageTimeSpent?: number;
+
+  @ApiProperty({ example: 42, description: 'Distinct users who attempted this puzzle' })
+  uniqueUsers?: number;
+
+  @ApiProperty({ example: '2024-01-01', description: 'Start of queried range', required: false })
+  startDate?: string;
+
+  @ApiProperty({ example: '2024-01-31', description: 'End of queried range', required: false })
+  endDate?: string;
+}
