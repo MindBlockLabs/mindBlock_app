@@ -3,6 +3,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AnalyticsEvent } from './entities/analytics-event.entity';
 import { RetentionCohort } from './entities/retention-cohort.entity';
 import { DailyActiveUser } from './entities/daily-active-user.entity';
+import { QuestAnalytics } from './entities/quest-analytics.entity';
+import { DailyQuest } from '../quests/entities/daily-quest.entity';
 import { UsersAnalyticsListener } from './listeners/users-analytics.listener';
 import { BlockchainAnalyticsListener } from './listeners/blockchain-analytics.listener';
 import { AnalyticsController } from './controllers/analytics.controller';
@@ -13,6 +15,8 @@ import { GetRetentionCurveProvider } from './providers/get-retention-curve.provi
 import { GetChurnRiskProvider } from './providers/get-churn-risk.provider';
 import { PuzzleAnalyticsProvider } from './providers/puzzle-analytics.provider';
 import { ExportCsvProvider } from './providers/export-csv.provider';
+import { DailyActiveUsersRollupJob } from './jobs/daily-active-users-rollup.job';
+import { QuestAnalyticsRollupJob } from './jobs/quest-analytics-rollup.job';
 
 @Module({
   imports: [
@@ -20,6 +24,8 @@ import { ExportCsvProvider } from './providers/export-csv.provider';
       AnalyticsEvent,
       RetentionCohort,
       DailyActiveUser,
+      QuestAnalytics,
+      DailyQuest,
     ]),
   ],
   controllers: [AnalyticsController],
@@ -33,6 +39,8 @@ import { ExportCsvProvider } from './providers/export-csv.provider';
     GetChurnRiskProvider,
     PuzzleAnalyticsProvider,
     ExportCsvProvider,
+    DailyActiveUsersRollupJob,
+    QuestAnalyticsRollupJob,
   ],
   exports: [
     AnalyticsService,
