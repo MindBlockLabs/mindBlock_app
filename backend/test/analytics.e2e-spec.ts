@@ -42,7 +42,7 @@ describe('GET /analytics/users/retention (e2e)', () => {
   let app: INestApplication<App>;
 
   const mockGetRetentionCurveProvider = {
-    getRetentionCurve: jest.fn<Promise<AnalyticsMetricResult>>(),
+    getRetentionCurve: jest.fn<() => Promise<AnalyticsMetricResult>>(),
   };
   const mockExportCsvProvider = { export: jest.fn() };
 
@@ -201,11 +201,6 @@ describe('GET /analytics/users/retention (e2e)', () => {
 describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
   let app: INestApplication<App>;
 
-  const mockPuzzleAnalyticsProvider = {
-    // return a resolved promise with the fake result
-    getPuzzleStats: jest.fn().mockResolvedValue(fakePuzzleStatsResult) as jest.MockedFunction<() => Promise<PuzzleStatsResult>>,
-  };
-
   const fakePuzzleStatsResult: PuzzleStatsResult = {
     puzzleId: 'puzzle-uuid-100',
     totalAttempts: 10,
@@ -216,6 +211,11 @@ describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
     uniqueUsers: 6,
     startDate: '2024-01-01',
     endDate: '2024-01-31',
+  };
+
+  const mockPuzzleAnalyticsProvider = {
+    // return a resolved promise with the fake result
+    getPuzzleStats: jest.fn().mockResolvedValue(fakePuzzleStatsResult) as jest.MockedFunction<() => Promise<PuzzleStatsResult>>,
   };
 
   beforeAll(async () => {
@@ -341,7 +341,7 @@ describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
 describe('GET /analytics/export (e2e)', () => {
   let app: INestApplication<App>;
 
-  const mockExportCsvProvider = { export: jest.fn() };
+  const mockExportCsvProvider = { export: jest.fn<() => Promise<{ contentType: string; filename: string; body: string }>>() };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

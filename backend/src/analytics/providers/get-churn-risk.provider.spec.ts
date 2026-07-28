@@ -175,8 +175,8 @@ describe('GetChurnRiskProvider', () => {
       ]);
 
       const { data } = await provider.getChurnRisk(TEN_DAYS);
-      const steady = data.find((d) => d.userId === 'steady')!;
-      const spiky = data.find((d) => d.userId === 'spiky')!;
+      const steady = data!.find((d) => d.userId === 'steady')!;
+      const spiky = data!.find((d) => d.userId === 'spiky')!;
 
       expect(steady.recentCount).toBe(spiky.recentCount);
       expect(steady.riskScore).toBe(100);
@@ -315,12 +315,12 @@ describe('GetChurnRiskProvider', () => {
       const { data, total } = await provider.getChurnRisk(TEN_DAYS);
 
       expect(total).toBe(3);
-      expect(data.map((d) => d.userId)).toEqual([
+      expect(data!.map((d) => d.userId)).toEqual([
         'severe',
         'mild',
         'unscorable',
       ]);
-      expect(data[data.length - 1].riskScore).toBeNull();
+      expect(data![data!.length - 1].riskScore).toBeNull();
     });
   });
 
