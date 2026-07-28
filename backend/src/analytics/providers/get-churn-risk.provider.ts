@@ -296,12 +296,12 @@ export class GetChurnRiskProvider {
   private sortByRisk(data: ChurnRiskDataPoint[]): void {
     data.sort((a, b) => {
       if (a.riskScore === null && b.riskScore === null) {
-        return a.userId.localeCompare(b.userId);
+        return (a.userId ?? '').localeCompare(b.userId ?? '');
       }
       if (a.riskScore === null) return 1;
       if (b.riskScore === null) return -1;
-      if (b.riskScore !== a.riskScore) return b.riskScore - a.riskScore;
-      return a.userId.localeCompare(b.userId);
+      if ((b.riskScore ?? 0) !== (a.riskScore ?? 0)) return (b.riskScore ?? 0) - (a.riskScore ?? 0);
+      return (a.userId ?? '').localeCompare(b.userId ?? '');
     });
   }
 

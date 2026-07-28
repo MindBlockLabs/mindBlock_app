@@ -7,7 +7,7 @@ export class TrackEventDto {
     example: 'puzzle_attempted',
   })
   @IsString()
-  eventType: string;
+  eventType?: string;
 
   @ApiPropertyOptional({
     description: 'Arbitrary payload for the event',
@@ -18,7 +18,8 @@ export class TrackEventDto {
   payload?: Record<string, any>;
 
   @ApiPropertyOptional({
-    description: 'User identifier if the event is tied to an authenticated user',
+    description:
+      'User identifier if the event is tied to an authenticated user',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()

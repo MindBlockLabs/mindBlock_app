@@ -45,5 +45,6 @@ import { ExportCsvProvider } from './providers/export-csv.provider';
     ExportCsvProvider,
     TypeOrmModule,
   ],
+
 })
 export class AnalyticsModule {}

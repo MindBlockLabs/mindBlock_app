@@ -1,3 +1,4 @@
+import { describe, expect, it, jest, beforeEach, afterEach } from '@jest/globals';
 import { Test, TestingModule } from '@nestjs/testing';
 import { HealthService } from './health.service';
 import { Connection } from 'typeorm';
@@ -92,8 +93,17 @@ describe('HealthService', () => {
     it('should return healthy when all dependencies are healthy', async () => {
       mockConnection.query.mockResolvedValue(undefined);
       mockRedis.ping.mockResolvedValue('PONG');
+      const originalMemoryUsage = process.memoryUsage;
+      (process.memoryUsage as unknown as jest.Mock) = jest.fn().mockReturnValue({
+        heapTotal: 1000,
+        heapUsed: 500, // 50% usage
+        rss: 1200,
+        external: 100,
+        arrayBuffers: 50,
+      })
 
       const result = await service.getReadinessHealth();
+     
 
       expect(result.status).toBe('healthy');
       expect(result.checks).toBeDefined();
@@ -104,7 +114,9 @@ describe('HealthService', () => {
     });
 
     it('should return unhealthy when database fails', async () => {
-      mockConnection.query.mockRejectedValue(new Error('Database connection failed'));
+      mockConnection.query.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
       mockRedis.ping.mockResolvedValue('PONG');
 
       const result = await service.getReadinessHealth();
@@ -169,13 +181,15 @@ describe('HealthService', () => {
 
       // Mock high memory usage
       const originalMemoryUsage = process.memoryUsage;
-      (process.memoryUsage as unknown as jest.Mock) = jest.fn().mockReturnValue({
-        heapTotal: 1000,
-        heapUsed: 850, // 85% usage
-        rss: 1200,
-        external: 100,
-        arrayBuffers: 50,
-      });
+      (process.memoryUsage as unknown as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          heapTotal: 1000,
+          heapUsed: 850, // 85% usage
+          rss: 1200,
+          external: 100,
+          arrayBuffers: 50,
+        });
 
       const result = await service.getDetailedHealth();
 
@@ -191,13 +205,15 @@ describe('HealthService', () => {
 
       // Mock critical memory usage
       const originalMemoryUsage = process.memoryUsage;
-      (process.memoryUsage as unknown as jest.Mock) = jest.fn().mockReturnValue({
-        heapTotal: 1000,
-        heapUsed: 950, // 95% usage
-        rss: 1200,
-        external: 100,
-        arrayBuffers: 50,
-      });
+      (process.memoryUsage as unknown as jest.Mock) = jest
+        .fn()
+        .mockReturnValue({
+          heapTotal: 1000,
+          heapUsed: 950, // 95% usage
+          rss: 1200,
+          external: 100,
+          arrayBuffers: 50,
+        });
 
       const result = await service.getDetailedHealth();
 
@@ -215,14 +231,14 @@ describe('HealthService', () => {
 
       // First call
       const result1 = await service.getDetailedHealth();
-      
+
       // Second call should use cache
       const result2 = await service.getDetailedHealth();
 
       // Should only call dependencies once due to caching
       expect(mockConnection.query).toHaveBeenCalledTimes(1);
       expect(mockRedis.ping).toHaveBeenCalledTimes(1);
-      
+
       // Results should be identical
       expect(result1).toEqual(result2);
     });
@@ -233,9 +249,9 @@ describe('HealthService', () => {
 
       // First call
       await service.getDetailedHealth();
-      
+
       // Second call with skip cache
-      await service.getDetailedHealth();
+      await service.getDetailedHealth(true);
 
       // Should call dependencies twice
       expect(mockConnection.query).toHaveBeenCalledTimes(2);
@@ -250,7 +266,7 @@ describe('HealthService', () => {
       mockRedis.ping.mockResolvedValue('PONG');
 
       // Mock fetch
-      global.fetch = jest.fn().mockResolvedValue({
+      global.fetch = jest.fn<() => Promise<any>>() .mockResolvedValue({
         ok: true,
         status: 200,
       }) as any;
@@ -258,11 +274,16 @@ describe('HealthService', () => {
       const result = await service.getDetailedHealth();
 
       expect(result.checks!.externalApis).toBeDefined();
-      expect(result.checks!.externalApis!['https://api.example.com/health']).toBeDefined();
-      expect(fetch).toHaveBeenCalledWith('https://api.example.com/health', expect.objectContaining({
-        method: 'GET',
-        signal: expect.any(Object),
-      }));
+      expect(
+        result.checks!.externalApis!['https://api.example.com/health'],
+      ).toBeDefined();
+      expect(fetch).toHaveBeenCalledWith(
+        'https://api.example.com/health',
+        expect.objectContaining({
+          method: 'GET',
+          signal: expect.any(Object),
+        }),
+      );
     });
 
     it('should handle external API failures', async () => {
@@ -271,12 +292,18 @@ describe('HealthService', () => {
       mockRedis.ping.mockResolvedValue('PONG');
 
       // Mock fetch failure
-      global.fetch = jest.fn().mockRejectedValue(new Error('Network error')) as any;
+      global.fetch = jest
+        .fn<() => Promise<Response>>()
+        .mockRejectedValue(new Error('Network error')) as any;
 
       const result = await service.getDetailedHealth();
 
-      expect(result.checks!.externalApis!['https://api.example.com/health'].status).toBe('unhealthy');
-      expect(result.checks!.externalApis!['https://api.example.com/health'].error).toBe('Network error');
+      expect(
+        result.checks!.externalApis!['https://api.example.com/health'].status,
+      ).toBe('unhealthy');
+      expect(
+        result.checks!.externalApis!['https://api.example.com/health'].error,
+      ).toBe('Network error');
     });
   });
 

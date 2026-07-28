@@ -48,6 +48,10 @@ export class ExportCsvProvider {
   async export(query: AnalyticsQueryDto): Promise<ExportResult> {
     const { metric, format = ExportFormat.CSV } = query;
 
+    if (!metric) {
+      throw new Error('Metric must be specified for CSV export');
+    }
+
     const rows =
       metric === ExportMetric.RETENTION
         ? await this.getRetentionRows(query)
@@ -65,8 +69,12 @@ export class ExportCsvProvider {
       };
     }
 
-    const body = await this.toCsv(rows, metric);
-    return { contentType: 'text/csv', filename, body };
+    const csvBody = await this.toCsv(rows, metric);
+    return {
+      contentType: 'text/csv',
+      filename,
+      body: csvBody,
+    };
   }
 
   private async getRetentionRows(
@@ -114,8 +122,8 @@ export class ExportCsvProvider {
   ): Promise<Record<string, unknown>[]> {
     if (!this.getChurnRiskProvider) return [];
     const result = await this.getChurnRiskProvider.getChurnRisk(query);
-    return result.data.map((item) => ({
-      userId: item.userId,
+    return (result.data ?? []).map((item) => ({
+      userId: item.userId ?? '',
       riskScore: item.riskScore ?? '',
       riskBand: item.riskBand ?? '',
       baselineMean: item.baselineMean,

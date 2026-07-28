@@ -1,49 +1,30 @@
-import { Injectable, OnModuleDestroy } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AnalyticsEvent } from '../entities/analytics-event.entity';
+import { TrackEventDto } from '../dtos/track-event.dto';
 
 @Injectable()
-export class TrackEventProvider implements OnModuleDestroy {
-  private buffer: AnalyticsEvent[] = [];
-  private flushInterval: NodeJS.Timeout;
-  private readonly BATCH_SIZE = 50;
-  private readonly FLUSH_INTERVAL_MS = 5000;
-
+export class TrackEventProvider {
   constructor(
     @InjectRepository(AnalyticsEvent)
     private readonly analyticsEventRepository: Repository<AnalyticsEvent>,
-  ) {
-    this.flushInterval = setInterval(
-      () => this.flush(),
-      this.FLUSH_INTERVAL_MS,
-    );
-  }
+  ) {}
 
-  async track(eventData: Partial<AnalyticsEvent>): Promise<void> {
-    const entity = this.analyticsEventRepository.create(eventData);
-    this.buffer.push(entity);
+  async track(dto: TrackEventDto) {
+    const event = this.analyticsEventRepository.create({
+      eventType: dto.eventType,
+      userId: dto.userId ?? '',
+      entityId: dto.payload?.entityId ?? '',
+      payload: dto.payload,
+    });
 
-    if (this.buffer.length >= this.BATCH_SIZE) {
-      await this.flush();
-    }
-  }
+    const saved = await this.analyticsEventRepository.save(event);
 
-  async flush(): Promise<void> {
-    if (this.buffer.length === 0) return;
-
-    const batch = [...this.buffer];
-    this.buffer = [];
-
-    try {
-      await this.analyticsEventRepository.save(batch);
-    } catch (error) {
-      this.buffer.unshift(...batch);
-      throw error;
-    }
-  }
-
-  onModuleDestroy() {
-    clearInterval(this.flushInterval);
+    return {
+      success: true,
+      message: 'Event tracked successfully',
+      data: saved,
+    };
   }
 }

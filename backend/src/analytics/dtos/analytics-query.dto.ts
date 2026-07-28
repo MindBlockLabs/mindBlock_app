@@ -1,5 +1,11 @@
-import { IsEnum, IsOptional } from 'class-validator';
-import { ApiPropertyOptional, ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { DateRangeDto } from './date-range.dto';
 
 export enum ExportMetric {
@@ -14,13 +20,28 @@ export enum ExportFormat {
 }
 
 export class AnalyticsQueryDto extends DateRangeDto {
+  // Event tracking fields
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  event?: string;
+
+  @IsOptional()
+  @IsString()
+  source?: string;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Export fields
   @ApiProperty({
     enum: ExportMetric,
     example: ExportMetric.RETENTION,
     description: 'Which analytics metric to export',
   })
   @IsEnum(ExportMetric)
-  metric: ExportMetric;
+  metric?: ExportMetric;
 
   @ApiPropertyOptional({
     enum: ExportFormat,

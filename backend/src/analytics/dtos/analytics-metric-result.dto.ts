@@ -1,20 +1,35 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RetentionDataPoint {
-  @ApiProperty({ example: '2024-01-15', description: 'Cohort date (YYYY-MM-DD)' })
-  cohortDate: string;
+  @ApiProperty({
+    example: '2024-01-15',
+    description: 'Cohort date (YYYY-MM-DD)',
+  })
+  cohortDate?: string;
 
   @ApiProperty({ example: 200, description: 'Total users in this cohort' })
-  cohortSize: number;
+  cohortSize?: number;
 
-  @ApiProperty({ example: 65.5, description: 'Day-1 retention %', nullable: true })
-  day1RetentionPct: number | null;
+  @ApiProperty({
+    example: 65.5,
+    description: 'Day-1 retention %',
+    nullable: true,
+  })
+  day1RetentionPct?: number | null;
 
-  @ApiProperty({ example: 42.0, description: 'Day-7 retention %', nullable: true })
-  day7RetentionPct: number | null;
+  @ApiProperty({
+    example: 42.0,
+    description: 'Day-7 retention %',
+    nullable: true,
+  })
+  day7RetentionPct?: number | null;
 
-  @ApiProperty({ example: 28.5, description: 'Day-30 retention %', nullable: true })
-  day30RetentionPct: number | null;
+  @ApiProperty({
+    example: 28.5,
+    description: 'Day-30 retention %',
+    nullable: true,
+  })
+  day30RetentionPct?: number | null;
 }
 
 /** Risk band derived from `riskScore`. `null` when there is no usable baseline. */
@@ -25,7 +40,7 @@ export class ChurnRiskDataPoint {
     example: 'user-123',
     description: 'User the score belongs to',
   })
-  userId: string;
+  userId?: string;
 
   @ApiProperty({
     example: 78,
@@ -34,20 +49,20 @@ export class ChurnRiskDataPoint {
       'Churn risk 0-100. Null when the user has too little history for a ' +
       'baseline — deliberately not 0, which would read as "safe".',
   })
-  riskScore: number | null;
+  riskScore?: number | null;
 
   @ApiProperty({
     example: 'high',
     nullable: true,
     enum: ['none', 'low', 'medium', 'high'],
   })
-  riskBand: ChurnRiskBand | null;
+  riskBand?: ChurnRiskBand | null;
 
   @ApiProperty({
     example: 12.5,
     description: 'Mean events per baseline bucket',
   })
-  baselineMean: number;
+  baselineMean?: number;
 
   @ApiProperty({
     example: 2.1,
@@ -55,16 +70,16 @@ export class ChurnRiskDataPoint {
       'Std deviation of the baseline buckets. The drop is scored against this, ' +
       'so a naturally spiky user needs a bigger drop to flag.',
   })
-  baselineStdDev: number;
+  baselineStdDev?: number;
 
   @ApiProperty({
     example: 9,
     description: 'Baseline buckets backing the score',
   })
-  baselineBuckets: number;
+  baselineBuckets?: number;
 
   @ApiProperty({ example: 1, description: 'Event count in the recent bucket' })
-  recentCount: number;
+  recentCount?: number;
 
   @ApiProperty({
     example: 0,
@@ -72,62 +87,61 @@ export class ChurnRiskDataPoint {
       'Trailing buckets with no activity, most recent included. Reported but ' +
       'not scored: this measures the drop, not sustained dormancy.',
   })
-  consecutiveSilentBuckets: number;
+  consecutiveSilentBuckets?: number;
 
   @ApiProperty({
     example: 0.92,
     nullable: true,
     description: 'Proportional drop from the baseline mean, for readability.',
   })
-  dropRatio: number | null;
+  dropRatio?: number | null;
 
   @ApiProperty({ example: false, description: 'History too short to score' })
-  insufficientBaseline: boolean;
+  insufficientBaseline?: boolean;
 }
 
 export class AnalyticsMetricResult<T = RetentionDataPoint> {
   @ApiProperty({ example: '2024-01-01', description: 'Start of queried range' })
-  startDate: string;
+  startDate?: string;
 
   @ApiProperty({ example: '2024-01-31', description: 'End of queried range' })
-  endDate: string;
+  endDate?: string;
 
   @ApiProperty({ example: 'day', description: 'Granularity used' })
-  granularity: string;
+  granularity?: string;
 
   @ApiProperty({ type: [RetentionDataPoint] })
-  data: T[];
+  data?: T[];
 
   @ApiProperty({ example: 15, description: 'Total rows returned' })
-  total: number;
+  total?: number;
 }
 
 export class PuzzleStatsResult {
-  @ApiProperty({ example: 'puzzle-uuid-123', description: 'Puzzle unique ID' })
-  puzzleId: string;
+  @ApiProperty({ example: 'puzzle-123', description: 'Puzzle identifier' })
+  puzzleId?: string;
 
-  @ApiProperty({ example: 150, description: 'Total attempts made on this puzzle' })
-  totalAttempts: number;
+  @ApiProperty({ example: 150, description: 'Total attempts recorded' })
+  totalAttempts?: number;
 
-  @ApiProperty({ example: 105, description: 'Total correct/successful attempts' })
-  successfulAttempts: number;
+  @ApiProperty({ example: 90, description: 'Attempts marked correct' })
+  successfulAttempts?: number;
 
-  @ApiProperty({ example: 45, description: 'Total incorrect/failed attempts' })
-  failedAttempts: number;
+  @ApiProperty({ example: 60, description: 'Attempts marked incorrect' })
+  failedAttempts?: number;
 
-  @ApiProperty({ example: 70, description: 'Success rate percentage (0-100)' })
-  successRate: number;
+  @ApiProperty({ example: 60.0, description: 'Success rate as a percentage' })
+  successRate?: number;
 
-  @ApiProperty({ example: 35.5, description: 'Average time spent in seconds' })
-  averageTimeSpent: number;
+  @ApiProperty({ example: 45.5, description: 'Average time spent per attempt' })
+  averageTimeSpent?: number;
 
-  @ApiProperty({ example: 42, description: 'Unique users who attempted this puzzle' })
-  uniqueUsers: number;
+  @ApiProperty({ example: 42, description: 'Distinct users who attempted this puzzle' })
+  uniqueUsers?: number;
 
-  @ApiProperty({ example: '2024-01-01', description: 'Start date of stats window', required: false })
+  @ApiProperty({ example: '2024-01-01', description: 'Start of queried range', required: false })
   startDate?: string;
 
-  @ApiProperty({ example: '2024-01-31', description: 'End date of stats window', required: false })
+  @ApiProperty({ example: '2024-01-31', description: 'End of queried range', required: false })
   endDate?: string;
 }
-

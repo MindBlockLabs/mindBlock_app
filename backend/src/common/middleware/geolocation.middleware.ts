@@ -8,10 +8,10 @@ import { GeolocationData } from '../interfaces/geolocation.interface';
 @Injectable()
 export class GeolocationMiddleware implements NestMiddleware {
   private readonly logger = new Logger(GeolocationMiddleware.name);
-  
+
   // 24 hours in seconds
   private readonly CACHE_TTL = 86400;
-  
+
   // Default fallback location
   private readonly DEFAULT_LOCATION: Partial<GeolocationData> = {
     country: 'US',
@@ -20,9 +20,7 @@ export class GeolocationMiddleware implements NestMiddleware {
     timezone: 'America/New_York',
   };
 
-  constructor(
-    @Inject(REDIS_CLIENT) private readonly redisClient: Redis,
-  ) {}
+  constructor(@Inject(REDIS_CLIENT) private readonly redisClient: Redis) {}
 
   async use(req: Request, res: Response, next: NextFunction) {
     try {
@@ -34,7 +32,7 @@ export class GeolocationMiddleware implements NestMiddleware {
       const overrideCountry = req.headers['x-override-country'] as string;
       const overrideCity = req.headers['x-override-city'] as string;
       const overrideTimezone = req.headers['x-override-timezone'] as string;
-      
+
       const ip = this.getClientIp(req);
 
       if (overrideCountry || overrideCity || overrideTimezone) {
@@ -49,8 +47,13 @@ export class GeolocationMiddleware implements NestMiddleware {
         };
         return next();
       }
-      
-      if (!ip || ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1') {
+
+      if (
+        !ip ||
+        ip === '127.0.0.1' ||
+        ip === '::1' ||
+        ip === '::ffff:127.0.0.1'
+      ) {
         // Localhost access fallback
         req.location = {
           ip: ip || '127.0.0.1',
@@ -70,14 +73,14 @@ export class GeolocationMiddleware implements NestMiddleware {
 
       if (cachedData) {
         const parsed = JSON.parse(cachedData) as Partial<GeolocationData>;
-        req.location = { 
+        req.location = {
           ip: parsed.ip || ip,
           country: parsed.country!,
           region: parsed.region!,
           city: parsed.city!,
           timezone: parsed.timezone!,
-          language, 
-          isOverride: false 
+          language,
+          isOverride: false,
         };
         return next();
       }
@@ -99,13 +102,17 @@ export class GeolocationMiddleware implements NestMiddleware {
         req.location = locationData;
 
         // Cache result (store only needed parts to comply with privacy)
-        await this.redisClient.setex(cacheKey, this.CACHE_TTL, JSON.stringify({
-          ip: locationData.ip,
-          country: locationData.country,
-          region: locationData.region,
-          city: locationData.city,
-          timezone: locationData.timezone,
-        }));
+        await this.redisClient.setex(
+          cacheKey,
+          this.CACHE_TTL,
+          JSON.stringify({
+            ip: locationData.ip,
+            country: locationData.country,
+            region: locationData.region,
+            city: locationData.city,
+            timezone: locationData.timezone,
+          }),
+        );
       } else {
         // Fallback
         req.location = {
@@ -118,10 +125,13 @@ export class GeolocationMiddleware implements NestMiddleware {
           isOverride: false,
         };
       }
-      
+
       next();
     } catch (error) {
-      this.logger.error(`Geolocation error: ${(error as Error).message}`, (error as Error).stack);
+      this.logger.error(
+        `Geolocation error: ${(error as Error).message}`,
+        (error as Error).stack,
+      );
       // Don't break application if geolocation fails
       req.location = {
         ip: this.getClientIp(req),
@@ -144,7 +154,7 @@ export class GeolocationMiddleware implements NestMiddleware {
       }
       return xForwardedFor.split(',')[0].trim();
     }
-    
+
     return req.ip || req.socket.remoteAddress || '127.0.0.1';
   }
 

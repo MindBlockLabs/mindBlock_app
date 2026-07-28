@@ -6,11 +6,7 @@ import { HealthService } from './health.service';
 import { RedisModule } from '../redis/redis.module';
 
 @Module({
-  imports: [
-    ConfigModule,
-    TypeOrmModule,
-    RedisModule,
-  ],
+  imports: [ConfigModule, TypeOrmModule, RedisModule],
   controllers: [HealthController],
   providers: [HealthService],
   exports: [HealthService],

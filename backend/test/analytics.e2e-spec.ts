@@ -4,7 +4,16 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import * as request from 'supertest';
+import {
+  afterAll,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+import request from 'supertest';
 import { App } from 'supertest/types';
 import { AnalyticsController } from '../src/analytics/controllers/analytics.controller';
 import { TrackEventProvider } from '../src/analytics/providers/track-event.provider';
@@ -15,15 +24,26 @@ import { ExportCsvProvider } from '../src/analytics/providers/export-csv.provide
 import { PuzzleAnalyticsProvider } from '../src/analytics/providers/puzzle-analytics.provider';
 import { AnalyticsService } from '../src/analytics/analytics.service';
 import { AnalyticsAdminGuard } from '../src/analytics/guards/analytics-admin.guard';
-import {
-  AnalyticsMetricResult,
-  PuzzleStatsResult,
-} from '../src/analytics/dtos/analytics-metric-result.dto';
+import { AnalyticsMetricResult } from '../src/analytics/dtos/analytics-metric-result.dto';
+
+interface PuzzleStatsResult {
+  puzzleId: string;
+  totalAttempts: number;
+  successfulAttempts: number;
+  failedAttempts: number;
+  successRate: number;
+  averageTimeSpent: number;
+  uniqueUsers: number;
+  startDate?: string;
+  endDate?: string;
+}
 
 describe('GET /analytics/users/retention (e2e)', () => {
   let app: INestApplication<App>;
 
-  const mockGetRetentionCurveProvider = { getRetentionCurve: jest.fn() };
+  const mockGetRetentionCurveProvider = {
+    getRetentionCurve: jest.fn<() => Promise<AnalyticsMetricResult>>(),
+  };
   const mockExportCsvProvider = { export: jest.fn() };
 
   const fakeResult: AnalyticsMetricResult = {
@@ -109,9 +129,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
       .expect(200);
 
     expect(res.body).toEqual(fakeResult);
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).toHaveBeenCalledTimes(
-      1,
-    );
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).toHaveBeenCalledTimes(1);
   });
 
   it('returns 403 for a caller without the admin role', async () => {
@@ -123,7 +143,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
       })
       .expect(403);
 
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 with a clear validation message for an invalid granularity', async () => {
@@ -136,7 +158,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
     expect(res.body.message).toEqual(
       expect.arrayContaining([expect.stringContaining('granularity')]),
     );
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 when start is after end', async () => {
@@ -156,7 +180,9 @@ describe('GET /analytics/users/retention (e2e)', () => {
         ),
       ]),
     );
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 
   it('returns 400 for an unrecognized query param', async () => {
@@ -166,14 +192,14 @@ describe('GET /analytics/users/retention (e2e)', () => {
       .query({ unknownParam: 'nope' })
       .expect(400);
 
-    expect(mockGetRetentionCurveProvider.getRetentionCurve).not.toHaveBeenCalled();
+    expect(
+      mockGetRetentionCurveProvider.getRetentionCurve,
+    ).not.toHaveBeenCalled();
   });
 });
 
 describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
   let app: INestApplication<App>;
-
-  const mockPuzzleAnalyticsProvider = { getPuzzleStats: jest.fn() };
 
   const fakePuzzleStatsResult: PuzzleStatsResult = {
     puzzleId: 'puzzle-uuid-100',
@@ -185,6 +211,11 @@ describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
     uniqueUsers: 6,
     startDate: '2024-01-01',
     endDate: '2024-01-31',
+  };
+
+  const mockPuzzleAnalyticsProvider = {
+    // return a resolved promise with the fake result
+    getPuzzleStats: jest.fn<() => Promise<PuzzleStatsResult>>().mockResolvedValue(fakePuzzleStatsResult),
   };
 
   beforeAll(async () => {
@@ -310,7 +341,7 @@ describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
 describe('GET /analytics/export (e2e)', () => {
   let app: INestApplication<App>;
 
-  const mockExportCsvProvider = { export: jest.fn() };
+  const mockExportCsvProvider = { export: jest.fn<() => Promise<{ contentType: string; filename: string; body: string }>>() };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({

@@ -31,7 +31,10 @@ export interface ErrorResponse {
 /**
  * TypeORM Postgres error codes mapped to our domain error codes.
  */
-const PG_ERROR_MAP: Record<string, { code: AppErrorCode; status: HttpStatus; message: string }> = {
+const PG_ERROR_MAP: Record<
+  string,
+  { code: AppErrorCode; status: HttpStatus; message: string }
+> = {
   '23505': {
     code: AppErrorCode.DUPLICATE_RESOURCE,
     status: HttpStatus.CONFLICT,
@@ -52,7 +55,7 @@ const PG_ERROR_MAP: Record<string, { code: AppErrorCode; status: HttpStatus; mes
     status: HttpStatus.BAD_REQUEST,
     message: 'A check constraint was violated.',
   },
-  'ECONNREFUSED': {
+  ECONNREFUSED: {
     code: AppErrorCode.DB_CONNECTION_ERROR,
     status: HttpStatus.SERVICE_UNAVAILABLE,
     message: 'Database is temporarily unavailable. Please try again later.',

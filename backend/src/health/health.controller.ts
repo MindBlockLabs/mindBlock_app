@@ -1,10 +1,10 @@
-import { 
-  Controller, 
-  Get, 
-  HttpCode, 
-  HttpStatus, 
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
   Headers,
-  ForbiddenException
+  ForbiddenException,
 } from '@nestjs/common';
 import { HealthService } from './health.service';
 import { HealthCheckResult } from './health.interfaces';
@@ -20,7 +20,7 @@ export class HealthController {
     if (this.healthService.isAppShuttingDown()) {
       throw new ForbiddenException('Application is shutting down');
     }
-    
+
     return this.healthService.getBasicHealth();
   }
 
@@ -31,7 +31,7 @@ export class HealthController {
     if (this.healthService.isAppShuttingDown()) {
       throw new ForbiddenException('Application is shutting down');
     }
-    
+
     return this.healthService.getLivenessHealth();
   }
 
@@ -42,31 +42,33 @@ export class HealthController {
     if (this.healthService.isAppShuttingDown()) {
       throw new ForbiddenException('Application is shutting down');
     }
-    
+
     const health = await this.healthService.getReadinessHealth();
-    
+
     // Return appropriate HTTP status based on health
     if (health.status === 'unhealthy') {
       throw new ForbiddenException('Service not ready');
     }
-    
+
     return health;
   }
 
   @Get('detailed')
   @HttpCode(HttpStatus.OK)
-  async getDetailedHealth(@Headers('x-admin-key') adminKey?: string): Promise<HealthCheckResult> {
+  async getDetailedHealth(
+    @Headers('x-admin-key') adminKey?: string,
+  ): Promise<HealthCheckResult> {
     // Admin-only detailed health check
     const requiredAdminKey = process.env.ADMIN_HEALTH_KEY || 'admin-key';
-    
+
     if (adminKey !== requiredAdminKey) {
       throw new ForbiddenException('Admin access required');
     }
-    
+
     if (this.healthService.isAppShuttingDown()) {
       throw new ForbiddenException('Application is shutting down');
     }
-    
+
     return this.healthService.getDetailedHealth();
   }
 }

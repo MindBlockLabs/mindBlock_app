@@ -19,20 +19,20 @@ import {
 @Index(['userId', 'timestamp'])
 export class AnalyticsEvent {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id?: string;
 
   @Column({ type: 'varchar', length: 100 })
-  eventType: string;
+  eventType?: string;
 
   @Column({ type: 'varchar', length: 100 })
-  userId: string;
+  userId?: string;
 
   @Column({ type: 'varchar', length: 100 })
-  entityId: string;
+  entityId?: string;
 
   @Column({ type: 'json', nullable: true })
   payload?: Record<string, any>;
 
   @CreateDateColumn({ type: 'timestamptz' })
-  timestamp: Date;
+  timestamp?: Date;
 }

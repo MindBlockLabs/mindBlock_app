@@ -22,9 +22,7 @@ export class GetRetentionCurveProvider {
     private readonly retentionCohortRepo: Repository<RetentionCohort>,
   ) {}
 
-  async getRetentionCurve(
-    query: DateRangeDto,
-  ): Promise<AnalyticsMetricResult> {
+  async getRetentionCurve(query: DateRangeDto): Promise<AnalyticsMetricResult> {
     const { start, end, granularity = 'day' } = query;
 
     // Convert Date objects to YYYY-MM-DD strings for cohortDate comparisons

@@ -111,7 +111,9 @@ export class JwtAuthMiddleware implements NestMiddleware {
             this.logger.warn(
               `Blacklisted token used: ${token.substring(0, 10)}...`,
             );
-          throw new UnauthorizedException('Token blacklisted (user logged out)');
+          throw new UnauthorizedException(
+            'Token blacklisted (user logged out)',
+          );
         }
       }
 

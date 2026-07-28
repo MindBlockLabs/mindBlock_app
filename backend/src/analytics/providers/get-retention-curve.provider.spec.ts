@@ -14,7 +14,10 @@ describe('GetRetentionCurveProvider', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetRetentionCurveProvider,
-        { provide: getRepositoryToken(RetentionCohort), useValue: mockRetentionCohortRepo },
+        {
+          provide: getRepositoryToken(RetentionCohort),
+          useValue: mockRetentionCohortRepo,
+        },
       ],
     }).compile();
     provider = module.get<GetRetentionCurveProvider>(GetRetentionCurveProvider);
@@ -63,9 +66,9 @@ describe('GetRetentionCurveProvider', () => {
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data.length).toBe(1);
+      expect(result.data!.length).toBe(1);
       expect(result.total).toBe(1);
-      const point = result.data[0];
+      const point = result.data![0];
       expect(point.cohortDate).toBe('2024-01-15');
       expect(point.cohortSize).toBe(100);
       expect(point.day1RetentionPct).toBe(70);
@@ -81,21 +84,48 @@ describe('GetRetentionCurveProvider', () => {
         _dateRange: true,
       };
       const cohorts: Partial<RetentionCohort>[] = [
-        { id: 'uuid-1', cohortDate: '2024-01-01', cohortSize: 200, retainedDay1: 130, retainedDay7: 100, retainedDay30: 60, createdAt: new Date(), updatedAt: new Date() },
-        { id: 'uuid-2', cohortDate: '2024-01-02', cohortSize: 150, retainedDay1: 90, retainedDay7: 75, retainedDay30: 45, createdAt: new Date(), updatedAt: new Date() },
-        { id: 'uuid-3', cohortDate: '2024-01-03', cohortSize: 180, retainedDay1: 126, retainedDay7: 90, retainedDay30: 54, createdAt: new Date(), updatedAt: new Date() },
+        {
+          id: 'uuid-1',
+          cohortDate: '2024-01-01',
+          cohortSize: 200,
+          retainedDay1: 130,
+          retainedDay7: 100,
+          retainedDay30: 60,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'uuid-2',
+          cohortDate: '2024-01-02',
+          cohortSize: 150,
+          retainedDay1: 90,
+          retainedDay7: 75,
+          retainedDay30: 45,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+        {
+          id: 'uuid-3',
+          cohortDate: '2024-01-03',
+          cohortSize: 180,
+          retainedDay1: 126,
+          retainedDay7: 90,
+          retainedDay30: 54,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
       ];
       mockRetentionCohortRepo.find.mockResolvedValue(cohorts);
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data.length).toBe(3);
+      expect(result.data!.length).toBe(3);
       expect(result.total).toBe(3);
-      expect(result.data[0].day1RetentionPct).toBe(65);
-      expect(result.data[1].day1RetentionPct).toBe(60);
-      expect(result.data[2].day1RetentionPct).toBe(70);
-      expect(result.data[2].day7RetentionPct).toBe(50);
-      expect(result.data[2].day30RetentionPct).toBe(30);
+      expect(result.data![0].day1RetentionPct).toBe(65);
+      expect(result.data![1].day1RetentionPct).toBe(60);
+      expect(result.data![2].day1RetentionPct).toBe(70);
+      expect(result.data![2].day7RetentionPct).toBe(50);
+      expect(result.data![2].day30RetentionPct).toBe(30);
     });
 
     it('should return null percentages when cohortSize is 0 (no division by zero)', async () => {
@@ -105,20 +135,30 @@ describe('GetRetentionCurveProvider', () => {
         _dateRange: true,
       };
       const cohort: Partial<RetentionCohort> = {
-        id: 'uuid-zero', cohortDate: '2024-01-10', cohortSize: 0,
-        retainedDay1: 0, retainedDay7: 0, retainedDay30: 0, createdAt: new Date(), updatedAt: new Date(),
+        id: 'uuid-zero',
+        cohortDate: '2024-01-10',
+        cohortSize: 0,
+        retainedDay1: 0,
+        retainedDay7: 0,
+        retainedDay30: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockRetentionCohortRepo.find.mockResolvedValue([cohort]);
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data[0].day1RetentionPct).toBeNull();
-      expect(result.data[0].day7RetentionPct).toBeNull();
-      expect(result.data[0].day30RetentionPct).toBeNull();
+      expect(result.data![0].day1RetentionPct).toBeNull();
+      expect(result.data![0].day7RetentionPct).toBeNull();
+      expect(result.data![0].day30RetentionPct).toBeNull();
     });
 
     it('should default granularity to "day" when not specified', async () => {
-      const query: DateRangeDto = { start: new Date('2024-02-01'), end: new Date('2024-02-05'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-02-01'),
+        end: new Date('2024-02-05'),
+        _dateRange: true,
+      };
       mockRetentionCohortRepo.find.mockResolvedValue([]);
 
       const result = await provider.getRetentionCurve(query);
@@ -127,7 +167,11 @@ describe('GetRetentionCurveProvider', () => {
     });
 
     it('should query using Between on cohortDate (index-backed)', async () => {
-      const query: DateRangeDto = { start: new Date('2024-03-01'), end: new Date('2024-03-31'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-03-01'),
+        end: new Date('2024-03-31'),
+        _dateRange: true,
+      };
       mockRetentionCohortRepo.find.mockResolvedValue([]);
 
       await provider.getRetentionCurve(query);
@@ -141,19 +185,28 @@ describe('GetRetentionCurveProvider', () => {
     });
 
     it('should round retention percentages to two decimal places', async () => {
-      const query: DateRangeDto = { start: new Date('2024-04-01'), end: new Date('2024-04-01'), _dateRange: true };
+      const query: DateRangeDto = {
+        start: new Date('2024-04-01'),
+        end: new Date('2024-04-01'),
+        _dateRange: true,
+      };
       const cohort: Partial<RetentionCohort> = {
-        id: 'uuid-frac', cohortDate: '2024-04-01', cohortSize: 300,
-        retainedDay1: 199, retainedDay7: 151, retainedDay30: 99,
-        createdAt: new Date(), updatedAt: new Date(),
+        id: 'uuid-frac',
+        cohortDate: '2024-04-01',
+        cohortSize: 300,
+        retainedDay1: 199,
+        retainedDay7: 151,
+        retainedDay30: 99,
+        createdAt: new Date(),
+        updatedAt: new Date(),
       };
       mockRetentionCohortRepo.find.mockResolvedValue([cohort]);
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data[0].day1RetentionPct).toBe(66.33);
-      expect(result.data[0].day7RetentionPct).toBe(50.33);
-      expect(result.data[0].day30RetentionPct).toBe(33);
+      expect(result.data![0].day1RetentionPct).toBe(66.33);
+      expect(result.data![0].day7RetentionPct).toBe(50.33);
+      expect(result.data![0].day30RetentionPct).toBe(33);
     });
   });
 });
