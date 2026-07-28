@@ -202,7 +202,7 @@ describe('GetChurnRiskProvider', () => {
         }),
       );
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.riskScore).toBe(0);
       expect(point.riskBand).toBe('none');
@@ -217,7 +217,7 @@ describe('GetChurnRiskProvider', () => {
         rowsFor('intermittent', { 1: 10, 3: 10, 5: 10, 7: 10, 9: 10 }),
       );
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.baselineBuckets).toBe(9);
       expect(point.baselineMean).toBe(5.5556);
@@ -231,7 +231,7 @@ describe('GetChurnRiskProvider', () => {
         rowsFor('newcomer', { 6: 10, 7: 10, 8: 10, 9: 10 }),
       );
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.baselineBuckets).toBe(4);
       expect(point.baselineMean).toBe(10);
@@ -244,7 +244,7 @@ describe('GetChurnRiskProvider', () => {
     it(`returns null — not 0 — below ${MIN_BASELINE_BUCKETS} baseline buckets`, async () => {
       qb.getRawMany.mockResolvedValue(rowsFor('fresh', { 8: 10, 9: 10 }));
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.baselineBuckets).toBe(2);
       expect(point.insufficientBaseline).toBe(true);
@@ -258,7 +258,7 @@ describe('GetChurnRiskProvider', () => {
     it('treats a user active only in the recent bucket as unscorable', async () => {
       qb.getRawMany.mockResolvedValue(rowsFor('brandnew', { 10: 5 }));
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.baselineBuckets).toBe(0);
       expect(point.insufficientBaseline).toBe(true);
@@ -276,7 +276,7 @@ describe('GetChurnRiskProvider', () => {
         rowsFor('longGone', { 1: 10, 2: 10, 3: 10 }),
       );
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.consecutiveSilentBuckets).toBe(7);
       expect(point.recentCount).toBe(0);
