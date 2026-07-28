@@ -215,7 +215,7 @@ describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
 
   const mockPuzzleAnalyticsProvider = {
     // return a resolved promise with the fake result
-    getPuzzleStats: jest.fn().mockResolvedValue(fakePuzzleStatsResult) as jest.MockedFunction<() => Promise<PuzzleStatsResult>>,
+    getPuzzleStats: jest.fn<() => Promise<PuzzleStatsResult>>().mockResolvedValue(fakePuzzleStatsResult),
   };
 
   beforeAll(async () => {

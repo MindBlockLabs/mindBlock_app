@@ -130,7 +130,7 @@ describe('GetChurnRiskProvider', () => {
         }),
       );
 
-      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data;
+      const [point] = (await provider.getChurnRisk(TEN_DAYS)).data!;
 
       expect(point.userId).toBe('steady');
       expect(point.baselineBuckets).toBe(9);
