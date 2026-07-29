@@ -17,6 +17,7 @@ import { PuzzleAnalyticsProvider } from './providers/puzzle-analytics.provider';
 import { ExportCsvProvider } from './providers/export-csv.provider';
 import { DailyActiveUsersRollupJob } from './jobs/daily-active-users-rollup.job';
 import { QuestAnalyticsRollupJob } from './jobs/quest-analytics-rollup.job';
+import { RetentionCohortRollupJob } from './jobs/retention-cohort-rollup.job';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { QuestAnalyticsRollupJob } from './jobs/quest-analytics-rollup.job';
     ExportCsvProvider,
     DailyActiveUsersRollupJob,
     QuestAnalyticsRollupJob,
+    RetentionCohortRollupJob,
   ],
   exports: [
     AnalyticsService,
