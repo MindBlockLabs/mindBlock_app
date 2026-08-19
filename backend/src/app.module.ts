@@ -33,6 +33,7 @@ import { GeolocationMiddleware } from './common/middleware/geolocation.middlewar
 import { HealthModule } from './health/health.module';
 import { AnalyticsModule } from './analytics/analytics.module';
 import { ChallengeAttemptModule } from './challenge-attempt/challenge-attempt.module';
+import { GameSessionsModule } from './game-sessions/game-sessions.module';
 
 // const ENV = process.env.NODE_ENV;
 // console.log('NODE_ENV:', process.env.NODE_ENV);
@@ -121,6 +122,7 @@ import { ChallengeAttemptModule } from './challenge-attempt/challenge-attempt.mo
     }),
     HealthModule,
     ChallengeAttemptModule,
+    GameSessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
