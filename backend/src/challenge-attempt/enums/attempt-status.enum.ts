@@ -1,0 +1,7 @@
+export enum AttemptStatus {
+  STARTED = 'STARTED',
+  SUBMITTED = 'SUBMITTED',
+  CORRECT = 'CORRECT',
+  INCORRECT = 'INCORRECT',
+  EXPIRED = 'EXPIRED',
+}
