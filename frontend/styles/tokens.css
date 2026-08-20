@@ -1,0 +1,140 @@
+/* ==========================================================================
+   Mind Block Design Token System
+   Centralized Tokens for Colors, Typography, Spacing, Radius, Glows, etc.
+   ========================================================================== */
+
+:root,
+[data-theme='dark'] {
+  /* Core Brand Colors */
+  --mb-electric-blue: #3B82F6;
+  --mb-neon-purple: #8B5CF6;
+  --mb-vibrant-teal: #14B8A6;
+
+  /* Surfaces & Backgrounds (Dark Mode Default) */
+  --mb-bg-primary: #0B0F19;
+  --mb-bg-secondary: #111827;
+  --mb-bg-surface: #1E293B;
+  --mb-bg-glass: rgba(30, 41, 59, 0.7);
+  --mb-bg-glass-hover: rgba(51, 65, 85, 0.8);
+  --mb-bg-card: rgba(15, 23, 42, 0.75);
+
+  /* Text & Foreground */
+  --mb-text-primary: #F8FAFC;
+  --mb-text-secondary: #94A3B8;
+  --mb-text-muted: #64748B;
+  --mb-text-accent: #3B82F6;
+
+  /* Borders & Dividers */
+  --mb-border-subtle: rgba(255, 255, 255, 0.1);
+  --mb-border-glow: rgba(59, 130, 246, 0.4);
+  --mb-border-purple: rgba(139, 92, 246, 0.4);
+  --mb-border-teal: rgba(20, 184, 166, 0.4);
+
+  /* Status Colors */
+  --mb-status-success: #22C55E;
+  --mb-status-warning: #F59E0B;
+  --mb-status-error: #EF4444;
+  --mb-status-info: #3B82F6;
+
+  /* Glows & Neon Effects */
+  --mb-glow-blue: 0 0 20px rgba(59, 130, 246, 0.5);
+  --mb-glow-purple: 0 0 20px rgba(139, 92, 246, 0.5);
+  --mb-glow-teal: 0 0 20px rgba(20, 184, 166, 0.5);
+  --mb-shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+
+  /* Gradients */
+  --mb-gradient-primary: linear-gradient(135deg, #3B82F6 0%, #8B5CF6 100%);
+  --mb-gradient-accent: linear-gradient(135deg, #8B5CF6 0%, #14B8A6 100%);
+  --mb-gradient-dark: linear-gradient(180deg, #0F172A 0%, #020617 100%);
+  --mb-gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.03) 100%);
+}
+
+[data-theme='light'] {
+  /* Surfaces & Backgrounds (Light Mode) */
+  --mb-bg-primary: #F8FAFC;
+  --mb-bg-secondary: #F1F5F9;
+  --mb-bg-surface: #FFFFFF;
+  --mb-bg-glass: rgba(255, 255, 255, 0.75);
+  --mb-bg-glass-hover: rgba(241, 245, 249, 0.9);
+  --mb-bg-card: rgba(255, 255, 255, 0.9);
+
+  /* Text & Foreground */
+  --mb-text-primary: #0F172A;
+  --mb-text-secondary: #475569;
+  --mb-text-muted: #94A3B8;
+  --mb-text-accent: #2563EB;
+
+  /* Borders & Dividers */
+  --mb-border-subtle: rgba(15, 23, 42, 0.12);
+  --mb-border-glow: rgba(37, 99, 235, 0.4);
+  --mb-border-purple: rgba(124, 58, 237, 0.4);
+  --mb-border-teal: rgba(13, 148, 136, 0.4);
+
+  /* Glows & Shadows */
+  --mb-glow-blue: 0 0 15px rgba(37, 99, 235, 0.3);
+  --mb-glow-purple: 0 0 15px rgba(124, 58, 237, 0.3);
+  --mb-glow-teal: 0 0 15px rgba(13, 148, 136, 0.3);
+  --mb-shadow-glass: 0 8px 24px 0 rgba(0, 0, 0, 0.08);
+
+  /* Gradients */
+  --mb-gradient-primary: linear-gradient(135deg, #2563EB 0%, #7C3AED 100%);
+  --mb-gradient-accent: linear-gradient(135deg, #7C3AED 0%, #0D9488 100%);
+  --mb-gradient-dark: linear-gradient(180deg, #F8FAFC 0%, #E2E8F0 100%);
+  --mb-gradient-glass: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(241, 245, 249, 0.6) 100%);
+}
+
+/* Typography, Spacing, Radius, Z-Index (Global Tokens) */
+:root {
+  /* Typography */
+  --mb-font-sans: 'Poppins', system-ui, -apple-system, sans-serif;
+  --mb-font-mono: 'Geist Mono', monospace;
+
+  --mb-font-size-xs: 0.75rem;    /* 12px */
+  --mb-font-size-sm: 0.875rem;   /* 14px */
+  --mb-font-size-base: 1rem;     /* 16px */
+  --mb-font-size-lg: 1.125rem;   /* 18px */
+  --mb-font-size-xl: 1.25rem;    /* 20px */
+  --mb-font-size-2xl: 1.5rem;    /* 24px */
+  --mb-font-size-3xl: 1.875rem;  /* 30px */
+  --mb-font-size-4xl: 2.25rem;   /* 36px */
+
+  --mb-weight-normal: 400;
+  --mb-weight-medium: 500;
+  --mb-weight-semibold: 600;
+  --mb-weight-bold: 700;
+
+  /* Spacing Scale */
+  --mb-space-1: 0.25rem;  /* 4px */
+  --mb-space-2: 0.5rem;   /* 8px */
+  --mb-space-3: 0.75rem;  /* 12px */
+  --mb-space-4: 1rem;     /* 16px */
+  --mb-space-5: 1.25rem;  /* 20px */
+  --mb-space-6: 1.5rem;   /* 24px */
+  --mb-space-8: 2rem;     /* 32px */
+  --mb-space-10: 2.5rem;  /* 40px */
+  --mb-space-12: 3rem;    /* 48px */
+
+  /* Border Radius */
+  --mb-radius-sm: 0.25rem;   /* 4px */
+  --mb-radius-md: 0.5rem;    /* 8px */
+  --mb-radius-lg: 0.75rem;   /* 12px */
+  --mb-radius-xl: 1rem;      /* 16px */
+  --mb-radius-2xl: 1.5rem;   /* 24px */
+  --mb-radius-full: 9999px;
+
+  /* Transitions */
+  --mb-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --mb-transition-normal: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Z-Index Hierarchy */
+  --mb-z-dropdown: 1000;
+  --mb-z-sticky: 1100;
+  --mb-z-modal: 2000;
+  --mb-z-toast: 3000;
+
+  /* Breakpoints */
+  --mb-breakpoint-sm: 640px;
+  --mb-breakpoint-md: 768px;
+  --mb-breakpoint-lg: 1024px;
+  --mb-breakpoint-xl: 1280px;
+}
