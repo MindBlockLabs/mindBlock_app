@@ -21,6 +21,8 @@ import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { MailService } from './providers/mail.service';
 import { NonceService } from './providers/nonce.service';
 
+import { GuestSessionProvider } from './providers/guest-session.provider';
+
 @Module({
   imports: [
     forwardRef(() => UsersModule),
@@ -36,6 +38,7 @@ import { NonceService } from './providers/nonce.service';
   controllers: [AuthController, GoogleAuthenticationController],
   providers: [
     AuthService,
+    GuestSessionProvider,
     JwtStrategy,
     SignInProvider,
     RefreshTokensProvider,
@@ -58,6 +61,7 @@ import { NonceService } from './providers/nonce.service';
   exports: [
     JwtStrategy,
     AuthService,
+    GuestSessionProvider,
     HashingProvider,
     GoogleAuthenticationService,
     NonceService,
