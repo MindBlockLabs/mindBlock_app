@@ -1,5 +1,6 @@
 import { Controller, Post, Body, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { TrackEventProvider } from '../providers/track-event.provider';
 import { GetOnboardingFunnelProvider } from '../providers/get-onboarding-funnel.provider';
 import { GetRetentionCurveProvider } from '../providers/get-retention-curve.provider';
@@ -27,7 +28,9 @@ export class AnalyticsController {
   }
 
   @Post('track')
+  @Throttle({ default: { limit: 20, ttl: 60000 } })
   @ApiOperation({ summary: 'Track an analytics event' })
+  @ApiResponse({ status: 429, description: 'Too many requests — rate limit exceeded' })
   async track(@Body() dto: TrackEventDto) {
     await this.trackEventProvider.track(dto);
     return { success: true };
