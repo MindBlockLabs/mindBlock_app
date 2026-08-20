@@ -12,6 +12,7 @@ import { GetOverallStatsProvider } from './providers/get-overall-stats.provider'
 import { ProgressCalculationProvider } from './providers/progress-calculation.provider';
 import { Puzzle } from '../puzzles/entities/puzzle.entity';
 import { XpLevelService } from '../users/providers/xp-level.service';
+import { ScoreService } from '../score/providers/score.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { XpLevelService } from '../users/providers/xp-level.service';
     GetOverallStatsProvider,
     ProgressCalculationProvider,
     XpLevelService,
+    ScoreService,
   ],
   exports: [ProgressService, ProgressCalculationProvider],
 })
