@@ -8,6 +8,8 @@ import { XpLevelService } from '../../users/providers/xp-level.service';
 import { User } from '../../users/user.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 import { getPointsByDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
+import { ScoreService } from '../../score/providers/score.service';
+
 
 export interface AnswerValidationResult {
   isCorrect: boolean;
@@ -32,6 +34,7 @@ export class ProgressCalculationProvider {
     private readonly userRepository: Repository<User>,
     @InjectRepository(DailyQuest)
     private readonly dailyQuestRepository: Repository<DailyQuest>,
+    private readonly scoreService: ScoreService,
   ) {}
 
   /**
@@ -84,20 +87,7 @@ export class ProgressCalculationProvider {
     );
   }
 
-  /**
-   * Calculates level based on total XP
-   */
-  calculateLevel(totalXP: number): number {
-    if (totalXP < 1000) return 1;
-    if (totalXP < 2500) return 2;
-    if (totalXP < 5000) return 3;
-    if (totalXP < 10000) return 4;
-
-    // Level 5+: Exponential scaling: 10000 + (level - 4) * some_growth
-    // Simplified: level 5 starts at 10000, each level after adds 5000+
-    return Math.floor((totalXP - 10000) / 5000) + 5;
-  }
-
+  
   /**
    * Processes answer submission and creates user progress record
    */
@@ -135,11 +125,18 @@ export class ProgressCalculationProvider {
     );
 
     // Calculate points
-    let pointsEarned = this.calculatePoints(
-      puzzle,
-      submitAnswerDto.timeSpent,
-      validation.isCorrect,
-    );
+    const basePoints = this.calculatePoints(
+  puzzle,
+  submitAnswerDto.timeSpent,
+  validation.isCorrect,
+);
+
+   const scoreResult = this.scoreService.calculateScore({
+  correct: validation.isCorrect,
+  basePoints,
+  });
+
+    let pointsEarned = scoreResult.score;
 
     // Fetch user and apply streak bonus
     const user = await this.userRepository.findOne({
@@ -148,20 +145,20 @@ export class ProgressCalculationProvider {
     });
 
     if (user && validation.isCorrect) {
-      const streakCount = user.streak?.currentStreak || 0;
-      let streakMultiplier = 0;
-      if (streakCount >= 7) {
-        streakMultiplier = 0.25;
-      } else if (streakCount >= 3) {
-        streakMultiplier = 0.1;
-      }
-      pointsEarned = Math.round(pointsEarned * (1 + streakMultiplier));
+   const streakCount = user.streak?.currentStreak || 0;
 
-      // Update User XP and Level
-      user.xp += pointsEarned;
-      user.level = this.calculateLevel(user.xp);
-      await this.userRepository.save(user);
-    }
+   let streakMultiplier = 0;
+
+   if (streakCount >= 7) {
+    streakMultiplier = 0.25;
+   } else if (streakCount >= 3) {
+    streakMultiplier = 0.1;
+   }
+
+   pointsEarned = Math.round(
+    pointsEarned * (1 + streakMultiplier),
+   );
+   }
 
     validation.pointsEarned = pointsEarned;
 
@@ -195,12 +192,10 @@ export class ProgressCalculationProvider {
             dailyQuest.completedAt = new Date();
             // Award bonus XP for daily quest completion (e.g., 50 XP as hinted in "completion screen")
             if (user) {
-              user.xp += 50;
-              user.level = this.calculateLevel(user.xp);
-              await this.userRepository.save(user);
+            await this.xpLevelService.addXp(user.id, 50);
+}
             }
-          }
-          await this.dailyQuestRepository.save(dailyQuest);
+            await this.dailyQuestRepository.save(dailyQuest);
         }
       }
     }

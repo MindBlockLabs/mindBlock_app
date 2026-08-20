@@ -201,22 +201,22 @@ describe('GET /analytics/users/retention (e2e)', () => {
 describe('GET /analytics/puzzles/:id/stats (e2e)', () => {
   let app: INestApplication<App>;
 
-  const fakePuzzleStatsResult: PuzzleStatsResult = {
-    puzzleId: 'puzzle-uuid-100',
-    totalAttempts: 10,
-    successfulAttempts: 7,
-    failedAttempts: 3,
-    successRate: 70,
-    averageTimeSpent: 45.2,
-    uniqueUsers: 6,
-    startDate: '2024-01-01',
-    endDate: '2024-01-31',
-  };
+const fakePuzzleStatsResult: PuzzleStatsResult = {
+  puzzleId: 'puzzle-uuid-100',
+  totalAttempts: 10,
+  successfulAttempts: 7,
+  failedAttempts: 3,
+  successRate: 70,
+  averageTimeSpent: 45.2,
+  uniqueUsers: 6,
+  startDate: '2024-01-01',
+  endDate: '2024-01-31',
+};
 
-  const mockPuzzleAnalyticsProvider = {
-    // return a resolved promise with the fake result
-    getPuzzleStats: jest.fn<() => Promise<PuzzleStatsResult>>().mockResolvedValue(fakePuzzleStatsResult),
-  };
+const mockPuzzleAnalyticsProvider = {
+  // return a resolved promise with the fake result
+  getPuzzleStats: jest.fn<() => Promise<PuzzleStatsResult>>().mockResolvedValue(fakePuzzleStatsResult),
+};
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
