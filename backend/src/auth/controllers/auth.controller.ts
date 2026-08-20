@@ -18,12 +18,50 @@ import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 
+import { GuestSessionProvider } from '../providers/guest-session.provider';
+import { ConvertGuestDto } from '../dtos/convert-guest.dto';
+
 @Controller('auth')
 export class AuthController {
   constructor(
-    // injecting auth service
+    // injecting auth service & guest session provider
     private readonly authservice: AuthService,
+    private readonly guestSessionProvider: GuestSessionProvider,
   ) {}
+
+  @Post('/guest-session')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Create a new 15-minute guest session' })
+  @ApiResponse({ status: 201, description: 'Guest session created successfully' })
+  public createGuestSession() {
+    return this.guestSessionProvider.createGuestSession();
+  }
+
+  @Get('/guest-session/:sessionId/status')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Check guest session status and expiration' })
+  @ApiResponse({ status: 200, description: 'Guest session status retrieved' })
+  public checkGuestSessionStatus(@Param('sessionId') sessionId: string) {
+    return this.guestSessionProvider.getGuestSessionStatus(sessionId);
+  }
+
+  @Post('/guest-session/:sessionId/hint')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Request hint for guest session (max 2 allowed)' })
+  @ApiResponse({ status: 200, description: 'Hint usage validated' })
+  @ApiResponse({ status: 403, description: 'Hint limit reached' })
+  public requestGuestHint(@Param('sessionId') sessionId: string) {
+    return this.guestSessionProvider.validateGuestHintUsage(sessionId);
+  }
+
+  @Post('/convert-guest')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Convert guest session into an authenticated account' })
+  @ApiResponse({ status: 200, description: 'Guest converted to account' })
+  public convertGuestAccount(@Body() dto: ConvertGuestDto) {
+    return this.guestSessionProvider.convertGuestToAccount(dto);
+  }
+
   @Post('/signIn')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign in with email and password' })
