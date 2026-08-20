@@ -66,9 +66,9 @@ describe('GetRetentionCurveProvider', () => {
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data.length).toBe(1);
+      expect(result.data!.length).toBe(1);
       expect(result.total).toBe(1);
-      const point = result.data[0];
+      const point = result.data![0];
       expect(point.cohortDate).toBe('2024-01-15');
       expect(point.cohortSize).toBe(100);
       expect(point.day1RetentionPct).toBe(70);
@@ -119,13 +119,13 @@ describe('GetRetentionCurveProvider', () => {
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data.length).toBe(3);
+      expect(result.data!.length).toBe(3);
       expect(result.total).toBe(3);
-      expect(result.data[0].day1RetentionPct).toBe(65);
-      expect(result.data[1].day1RetentionPct).toBe(60);
-      expect(result.data[2].day1RetentionPct).toBe(70);
-      expect(result.data[2].day7RetentionPct).toBe(50);
-      expect(result.data[2].day30RetentionPct).toBe(30);
+      expect(result.data![0].day1RetentionPct).toBe(65);
+      expect(result.data![1].day1RetentionPct).toBe(60);
+      expect(result.data![2].day1RetentionPct).toBe(70);
+      expect(result.data![2].day7RetentionPct).toBe(50);
+      expect(result.data![2].day30RetentionPct).toBe(30);
     });
 
     it('should return null percentages when cohortSize is 0 (no division by zero)', async () => {
@@ -148,9 +148,9 @@ describe('GetRetentionCurveProvider', () => {
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data[0].day1RetentionPct).toBeNull();
-      expect(result.data[0].day7RetentionPct).toBeNull();
-      expect(result.data[0].day30RetentionPct).toBeNull();
+      expect(result.data![0].day1RetentionPct).toBeNull();
+      expect(result.data![0].day7RetentionPct).toBeNull();
+      expect(result.data![0].day30RetentionPct).toBeNull();
     });
 
     it('should default granularity to "day" when not specified', async () => {
@@ -204,9 +204,9 @@ describe('GetRetentionCurveProvider', () => {
 
       const result = await provider.getRetentionCurve(query);
 
-      expect(result.data[0].day1RetentionPct).toBe(66.33);
-      expect(result.data[0].day7RetentionPct).toBe(50.33);
-      expect(result.data[0].day30RetentionPct).toBe(33);
+      expect(result.data![0].day1RetentionPct).toBe(66.33);
+      expect(result.data![0].day7RetentionPct).toBe(50.33);
+      expect(result.data![0].day30RetentionPct).toBe(33);
     });
   });
 });
