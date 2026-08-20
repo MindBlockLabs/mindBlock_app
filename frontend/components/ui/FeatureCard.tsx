@@ -22,20 +22,29 @@ const cardVariants = cva(
   },
 );
 
-export interface CardProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof cardVariants> {
-  isClickable?: boolean;
-}
+export type CardProps = VariantProps<typeof cardVariants> &
+  (
+    | ({ isClickable: true } & React.ButtonHTMLAttributes<HTMLButtonElement>)
+    | ({ isClickable?: false } & React.HTMLAttributes<HTMLDivElement>)
+  );
 
-const FeatureCard = forwardRef<HTMLDivElement, CardProps>(
+const FeatureCard = forwardRef<HTMLDivElement | HTMLButtonElement, CardProps>(
   ({ className, variant, isClickable, ...props }, ref) => {
-    const Tag = isClickable ? "button" : "div";
+    if (isClickable) {
+      return (
+        <button
+          ref={ref as React.Ref<HTMLButtonElement>}
+          className={cn(cardVariants({ variant, isClickable }), className)}
+          {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}
+        />
+      );
+    }
+
     return (
-      <Tag
-        ref={ref as any}
+      <div
+        ref={ref as React.Ref<HTMLDivElement>}
         className={cn(cardVariants({ variant, isClickable }), className)}
-        {...props}
+        {...(props as React.HTMLAttributes<HTMLDivElement>)}
       />
     );
   },
