@@ -152,13 +152,15 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
       
-      // Remove token from localStorage
+      // Remove tokens from localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       }
     },
     
@@ -223,12 +225,15 @@ const authSlice = createSlice({
       .addCase(restoreSession.fulfilled, (state, action) => {
         state.isRestoring = false;
         state.token = action.payload.token;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(restoreSession.rejected, (state, action) => {
         state.isRestoring = false;
         state.token = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
+        state.user = null;
         state.error = action.payload as string || 'Failed to restore session';
       })
       
@@ -239,12 +244,17 @@ const authSlice = createSlice({
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.token = action.payload.token;
+        state.token = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        }
         state.isAuthenticated = true;
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.isLoading = false;
         state.token = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload as string || 'Failed to refresh token';
@@ -270,6 +280,7 @@ export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.
 export const selectAuthLoading = (state: { auth: AuthState }) => state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
 export const selectToken = (state: { auth: AuthState }) => state.auth.token;
+export const selectRefreshToken = (state: { auth: AuthState }) => state.auth.refreshToken;
 export const selectIsRestoring = (state: { auth: AuthState }) => state.auth.isRestoring;
 
 // Reducer

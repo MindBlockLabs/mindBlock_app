@@ -8,6 +8,7 @@ import {
   selectAuthLoading,
   selectAuthError,
   selectToken,
+  selectRefreshToken,
   selectIsRestoring,
   loginSuccess,
   loginFailure,
