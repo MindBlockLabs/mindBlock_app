@@ -16,8 +16,10 @@ import { AppErrorCode } from '../errors/error-codes.enum';
  * Every error returned by the API must conform to this shape.
  */
 export interface ErrorResponse {
+  success: boolean;
   statusCode: number;
-  errorCode: string;
+  code: string;
+  errorCode: string; // Maintain backwards compatibility
   message: string;
   /** Field-level validation details — only present on 400 responses. */
   details?: Array<{ field?: string; message: string; value?: unknown }>;
@@ -102,9 +104,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
     this.logError(exception, resolved, correlationId, path, request.method);
 
     // ── 3. Build the response body ────────────────────────────────────────────
+    // Map VALIDATION_FAILED to VALIDATION_ERROR for the new 'code' field to match requirements
+    const responseCode = resolved.errorCode === AppErrorCode.VALIDATION_FAILED 
+      ? 'VALIDATION_ERROR' 
+      : resolved.errorCode;
     const body: ErrorResponse = {
+      success: false,
       statusCode: resolved.status,
-      errorCode: resolved.errorCode,
+      code: responseCode,
+      errorCode: resolved.errorCode, // Maintain backwards compatibility
       message: resolved.message,
       correlationId,
       timestamp,
