@@ -135,7 +135,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   @IsEnum(ChallengeLevel)
-  challengeLevel: ChallengeLevel;
+  challengeLevel?: ChallengeLevel;
 
   @ApiProperty({
     enum: ChallengeType,
@@ -146,7 +146,7 @@ export class CreateUserDto {
   @IsArray()
   @ArrayNotEmpty()
   @IsEnum(ChallengeType, { each: true })
-  challengeTypes: ChallengeType[];
+  challengeTypes?: ChallengeType[];
 
   @ApiProperty({
     enum: ReferralSource,
@@ -163,7 +163,7 @@ export class CreateUserDto {
   })
   @IsOptional()
   @IsEnum(AgeGroup)
-  ageGroup: AgeGroup;
+  ageGroup?: AgeGroup;
 
   /**
    * Country of the user
