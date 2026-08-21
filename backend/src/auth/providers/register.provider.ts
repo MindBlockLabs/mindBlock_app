@@ -21,6 +21,12 @@ export class RegisterProvider {
     this.logger.log(`Registration attempt for email: ${registerDto.email}`);
     
     try {
+      // Validate password confirmation
+      if (registerDto.password !== registerDto.passwordConfirm) {
+        this.logger.warn(`Registration failed: Passwords do not match for ${registerDto.email}`);
+        throw new BadRequestException('Passwords do not match');
+      }
+
       // Create the user
       const user = await this.createUserService.execute({
         email: registerDto.email,
