@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './providers/auth.service';
 import { UsersModule } from '../users/users.module';
 import { SignInProvider } from './providers/sign-in.provider';
@@ -20,7 +21,8 @@ import { ForgotPasswordProvider } from './providers/forgot-password.provider';
 import { ResetPasswordProvider } from './providers/reset-password.provider';
 import { MailService } from './providers/mail.service';
 import { NonceService } from './providers/nonce.service';
-
+import { Session } from './entities/session.entity';
+import { SessionsProvider } from './providers/sessions.provider';
 import { GuestSessionProvider } from './providers/guest-session.provider';
 
 @Module({
