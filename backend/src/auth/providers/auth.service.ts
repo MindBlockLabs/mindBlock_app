@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { LoginDto } from '../dtos/login.dto';
 import { SignInProvider } from './sign-in.provider';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
@@ -12,6 +12,8 @@ import { ResetPasswordProvider } from './reset-password.provider';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { NonceService } from './nonce.service';
+import { SessionsProvider } from './sessions.provider';
+import { UsersService } from '../../users/providers/users.service';
 
 @Injectable()
 export class AuthService {
@@ -45,6 +47,16 @@ export class AuthService {
      * inject nonceService
      */
     private readonly nonceService: NonceService,
+
+    /**
+     * Inject SessionsProvider for secure session management
+     */
+    private readonly sessionsProvider: SessionsProvider,
+
+    /**
+     * Inject UsersService to retrieve user data
+     */
+    private readonly usersService: UsersService,
   ) {}
 
   public async SignIn(signInDto: LoginDto) {
@@ -138,5 +150,34 @@ export class AuthService {
       token,
       resetPasswordDto,
     );
+  }
+
+  /**
+   * Logout current user by invalidating their refresh token
+   */
+  public async logout(refreshTokenDto: RefreshTokenDto) {
+    await this.sessionsProvider.invalidateSession(refreshTokenDto.refreshToken);
+    return { message: 'Successfully logged out' };
+  }
+
+  /**
+   * Invalidate all sessions for a user (logout from all devices)
+   */
+  public async logoutAll(userId: string) {
+    await this.sessionsProvider.invalidateAllUserSessions(userId);
+    return { message: 'All sessions invalidated successfully' };
+  }
+
+  /**
+   * Get current authenticated user data
+   */
+  public async getCurrentUser(userId: string) {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // Return user without sensitive data
+    const { password, passwordResetToken, passwordResetExpires, ...userWithoutSensitiveData } = user;
+    return userWithoutSensitiveData;
   }
 }

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SideNav from "@/components/SideNav";
 import { Menu } from "lucide-react";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ClientLayout({
   children,
@@ -11,6 +12,28 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { restoreSession } = useAuth();
+
+  // Restore session on app initialization
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
+
+  // Set up automatic token refresh
+  const { refreshToken: refreshTokenAction, isAuthenticated, token } = useAuth();
+  
+  useEffect(() => {
+    if (!isAuthenticated || !token) return;
+
+    // Refresh token 5 minutes before it expires (assuming 1 hour expiration)
+    const REFRESH_INTERVAL = 55 * 60 * 1000; // 55 minutes
+    
+    const intervalId = setInterval(() => {
+      refreshTokenAction();
+    }, REFRESH_INTERVAL);
+
+    return () => clearInterval(intervalId);
+  }, [isAuthenticated, token, refreshTokenAction]);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#0A0F1A] text-slate-100 flex flex-col md:flex-row">

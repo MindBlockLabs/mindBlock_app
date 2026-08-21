@@ -14,6 +14,7 @@ export interface User {
 export interface AuthState {
   user: User | null;
   token: string | null;
+  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -24,6 +25,7 @@ export interface AuthState {
 const initialState: AuthState = {
   user: null,
   token: typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null,
+  refreshToken: typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null,
   isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('accessToken') : false,
   isLoading: false,
   error: null,
@@ -42,18 +44,31 @@ export const loginStart = createAsyncThunk(
 
 export const restoreSession = createAsyncThunk(
   'auth/restoreSession',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) {
         throw new Error('No token found');
       }
       
-      // TODO: Validate token with backend and fetch user data
-      // For now, just return the token
-      return { token };
-    } catch {
+      // Validate token with backend by fetching user data
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Invalid token');
+      }
+      
+      const user = await response.json();
+      return { token, user };
+    } catch (error) {
+      // Clear invalid tokens
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       return rejectWithValue('Session expired');
     }
   }
@@ -61,16 +76,41 @@ export const restoreSession = createAsyncThunk(
 
 export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      // TODO: Implement token refresh logic
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No token to refresh');
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+      if (!refreshTokenValue) {
+        throw new Error('No refresh token found');
       }
-      return { token };
-    } catch {
+      
+      // Call refresh token endpoint
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+      
+      const data = await response.json();
+      
+      // Update stored tokens
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      
+      return { 
+        accessToken: data.accessToken, 
+        refreshToken: data.refreshToken,
+        user: data.user 
+      };
+    } catch (error) {
+      // Clear invalid tokens
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       return rejectWithValue('Failed to refresh token');
     }
   }
@@ -81,16 +121,18 @@ const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
-    loginSuccess: (state, action: PayloadAction<{ user: User; token: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{ user: User; token: string; refreshToken: string }>) => {
       state.user = action.payload.user;
       state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
       state.isAuthenticated = true;
       state.isLoading = false;
       state.error = null;
       
-      // Store token in localStorage
+      // Store tokens in localStorage
       if (typeof window !== 'undefined') {
         localStorage.setItem('accessToken', action.payload.token);
+        localStorage.setItem('refreshToken', action.payload.refreshToken);
       }
     },
     
@@ -110,13 +152,15 @@ const authSlice = createSlice({
     logout: (state) => {
       state.user = null;
       state.token = null;
+      state.refreshToken = null;
       state.isAuthenticated = false;
       state.isLoading = false;
       state.error = null;
       
-      // Remove token from localStorage
+      // Remove tokens from localStorage
       if (typeof window !== 'undefined') {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
       }
     },
     
@@ -181,12 +225,15 @@ const authSlice = createSlice({
       .addCase(restoreSession.fulfilled, (state, action) => {
         state.isRestoring = false;
         state.token = action.payload.token;
+        state.user = action.payload.user;
         state.isAuthenticated = true;
       })
       .addCase(restoreSession.rejected, (state, action) => {
         state.isRestoring = false;
         state.token = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
+        state.user = null;
         state.error = action.payload as string || 'Failed to restore session';
       })
       
@@ -197,12 +244,17 @@ const authSlice = createSlice({
       })
       .addCase(refreshToken.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.token = action.payload.token;
+        state.token = action.payload.accessToken;
+        state.refreshToken = action.payload.refreshToken;
+        if (action.payload.user) {
+          state.user = action.payload.user;
+        }
         state.isAuthenticated = true;
       })
       .addCase(refreshToken.rejected, (state, action) => {
         state.isLoading = false;
         state.token = null;
+        state.refreshToken = null;
         state.isAuthenticated = false;
         state.user = null;
         state.error = action.payload as string || 'Failed to refresh token';
@@ -228,6 +280,7 @@ export const selectIsAuthenticated = (state: { auth: AuthState }) => state.auth.
 export const selectAuthLoading = (state: { auth: AuthState }) => state.auth.isLoading;
 export const selectAuthError = (state: { auth: AuthState }) => state.auth.error;
 export const selectToken = (state: { auth: AuthState }) => state.auth.token;
+export const selectRefreshToken = (state: { auth: AuthState }) => state.auth.refreshToken;
 export const selectIsRestoring = (state: { auth: AuthState }) => state.auth.isRestoring;
 
 // Reducer

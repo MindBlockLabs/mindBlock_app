@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Trophy, User, Bell } from "lucide-react";
+import { Home, Trophy, User, Bell, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "Home", href: "/dashboard", icon: Home },
@@ -14,6 +15,7 @@ const navItems = [
 
 const SideNav = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const pathname = usePathname();
+  const { logout, isAuthenticated } = useAuth();
 
   return (
     <aside
@@ -50,6 +52,17 @@ const SideNav = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
               </Link>
             );
           })}
+          
+          {/* Logout button - only show if authenticated */}
+          {isAuthenticated && (
+            <button
+              onClick={logout}
+              className="flex items-center justify-start gap-3 rounded-xl px-3 py-3 text-sm font-medium transition text-red-300 hover:bg-red-900/30 hover:text-red-200 mt-4"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          )}
         </nav>
       </div>
     </aside>

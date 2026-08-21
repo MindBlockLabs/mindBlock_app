@@ -155,18 +155,15 @@ const SignInPage = () => {
       // Parse JSON only if response is ok
       const data = await response.json();
 
-      if (data.accessToken) {
-        // Store token in localStorage
-        localStorage.setItem('accessToken', data.accessToken);
-        
-        // Update Redux state
+      if (data.accessToken && data.refreshToken) {
+        // Update Redux state with both tokens
         const user = {
           id: data.user?.id || formData.username,
           email: formData.username,
           username: data.user?.username || formData.username.split('@')[0],
         };
         
-        loginSuccess(user, data.accessToken);
+        loginSuccess(user, data.accessToken, data.refreshToken);
         
         // Show success toast
         showSuccess('Login Successful', 'Welcome back!');
