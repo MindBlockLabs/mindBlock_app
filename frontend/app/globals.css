@@ -147,3 +147,54 @@ body {
 .animate-zoom-in {
   animation: zoom-in 0.5s ease-out forwards;
 }
+
+/* Shared feedback states keep page geometry stable while data changes. */
+.state-display {
+  min-height: 13rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #e2e8f0;
+}
+
+.state-display__icon {
+  display: grid;
+  place-items: center;
+  width: 3.5rem;
+  height: 3.5rem;
+  border: 1px solid rgb(148 163 184 / 0.18);
+  border-radius: 1rem;
+  color: #7dd3fc;
+  background: rgb(14 116 144 / 0.12);
+}
+
+.state-display__title { font-size: 1rem; font-weight: 700; }
+.state-display__message { max-width: 28rem; color: #94a3b8; font-size: 0.875rem; }
+.state-display__action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  border-radius: 0.6rem;
+  padding: 0.65rem 1rem;
+  background: #2563eb;
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 700;
+  transition: background-color 150ms ease;
+}
+.state-display__action:hover { background: #1d4ed8; }
+.state-display--loading .state-display__icon { animation: state-pulse 1.8s ease-in-out infinite; }
+.state-display--success .state-display__icon { color: #86efac; background: rgb(22 163 74 / 0.12); }
+.state-display--error .state-display__icon { color: #fca5a5; background: rgb(220 38 38 / 0.12); }
+.state-display--locked .state-display__icon { color: #cbd5e1; background: rgb(71 85 105 / 0.2); }
+.state-display--expired .state-display__icon { color: #fcd34d; background: rgb(217 119 6 / 0.12); }
+@keyframes state-pulse { 50% { box-shadow: 0 0 1.5rem rgb(56 189 248 / 0.3); transform: scale(1.04); } }
+@media (prefers-reduced-motion: reduce) {
+  .state-display--loading .state-display__icon { animation: none; }
+  .state-display__action { transition: none; }
+}

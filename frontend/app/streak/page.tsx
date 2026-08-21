@@ -4,6 +4,7 @@ import { DayData } from "@/components/WeeklyCalendar";
 import { useRouter } from "next/navigation";
 import { useStreak } from "@/hooks/useStreak";
 import { useMemo } from "react";
+import { LoadingState } from "@/components/ui/StateDisplay";
 
 const DAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -33,9 +34,7 @@ export default function StreakPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#050C16] flex items-center justify-center">
-                <div className="text-white">Loading streak...</div>
-            </div>
+            <div className="min-h-screen bg-[#050C16] text-white"><LoadingState message="Loading streak..." /></div>
         );
     }
 
