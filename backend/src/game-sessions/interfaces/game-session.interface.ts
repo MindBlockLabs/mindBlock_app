@@ -43,3 +43,29 @@ export interface IGameSessionSummary {
   startedAt: Date | null;
   completedAt: Date | null;
 }
+
+/** Correct/total breakdown for a single puzzle category within a session. */
+export interface CategoryPerformanceEntry {
+  categoryId: string;
+  categoryName: string;
+  correct: number;
+  total: number;
+  accuracy: number;
+}
+
+/**
+ * Final statistics calculated server-side when a session is marked COMPLETED.
+ * Derived entirely from persisted ChallengeAttempt records for the session.
+ */
+export interface SessionCompletionStats {
+  totalScore: number;
+  xpEarned: number;
+  challengesCompleted: number;
+  accuracy: number;
+  timeSpentSeconds: number;
+  categoryPerformance: CategoryPerformanceEntry[];
+  previousStreak: number | null;
+  currentStreak: number | null;
+  rewardEligible: boolean | null;
+  rewardReason: string | null;
+}

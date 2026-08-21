@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsInt, IsOptional, Min } from 'class-validator';
+import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 import { GameSessionStatus } from '../enums/game-session-status.enum';
 
 export class UpdateGameSessionStatusDto {
@@ -12,11 +12,14 @@ export class UpdateGameSessionStatusDto {
   status: GameSessionStatus;
 
   /**
-   * When completing a session, optionally supply the final score and XP.
-   * The service will ignore these values for non-terminal transitions.
+   * Fallback score, only used when completing a session that has no
+   * tracked ChallengeAttempt records. Whenever attempts exist, the final
+   * score is calculated server-side from those records and this value
+   * is ignored.
    */
   @ApiPropertyOptional({
-    description: 'Final score (used when transitioning to COMPLETED)',
+    description:
+      'Fallback score used only when the session has no tracked challenge attempts',
     example: 850,
     minimum: 0,
   })
@@ -25,8 +28,13 @@ export class UpdateGameSessionStatusDto {
   @Min(0)
   score?: number;
 
+  /**
+   * Fallback XP, only used when completing a session that has no tracked
+   * ChallengeAttempt records. See `score` above.
+   */
   @ApiPropertyOptional({
-    description: 'XP earned (used when transitioning to COMPLETED)',
+    description:
+      'Fallback XP used only when the session has no tracked challenge attempts',
     example: 120,
     minimum: 0,
   })
@@ -34,4 +42,17 @@ export class UpdateGameSessionStatusDto {
   @IsInt()
   @Min(0)
   xpEarned?: number;
+
+  /**
+   * IANA timezone (e.g. "America/New_York") used to evaluate streak
+   * continuity when completing a session. Defaults to UTC if omitted.
+   */
+  @ApiPropertyOptional({
+    description:
+      'IANA timezone used for streak calculation on completion, defaults to UTC',
+    example: 'America/New_York',
+  })
+  @IsOptional()
+  @IsString()
+  userTimezone?: string;
 }

@@ -11,6 +11,7 @@ import { GameSessionStatus } from '../enums/game-session-status.enum';
 import { CreateGameSessionDto } from '../dtos/create-game-session.dto';
 import { UpdateGameSessionStatusDto } from '../dtos/update-game-session-status.dto';
 import { SessionTransitionMap } from '../interfaces/game-session.interface';
+import { SessionSummaryProvider } from './session-summary.provider';
 
 /**
  * Valid state transitions for a GameSession.
@@ -50,6 +51,7 @@ export class GameSessionsService {
   constructor(
     @InjectRepository(GameSession)
     private readonly sessionRepository: Repository<GameSession>,
+    private readonly sessionSummaryProvider: SessionSummaryProvider,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -198,8 +200,29 @@ export class GameSessionsService {
     }
 
     if (dto.status === GameSessionStatus.COMPLETED) {
-      if (dto.score !== undefined) session.score = dto.score;
-      if (dto.xpEarned !== undefined) session.xpEarned = dto.xpEarned;
+      const stats = await this.sessionSummaryProvider.buildCompletionStats(
+        session.id,
+        session.userId,
+        dto.userTimezone,
+      );
+
+      // Statistics are calculated server-side from persisted challenge
+      // attempts. Client-supplied score/xpEarned are only used as a
+      // fallback when the session has no tracked attempts (e.g. legacy
+      // or externally-managed sessions), so completion never regresses
+      // to an unscored state.
+      const hasTrackedAttempts = stats.challengesCompleted > 0;
+      session.score = hasTrackedAttempts ? stats.totalScore : dto.score ?? 0;
+      session.xpEarned = hasTrackedAttempts
+        ? stats.xpEarned
+        : dto.xpEarned ?? 0;
+      session.accuracy = stats.accuracy;
+      session.timeSpentSeconds = stats.timeSpentSeconds;
+      session.categoryPerformance = stats.categoryPerformance;
+      session.previousStreak = stats.previousStreak;
+      session.currentStreak = stats.currentStreak;
+      session.rewardEligible = stats.rewardEligible;
+      session.rewardReason = stats.rewardReason;
     }
 
     session.status = dto.status;

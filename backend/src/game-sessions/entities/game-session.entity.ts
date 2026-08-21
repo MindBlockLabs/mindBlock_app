@@ -11,6 +11,7 @@ import {
 import { GameSessionStatus } from '../enums/game-session-status.enum';
 import { PuzzleDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
 import { User } from '../../users/user.entity';
+import { CategoryPerformanceEntry } from '../interfaces/game-session.interface';
 
 /**
  * GameSession represents a complete gameplay session for a user.
@@ -94,6 +95,41 @@ export class GameSession {
   /** Timestamp when the session reached a terminal state (COMPLETED / EXPIRED / ABANDONED). */
   @Column({ name: 'completed_at', type: 'timestamptz', nullable: true })
   completedAt: Date | null;
+
+  /**
+   * Percentage (0-100) of completed challenges answered correctly.
+   * Calculated server-side from ChallengeAttempt records at completion time.
+   */
+  @Column({ name: 'accuracy', type: 'int', nullable: true })
+  accuracy: number | null;
+
+  /** Total seconds spent across all challenge attempts in this session. */
+  @Column({ name: 'time_spent_seconds', type: 'int', nullable: true })
+  timeSpentSeconds: number | null;
+
+  /**
+   * Per-category breakdown of correct/total attempts, e.g.
+   * [{ categoryId, categoryName, correct, total, accuracy }].
+   * Calculated server-side and persisted so it survives a page refresh.
+   */
+  @Column({ name: 'category_performance', type: 'jsonb', nullable: true })
+  categoryPerformance: CategoryPerformanceEntry[] | null;
+
+  /** User's streak count immediately before this session completed. */
+  @Column({ name: 'previous_streak', type: 'int', nullable: true })
+  previousStreak: number | null;
+
+  /** User's streak count immediately after this session completed. */
+  @Column({ name: 'current_streak', type: 'int', nullable: true })
+  currentStreak: number | null;
+
+  /** Whether the player is eligible for a reward based on this session. */
+  @Column({ name: 'reward_eligible', type: 'boolean', nullable: true })
+  rewardEligible: boolean | null;
+
+  /** Human-readable reason for the reward eligibility outcome. */
+  @Column({ name: 'reward_reason', type: 'varchar', length: 255, nullable: true })
+  rewardReason: string | null;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamptz' })
   createdAt: Date;
