@@ -7,7 +7,7 @@ export class CreateSessionsTable20260821000000 implements MigrationInterface {
     await queryRunner.query(`
       CREATE TABLE "session" (
         "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
-        "userId" string NOT NULL,
+        "userId" INTEGER NOT NULL,
         "refreshTokenHash" VARCHAR NOT NULL UNIQUE,
         "deviceInfo" VARCHAR,
         "ipAddress" VARCHAR,
