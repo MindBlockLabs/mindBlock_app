@@ -45,9 +45,26 @@ export function useAuth() {
     dispatch(loginFailure(error));
   }, [dispatch]);
 
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
+    if (refreshTokenValue) {
+      try {
+        // Call backend logout endpoint to invalidate the session
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ refreshToken: refreshTokenValue }),
+        });
+      } catch (error) {
+        console.error('Logout error:', error);
+      }
+    }
+    // Clear local state regardless of backend response
     dispatch(logout());
-  }, [dispatch]);
+    // Redirect to signin page
+    window.location.href = '/auth/signin';
+  }, [dispatch, refreshTokenValue]);
 
   const handleClearError = useCallback(() => {
     dispatch(clearError());
@@ -84,6 +101,7 @@ export function useAuth() {
     isLoading,
     error,
     token,
+    refreshToken: refreshTokenValue,
     isRestoring,
     
     // Actions
@@ -119,6 +137,10 @@ export function useAuthError() {
 
 export function useAuthToken() {
   return useAppSelector(selectToken);
+}
+
+export function useRefreshToken() {
+  return useAppSelector(selectRefreshToken);
 }
 
 export function useIsRestoring() {
