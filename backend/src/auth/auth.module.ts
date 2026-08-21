@@ -29,6 +29,7 @@ import { GuestSessionProvider } from './providers/guest-session.provider';
 @Module({
   imports: [
     forwardRef(() => UsersModule),
+    TypeOrmModule.forFeature([User]),
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ThrottlerModule.forRoot([
