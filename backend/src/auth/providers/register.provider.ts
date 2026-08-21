@@ -35,9 +35,6 @@ export class RegisterProvider {
         fullname: registerDto.fullname || registerDto.username,
         password: registerDto.password,
         provider: 'email',
-        challengeLevel: undefined,
-        challengeTypes: undefined,
-        ageGroup: undefined,
       });
 
       this.logger.log(`User registered successfully: ${user.id} (${user.email})`);
