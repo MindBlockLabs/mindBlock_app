@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Trophy, User, Bell } from "lucide-react";
+import { Home, Trophy, User, Bell, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
   { label: "Home", href: "/dashboard", icon: Home },
@@ -14,6 +15,7 @@ const navItems = [
 
 const SideNav = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
   const pathname = usePathname();
+  const { logout, isAuthenticated } = useAuth();
 
   return (
     <aside
