@@ -151,4 +151,33 @@ export class AuthService {
       resetPasswordDto,
     );
   }
+
+  /**
+   * Logout current user by invalidating their refresh token
+   */
+  public async logout(refreshTokenDto: RefreshTokenDto) {
+    await this.sessionsProvider.invalidateSession(refreshTokenDto.refreshToken);
+    return { message: 'Successfully logged out' };
+  }
+
+  /**
+   * Invalidate all sessions for a user (logout from all devices)
+   */
+  public async logoutAll(userId: string) {
+    await this.sessionsProvider.invalidateAllUserSessions(userId);
+    return { message: 'All sessions invalidated successfully' };
+  }
+
+  /**
+   * Get current authenticated user data
+   */
+  public async getCurrentUser(userId: string) {
+    const user = await this.usersService.findOneById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    // Return user without sensitive data
+    const { password, passwordResetToken, passwordResetExpires, ...userWithoutSensitiveData } = user;
+    return userWithoutSensitiveData;
+  }
 }

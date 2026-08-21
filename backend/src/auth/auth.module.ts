@@ -27,6 +27,7 @@ import { GuestSessionProvider } from './providers/guest-session.provider';
   imports: [
     forwardRef(() => UsersModule),
     ConfigModule.forFeature(jwtConfig),
+    TypeOrmModule.forFeature([Session]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ThrottlerModule.forRoot([
       {
@@ -49,6 +50,7 @@ import { GuestSessionProvider } from './providers/guest-session.provider';
     ResetPasswordProvider,
     MailService,
     NonceService,
+    SessionsProvider,
     {
       provide: HashingProvider, // Use the abstract class as a token
       useClass: BcryptProvider, // Bind it to the concrete implementation
