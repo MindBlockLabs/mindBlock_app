@@ -63,7 +63,18 @@ export class AuthController {
     return this.guestSessionProvider.convertGuestToAccount(dto);
   }
 
+  @Post('/register')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 registration requests per minute per IP
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user with email and password' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid input or email already in use' })
+  public async register(@Body() registerDto: RegisterDto) {
+    return await this.authservice.register(registerDto);
+  }
+
   @Post('/signIn')
+  @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute per IP
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sign in with email and password' })
   @ApiResponse({ status: 200, description: 'Successfully signed in' })

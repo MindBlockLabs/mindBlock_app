@@ -30,29 +30,34 @@ export class SignInProvider {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
   public async SignIn(signInDto: LoginDto) {
-    // check if user exist in db
-    // throw error if user doesnt exist
+    // Always use the same error message to prevent email enumeration
+    const invalidCredentialsError = new UnauthorizedException('Email or password is incorrect');
+    
+    // Get user by email
     const user = await this.userService.GetOneByEmail(signInDto.email);
-
-    // conpare password
+    
+    // If user doesn't exist, still perform password comparison to prevent timing attacks
     let isCheckedPassword: boolean = false;
-
+    
     try {
-      if (!user.password) {
-        throw new UnauthorizedException('Email or password is incorrect');
+      if (user && user.password) {
+        isCheckedPassword = await this.hashingProvider.comparePasswords(
+          signInDto.password,
+          user.password,
+        );
       }
-      isCheckedPassword = await this.hashingProvider.comparePasswords(
-        signInDto.password,
-        user.password,
-      );
+      
+      // If user doesn't exist or password is incorrect, throw the same error
+      if (!user || !isCheckedPassword) {
+        throw invalidCredentialsError;
+      }
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new RequestTimeoutException(error, {
-        description: 'error  connecting to the database',
+        description: 'Error connecting to the database',
       });
-    }
-
-    if (!isCheckedPassword) {
-      throw new UnauthorizedException('email or password is incorrect');
     }
 
     const accessToken = await this.jwtService.signAsync(
