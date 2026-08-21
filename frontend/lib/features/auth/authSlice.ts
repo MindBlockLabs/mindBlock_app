@@ -44,18 +44,31 @@ export const loginStart = createAsyncThunk(
 
 export const restoreSession = createAsyncThunk(
   'auth/restoreSession',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
       const token = localStorage.getItem('accessToken');
       if (!token) {
         throw new Error('No token found');
       }
       
-      // TODO: Validate token with backend and fetch user data
-      // For now, just return the token
-      return { token };
-    } catch {
+      // Validate token with backend by fetching user data
+      const response = await fetch('/api/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error('Invalid token');
+      }
+      
+      const user = await response.json();
+      return { token, user };
+    } catch (error) {
+      // Clear invalid tokens
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       return rejectWithValue('Session expired');
     }
   }
@@ -63,16 +76,41 @@ export const restoreSession = createAsyncThunk(
 
 export const refreshToken = createAsyncThunk(
   'auth/refreshToken',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      // TODO: Implement token refresh logic
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No token to refresh');
+      const refreshTokenValue = localStorage.getItem('refreshToken');
+      if (!refreshTokenValue) {
+        throw new Error('No refresh token found');
       }
-      return { token };
-    } catch {
+      
+      // Call refresh token endpoint
+      const response = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken: refreshTokenValue }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to refresh token');
+      }
+      
+      const data = await response.json();
+      
+      // Update stored tokens
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      
+      return { 
+        accessToken: data.accessToken, 
+        refreshToken: data.refreshToken,
+        user: data.user 
+      };
+    } catch (error) {
+      // Clear invalid tokens
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       return rejectWithValue('Failed to refresh token');
     }
   }
