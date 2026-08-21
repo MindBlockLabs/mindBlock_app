@@ -42,6 +42,7 @@ import { GuestSessionProvider } from './providers/guest-session.provider';
     GuestSessionProvider,
     JwtStrategy,
     SignInProvider,
+    RegisterProvider,
     RefreshTokensProvider,
     GenerateTokensProvider,
     GoogleAuthenticationService,

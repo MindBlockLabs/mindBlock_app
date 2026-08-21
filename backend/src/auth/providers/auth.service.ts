@@ -1,6 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoginDto } from '../dtos/login.dto';
+import { RegisterDto } from '../dtos/register.dto';
 import { SignInProvider } from './sign-in.provider';
+import { RegisterProvider } from './register.provider';
 import { ApiBody, ApiOperation } from '@nestjs/swagger';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { RefreshTokensProvider } from './refreshTokensProvider';
