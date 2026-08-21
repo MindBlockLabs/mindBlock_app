@@ -22,82 +22,180 @@ Whether you're a beginner or a pro, **Mind Block adapts to you**—making every 
 
 ---
 
+## 📚 Documentation
+
+| Document | What it covers |
+| -------- | -------------- |
+| [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) | Full local setup, running each service, migrations, seed data, common errors |
+| [docs/ENVIRONMENT.md](docs/ENVIRONMENT.md) | Every backend, frontend, and Stellar environment variable |
+| [docs/API.md](docs/API.md) | REST API reference: endpoints, payloads, auth, errors |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Monorepo layout, request lifecycle, data stores, deployment |
+| [docs/TESTING.md](docs/TESTING.md) | Test, lint, type-check, and build commands, plus what CI enforces |
+| [docs/CANONICAL_DOMAIN_MODEL.md](docs/CANONICAL_DOMAIN_MODEL.md) | Authoritative domain model specification |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributor workflow, branch and PR standards |
+
+---
+
 ## 🏗️ Project Structure
 This is a **monorepo** containing three main components:
 
-- **Backend (NestJS)** – API & game logic  
-- **Frontend (NextJS)** – User interface  
-- **Smart Contracts (Soroban)** – Stellar testnet deployment  
+- **Backend (NestJS)** – API & game logic (`backend/`)
+- **Frontend (Next.js)** – User interface (`frontend/`)
+- **Smart Contract (Soroban)** – Stellar testnet deployment (`contract/`)
+
+A full directory breakdown is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ### 🌍 Hosting
 - **Backend (NestJS)** → [Render](https://mindblock-webaapp.onrender.com)  
 - **Frontend (NextJS)** → [Vercel](https://mind-block-app-frontend.vercel.app/)  
-- **Contracts (Rust)** → Stellar testnet  
+- **Contract (Rust)** → Stellar testnet  
+
+---
+
+## ✅ Prerequisites
+
+| Tool | Version | Required for |
+| ---- | ------- | ------------ |
+| Node.js | **20.x LTS (>= 20.9.0)** | Backend and frontend. CI pins Node 20.x; Next.js 16 needs >= 20.9. |
+| npm | **10.x** (ships with Node 20) | The repo uses npm workspaces and a committed `package-lock.json`. Do not use yarn, pnpm, or bun. |
+| PostgreSQL | **14+** | Backend datastore. |
+| Redis | **6+** | Sessions, JWT state, caching. The backend will not start without it. |
+| Rust + `wasm32-unknown-unknown` | stable | Only if you work on `contract/`. |
+| Stellar CLI | latest | Only for building or deploying the contract. |
 
 ---
 
 ## ⚡ Getting Started
 
-Follow these steps to clone and set up the project locally.
+The path from clone to a running stack, in order.
 
-### 1. Clone the repository
+### 1. Clone
+
 ```bash
 git clone https://github.com/MindBlockLabs/mindBlock_app.git
 cd mindBlock_app
 ```
 
-2. Install dependencies
-
-Each package has its own dependencies. You can install them separately or at ones:
-Instructions can be found in the general package.json file (script). It is advisable though to install seperately and focus on the folder your isuue is specific to.
-
-Backend (NestJS)
-cd backend
-npm install
-
-Frontend (NextJS)
-cd frontend
-npm install
-
-Contracts (Soroban)
-
-Make sure you have Scarb
- and Stellar CLI installed, then:
-
-cd contracts
-scarb build
-
-3. Environment variables
-
-Create a .env file inside the backend and/or frontend folders.
-For backend:
+### 2. Install
 
 ```bash
-REDIS_URL=redis://127.0.0.1:6379
-DATABASE_API='https://mindblock-webaapp.onrender.com/api'
-
+npm ci
 ```
 
-For frontend:
+This installs every workspace from the lockfile in one pass. You can also
+install a single package (`cd backend && npm install`) if you only work there.
 
-NEXT_PUBLIC_API_URL=http://localhost:5000
+### 3. Configure
 
-4. Run the project
-Backend
+```bash
+cp backend/.env.example backend/.env
+printf 'NEXT_PUBLIC_API_URL=http://localhost:3000\n' > frontend/.env.local
+```
+
+Fill in at minimum `REDIS_URL`, `JWT_SECRET`, and the `DATABASE_*` block in
+`backend/.env`. Every variable is documented in
+[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md).
+
+### 4. Start PostgreSQL
+
+```bash
+docker run --name mindblock-postgres \
+  -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=password \
+  -e POSTGRES_DB=mindblock -p 5432:5432 -d postgres:16
+```
+
+Or use a local install and `createdb mindblock`. The credentials must match
+`backend/.env`.
+
+### 5. Start Redis
+
+```bash
+docker run --name mindblock-redis -p 6379:6379 -d redis:7
+redis-cli ping   # -> PONG
+```
+
+### 6. Run the backend
+
+```bash
 cd backend
 npm run start:dev
+```
 
-Frontend
+- API: <http://localhost:3000>
+- Swagger UI: <http://localhost:3000/api>
+- Health: <http://localhost:3000/health>
+
+### 7. Run the frontend
+
+In a second terminal:
+
+```bash
 cd frontend
 npm run dev
+```
 
-Contracts
+Next.js picks a free port (typically 3001 while the backend holds 3000); the
+terminal prints the URL.
 
-Deploy your Soroban contracts on Stellar testnet:
+From the repo root you can also start either service without changing directory:
 
-cd contracts
-stellar-compile
-stellar-deploy
+```bash
+npm run dev:backend
+npm run dev:frontend
+```
+
+> `npm run dev` starts both through `concurrently`, which is not currently
+> declared as a dependency. Until it is, either run the two commands above in
+> separate terminals or install it yourself (`npm i -D concurrently`).
+
+### 8. Run the tests
+
+```bash
+npm --workspace backend run test
+npm --workspace backend run test:e2e
+```
+
+Lint, type-check, and build commands are in
+[docs/TESTING.md](docs/TESTING.md).
+
+### 9. Contract (optional)
+
+```bash
+rustup target add wasm32-unknown-unknown
+cargo install --locked stellar-cli
+
+cd contract
+cargo build --locked --target wasm32-unknown-unknown --release
+cargo test --locked
+```
+
+Deployment identities and network setup are covered in
+[docs/ENVIRONMENT.md](docs/ENVIRONMENT.md#3-stellar-and-soroban-shell-environment).
+
+---
+
+## 🛠️ Common commands
+
+| Command | Runs from | What it does |
+| ------- | --------- | ------------ |
+| `npm --workspace backend run start:dev` | root | Backend in watch mode |
+| `npm --workspace frontend run dev` | root | Frontend dev server |
+| `npm --workspace backend run test` | root | Backend unit tests |
+| `npm --workspace backend run test:cov` | root | Backend coverage |
+| `npm --workspace backend run lint` | root | Backend ESLint |
+| `npm --workspace frontend run lint` | root | Frontend ESLint |
+| `npm --workspace backend run build` | root | Compile the backend |
+| `npm --workspace frontend run build` | root | Production frontend build |
+
+---
+
+## 🚑 Troubleshooting
+
+Hitting `REDIS_URL not defined`, `ECONNREFUSED 5432`, `EADDRINUSE :::3000`, or a
+`401` on every request? Each of those, and more, is covered in
+[docs/DEVELOPMENT.md](docs/DEVELOPMENT.md#12-common-errors).
+
+---
 
 ## 👥 Contributors & Contact
 
@@ -111,21 +209,25 @@ amalikabdulmalik04@gmail.com
 
 ## Contribution Guidelines
 
-We ❤️ contributions!
+We ❤️ contributions! The full workflow, branch naming rules, PR standards, and
+CI requirements live in [CONTRIBUTING.md](CONTRIBUTING.md). The short version:
 
-Fork the repo
+1. Fork the repo and branch from `main`:
 
-Create a new branch:
-
+```bash
 git checkout -b feature/your-feature-name
+```
 
+2. Make your change and run the checks in [docs/TESTING.md](docs/TESTING.md).
 
-Commit changes with clear messages:
+3. Commit with a Conventional Commits message:
 
+```bash
 git commit -m "feat: add puzzle leaderboard"
+```
 
-
-Push and open a Pull Request (PR).
+4. Push and open a Pull Request describing the problem, the solution, the
+   acceptance criteria, and how you tested it.
 
 💡 For issues/bugs, please open an issue.
 
