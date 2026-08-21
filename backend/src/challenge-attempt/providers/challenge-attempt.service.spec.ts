@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { ChallengeAttemptService } from './challenge-attempt.service';
+import { ChallengeValidationService } from './challenge-validation.service';
 import { ChallengeAttempt } from '../entities/challenge-attempt.entity';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { AttemptStatus } from '../enums/attempt-status.enum';
@@ -10,6 +11,15 @@ import { CreateChallengeAttemptDto } from '../dtos/create-challenge-attempt.dto'
 import { SubmitAttemptDto } from '../dtos/submit-attempt.dto';
 import { RevealSolutionDto } from '../dtos/reveal-solution.dto';
 import { UseHintDto } from '../dtos/use-hint.dto';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+
 
 /** Helper: builds a minimal Puzzle stub */
 function makePuzzle(overrides?: Partial<Puzzle>): Puzzle {
@@ -60,8 +70,8 @@ describe('ChallengeAttemptService', () => {
   beforeEach(async () => {
     const mockAttemptRepo: Partial<jest.Mocked<Repository<ChallengeAttempt>>> =
       {
-        create: jest.fn(),
-        save: jest.fn(),
+        create: jest.fn() as unknown as jest.Mocked<Repository<ChallengeAttempt>>['create'],
+        save: jest.fn() as unknown as jest.Mocked<Repository<ChallengeAttempt>>['save'],
         findOneBy: jest.fn(),
         find: jest.fn(),
         existsBy: jest.fn(),
@@ -75,6 +85,7 @@ describe('ChallengeAttemptService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ChallengeAttemptService,
+        ChallengeValidationService,
         {
           provide: getRepositoryToken(ChallengeAttempt),
           useValue: mockAttemptRepo,
@@ -91,7 +102,9 @@ describe('ChallengeAttemptService', () => {
     puzzleRepo = module.get(getRepositoryToken(Puzzle));
   });
 
-  afterEach(() => jest.clearAllMocks());
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
   // ─────────────────────────────────────────────────────────────────────────────
   // Basic instantiation
@@ -251,6 +264,27 @@ describe('ChallengeAttemptService', () => {
       await expect(service.submitAttempt(dto)).rejects.toThrow(
         BadRequestException,
       );
+    });
+
+
+    it('should reject a duplicate submission for an already incorrect attempt', async () => {
+  const attempt = makeAttempt({
+    status: AttemptStatus.INCORRECT,
+    answer: 'wrong',
+    score: 0,
+  });
+
+  attemptRepo.findOneBy!.mockResolvedValue(attempt);
+
+  await expect(
+    service.submitAttempt({
+      ...dto,
+      answer: '4',
+    }),
+   ).rejects.toThrow(BadRequestException);
+
+    expect(puzzleRepo.findOneBy).not.toHaveBeenCalled();
+    expect(attemptRepo.save).not.toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when the puzzle no longer exists', async () => {
@@ -528,64 +562,6 @@ describe('ChallengeAttemptService', () => {
       attemptRepo.find!.mockResolvedValue([]);
       const result = await service.findBySession('unknown-session');
       expect(result).toEqual([]);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // validateAnswer (unit tests for the helper directly)
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  describe('validateAnswer', () => {
-    it('should return true for an exact match', () => {
-      expect(service.validateAnswer('4', '4')).toBe(true);
-    });
-
-    it('should return true for a case-insensitive match', () => {
-      expect(service.validateAnswer('FOUR', 'four')).toBe(true);
-    });
-
-    it('should return true when both sides differ only in whitespace', () => {
-      expect(service.validateAnswer('  four  ', 'four')).toBe(true);
-    });
-
-    it('should return false for a clearly wrong answer', () => {
-      expect(service.validateAnswer('3', '4')).toBe(false);
-    });
-
-    it('should return false for an empty answer against a non-empty correct answer', () => {
-      expect(service.validateAnswer('', '4')).toBe(false);
-    });
-  });
-
-  // ─────────────────────────────────────────────────────────────────────────────
-  // calculateScore (unit tests for the helper directly)
-  // ─────────────────────────────────────────────────────────────────────────────
-
-  describe('calculateScore', () => {
-    it('should return base points when timeSpent equals timeLimit (no bonus)', () => {
-      const score = service.calculateScore(100, 60, 60);
-      expect(score).toBe(100); // 100 * (1 + 0) = 100
-    });
-
-    it('should return full bonus (50%) when timeSpent is 0', () => {
-      const score = service.calculateScore(100, 0, 60);
-      expect(score).toBe(150); // 100 * (1 + 0.5) = 150
-    });
-
-    it('should return partial bonus when timeSpent is half of timeLimit', () => {
-      // bonus = (60 - 30) / 60 * 0.5 = 0.25 → total = 100 * 1.25 = 125
-      const score = service.calculateScore(100, 30, 60);
-      expect(score).toBe(125);
-    });
-
-    it('should return base points when timeSpent exceeds timeLimit (no bonus)', () => {
-      const score = service.calculateScore(100, 90, 60);
-      expect(score).toBe(100); // time exceeded, no bonus
-    });
-
-    it('should return 0 when basePoints is 0', () => {
-      const score = service.calculateScore(0, 10, 60);
-      expect(score).toBe(0);
     });
   });
 });

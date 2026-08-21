@@ -12,6 +12,7 @@ import { CreateChallengeAttemptDto } from '../dtos/create-challenge-attempt.dto'
 import { SubmitAttemptDto } from '../dtos/submit-attempt.dto';
 import { RevealSolutionDto } from '../dtos/reveal-solution.dto';
 import { UseHintDto } from '../dtos/use-hint.dto';
+import { ChallengeValidationService } from './challenge-validation.service';
 
 /** Terminal states where no further mutations are allowed. */
 const TERMINAL_STATES = new Set<AttemptStatus>([
@@ -27,6 +28,7 @@ export class ChallengeAttemptService {
     private readonly attemptRepository: Repository<ChallengeAttempt>,
     @InjectRepository(Puzzle)
     private readonly puzzleRepository: Repository<Puzzle>,
+    private readonly challengeValidationService: ChallengeValidationService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -92,7 +94,10 @@ export class ChallengeAttemptService {
       );
     }
 
-    const isCorrect = this.validateAnswer(dto.answer, puzzle.correctAnswer);
+    const isCorrect = this.challengeValidationService.validateAnswer(
+     dto.answer,
+    puzzle.correctAnswer,
+   );
 
     attempt.answer = dto.answer;
     attempt.timeSpent = dto.timeSpent;
@@ -105,7 +110,12 @@ export class ChallengeAttemptService {
       attempt.score = 0;
     } else if (isCorrect) {
       attempt.status = AttemptStatus.CORRECT;
-      attempt.score = this.calculateScore(puzzle.points, dto.timeSpent, puzzle.timeLimit);
+      attempt.score =
+     this.challengeValidationService.calculateScore(
+      puzzle.points,
+      dto.timeSpent,
+      puzzle.timeLimit,
+     );
     } else {
       attempt.status = AttemptStatus.INCORRECT;
       attempt.score = 0;
@@ -249,11 +259,7 @@ export class ChallengeAttemptService {
    * Validates a user's answer against the correct answer.
    * Case-insensitive, whitespace-trimmed comparison.
    */
-  validateAnswer(userAnswer: string, correctAnswer: string): boolean {
-    return (
-      userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-    );
-  }
+  
 
   /**
    * Calculates score for a correct answer with a time bonus.
@@ -261,15 +267,5 @@ export class ChallengeAttemptService {
    * Full base points are awarded; bonus of up to 50% for finishing
    * faster than the time limit (mirrors ProgressCalculationProvider logic).
    */
-  calculateScore(
-    basePoints: number,
-    timeSpent: number,
-    timeLimit: number,
-  ): number {
-    let bonus = 0;
-    if (timeSpent < timeLimit) {
-      bonus = ((timeLimit - timeSpent) / timeLimit) * 0.5;
-    }
-    return Math.round(basePoints * (1 + bonus));
-  }
+  
 }
