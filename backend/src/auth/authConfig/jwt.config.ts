@@ -7,6 +7,7 @@ export default registerAs('jwt', () => {
     googleClient_id: process.env.GOOGLE_CLIENT_ID,
     googleClient_secret: process.env.GOOGLE_CLIENT_SECRET,
     issuer: process.env.JWT_TOKEN_ISSUER ?? 'localhost',
-    ttl: parseInt(process.env.JWT_ACCESS_TOKEN_TTL ?? '3600'),
+    accessTokenTtl: parseInt(process.env.JWT_ACCESS_TOKEN_TTL ?? '3600'), // 1 hour default
+    refreshTokenTtl: parseInt(process.env.JWT_REFRESH_TOKEN_TTL ?? '604800'), // 7 days default
   };
 });

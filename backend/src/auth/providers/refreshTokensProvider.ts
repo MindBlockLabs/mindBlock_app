@@ -1,16 +1,7 @@
-import {
-  forwardRef,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigType } from '@nestjs/config';
-import jwtConfig from '../authConfig/jwt.config';
-import { GenerateTokensProvider } from './generate-tokens.provider';
 import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
-import { UsersService } from '../../users/providers/users.service';
+import { SessionsProvider } from './sessions.provider';
 
 /**
  * Refresh token provider class
@@ -20,26 +11,9 @@ import { UsersService } from '../../users/providers/users.service';
 export class RefreshTokensProvider {
   constructor(
     /**
-     * Injecting UserService repository
+     * Injecting SessionsProvider for secure session management
      */
-    @Inject(forwardRef(() => UsersService))
-    private readonly userService: UsersService,
-
-    /**
-     * Injecting JwtService
-     */
-    private readonly jwtService: JwtService,
-
-    /**
-     * Injecting JWT Configuration
-     */
-    @Inject(jwtConfig.KEY)
-    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
-
-    /**
-     * Injecting GenerateTokensProvider
-     */
-    private readonly generateTokenProvider: GenerateTokensProvider,
+    private readonly sessionsProvider: SessionsProvider,
   ) {}
 
   /**
@@ -49,28 +23,16 @@ export class RefreshTokensProvider {
    */
   @ApiOperation({ summary: 'Refresh authentication tokens' })
   @ApiBody({ type: RefreshTokenDto })
-  public async refreshTokens(refreshTokenDto: RefreshTokenDto) {
-    // Validate the refresh token using JWT
-    const payload = await this.jwtService.verifyAsync<{ sub: string }>(
+  public async refreshTokens(
+    refreshTokenDto: RefreshTokenDto,
+    deviceInfo?: string,
+    ipAddress?: string,
+  ) {
+    // Use sessions provider to validate and rotate the refresh token
+    return await this.sessionsProvider.refreshSession(
       refreshTokenDto.refreshToken,
-      {
-        secret: this.jwtConfiguration.secret,
-        audience: this.jwtConfiguration.audience,
-        issuer: this.jwtConfiguration.issuer,
-      },
+      deviceInfo,
+      ipAddress,
     );
-
-    const sub = payload.sub;
-
-    // Retrieve the user from the database
-    const user = await this.userService.findOneByGoogleId(sub);
-
-    // inside refreshTokens
-    if (!user) {
-      throw new UnauthorizedException('Invalid refresh token');
-    }
-
-    // Generate new tokens
-    return await this.generateTokenProvider.generateTokens(user);
   }
 }
