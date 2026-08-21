@@ -19,12 +19,13 @@ describe('AllExceptionsFilter', () => {
     statusSpy = jest.fn().mockReturnValue({ json: jsonSpy });
     mockResponse = {
       status: statusSpy,
-    };
+    } as unknown as Partial<Response>;
     mockRequest = {
       url: '/api/test',
       method: 'GET',
-      correlationId: 'test-correlation-id',
-    };
+    } as Partial<Request>;
+    // Add correlationId as a custom property
+    (mockRequest as any).correlationId = 'test-correlation-id';
     mockHost = {
       switchToHttp: jest.fn().mockReturnValue({
         getResponse: () => mockResponse,

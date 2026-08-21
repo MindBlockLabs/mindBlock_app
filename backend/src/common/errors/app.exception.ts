@@ -261,7 +261,7 @@ export class NotFoundException extends AppException {
   }
 }
 
-export class ConflictException extends AppException {
+export class LegacyConflictException extends AppException {
   constructor(message = 'Resource already exists') {
     super({
       errorCode: AppErrorCode.DUPLICATE_RESOURCE,
