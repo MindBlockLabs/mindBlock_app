@@ -33,6 +33,7 @@ export function useAuth() {
   const isLoading = useAppSelector(selectAuthLoading);
   const error = useAppSelector(selectAuthError);
   const token = useAppSelector(selectToken);
+  const refreshTokenValue = useAppSelector(selectRefreshToken);
   const isRestoring = useAppSelector(selectIsRestoring);
 
   // Actions
