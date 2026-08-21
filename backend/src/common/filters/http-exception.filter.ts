@@ -12,7 +12,7 @@ import { AppException } from '../errors/app.exception';
 import { AppErrorCode } from '../errors/error-codes.enum';
 
 /**
- * Standard API error response structure.
+ * Standard API error response structure as required.
  * Every error returned by the API must conform to this shape.
  */
 export interface ErrorResponse {
@@ -21,11 +21,13 @@ export interface ErrorResponse {
   code: string;
   errorCode: string; // Maintain backwards compatibility
   message: string;
-  /** Field-level validation details — only present on 400 responses. */
-  details?: Array<{ field?: string; message: string; value?: unknown }>;
-  correlationId: string;
+  code: string;
   timestamp: string;
   path: string;
+  /** Field-level validation details — only present on validation errors. */
+  details?: Array<{ field?: string; message: string; value?: unknown }>;
+  /** Unique request ID for tracing */
+  requestId?: string;
   /** Full stack trace — development only, never sent to production clients. */
   stack?: string;
 }
@@ -38,27 +40,27 @@ const PG_ERROR_MAP: Record<
   { code: AppErrorCode; status: HttpStatus; message: string }
 > = {
   '23505': {
-    code: AppErrorCode.DUPLICATE_RESOURCE,
+    code: AppErrorCode.CONFLICT,
     status: HttpStatus.CONFLICT,
     message: 'A record with the same unique value already exists.',
   },
   '23503': {
-    code: AppErrorCode.DB_CONSTRAINT_VIOLATION,
+    code: AppErrorCode.CONFLICT,
     status: HttpStatus.UNPROCESSABLE_ENTITY,
     message: 'Referenced resource does not exist.',
   },
   '23502': {
-    code: AppErrorCode.VALIDATION_FAILED,
+    code: AppErrorCode.VALIDATION_ERROR,
     status: HttpStatus.BAD_REQUEST,
     message: 'A required field is missing.',
   },
   '23514': {
-    code: AppErrorCode.DB_CONSTRAINT_VIOLATION,
+    code: AppErrorCode.VALIDATION_ERROR,
     status: HttpStatus.BAD_REQUEST,
     message: 'A check constraint was violated.',
   },
   ECONNREFUSED: {
-    code: AppErrorCode.DB_CONNECTION_ERROR,
+    code: AppErrorCode.INTERNAL_SERVER_ERROR,
     status: HttpStatus.SERVICE_UNAVAILABLE,
     message: 'Database is temporarily unavailable. Please try again later.',
   },
@@ -103,6 +105,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     // ── 2. Log full details (always — even in production) ────────────────────
     this.logError(exception, resolved, correlationId, path, request.method);
 
+    // Get the standard error name based on status code
+    const errorName = this.getHttpStatusName(resolved.status);
+    
     // ── 3. Build the response body ────────────────────────────────────────────
     // Map VALIDATION_FAILED to VALIDATION_ERROR for the new 'code' field to match requirements
     const responseCode = resolved.errorCode === AppErrorCode.VALIDATION_FAILED 
@@ -111,12 +116,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const body: ErrorResponse = {
       success: false,
       statusCode: resolved.status,
+      error: errorName,
       code: responseCode,
       errorCode: resolved.errorCode, // Maintain backwards compatibility
       message: resolved.message,
-      correlationId,
+      code: resolved.errorCode,
       timestamp,
       path,
+      requestId: correlationId,
     };
 
     if (resolved.details?.length) {
@@ -196,11 +203,19 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ) {
         const messages = (raw as any).message;
         if (Array.isArray(messages)) {
+          // Parse class-validator error messages to extract field information when possible
+          const details = messages.map((m: string) => {
+            // Try to extract field name from common validation error formats
+            const fieldMatch = m.match(/^(\w+)\s/);
+            const field = fieldMatch ? fieldMatch[1] : undefined;
+            return { message: m, field };
+          });
+          
           return {
             status,
-            errorCode: AppErrorCode.VALIDATION_FAILED,
+            errorCode: AppErrorCode.VALIDATION_ERROR,
             message: 'Validation failed',
-            details: messages.map((m: string) => ({ message: m })),
+            details,
           };
         }
       }
@@ -224,15 +239,30 @@ export class AllExceptionsFilter implements ExceptionFilter {
     };
   }
 
+  private getHttpStatusName(status: HttpStatus): string {
+    const statusNames: Record<number, string> = {
+      [HttpStatus.BAD_REQUEST]: 'Bad Request',
+      [HttpStatus.UNAUTHORIZED]: 'Unauthorized',
+      [HttpStatus.FORBIDDEN]: 'Forbidden',
+      [HttpStatus.NOT_FOUND]: 'Not Found',
+      [HttpStatus.CONFLICT]: 'Conflict',
+      [HttpStatus.TOO_MANY_REQUESTS]: 'Too Many Requests',
+      [HttpStatus.SERVICE_UNAVAILABLE]: 'Service Unavailable',
+      [HttpStatus.INTERNAL_SERVER_ERROR]: 'Internal Server Error',
+      [HttpStatus.UNPROCESSABLE_ENTITY]: 'Unprocessable Entity',
+    };
+    return statusNames[status] ?? 'Unknown Error';
+  }
+
   private mapHttpStatusToErrorCode(status: HttpStatus): string {
     const map: Partial<Record<HttpStatus, AppErrorCode>> = {
-      [HttpStatus.BAD_REQUEST]: AppErrorCode.VALIDATION_FAILED,
-      [HttpStatus.UNAUTHORIZED]: AppErrorCode.AUTH_TOKEN_INVALID,
-      [HttpStatus.FORBIDDEN]: AppErrorCode.INSUFFICIENT_PERMISSIONS,
-      [HttpStatus.NOT_FOUND]: AppErrorCode.RESOURCE_NOT_FOUND,
-      [HttpStatus.CONFLICT]: AppErrorCode.DUPLICATE_RESOURCE,
-      [HttpStatus.TOO_MANY_REQUESTS]: AppErrorCode.RATE_LIMIT_EXCEEDED,
-      [HttpStatus.SERVICE_UNAVAILABLE]: AppErrorCode.SERVICE_UNAVAILABLE,
+      [HttpStatus.BAD_REQUEST]: AppErrorCode.VALIDATION_ERROR,
+      [HttpStatus.UNAUTHORIZED]: AppErrorCode.UNAUTHORIZED,
+      [HttpStatus.FORBIDDEN]: AppErrorCode.FORBIDDEN,
+      [HttpStatus.NOT_FOUND]: AppErrorCode.NOT_FOUND,
+      [HttpStatus.CONFLICT]: AppErrorCode.CONFLICT,
+      [HttpStatus.TOO_MANY_REQUESTS]: AppErrorCode.RATE_LIMITED,
+      [HttpStatus.SERVICE_UNAVAILABLE]: AppErrorCode.INTERNAL_SERVER_ERROR,
       [HttpStatus.INTERNAL_SERVER_ERROR]: AppErrorCode.INTERNAL_SERVER_ERROR,
     };
     return map[status] ?? AppErrorCode.INTERNAL_SERVER_ERROR;
