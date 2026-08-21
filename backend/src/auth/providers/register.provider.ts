@@ -28,25 +28,15 @@ export class RegisterProvider {
         fullname: registerDto.fullname || registerDto.username,
         password: registerDto.password,
         provider: 'email',
+        challengeLevel: undefined,
+        challengeTypes: undefined,
+        ageGroup: undefined,
       });
 
       this.logger.log(`User registered successfully: ${user.id} (${user.email})`);
 
       // Generate authentication tokens
-      const tokens = await this.generateTokensProvider.generateTokens(user);
-
-      // Return user data (without password) and tokens
-      return {
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          fullname: user.fullname,
-          xp: user.xp,
-          level: user.level,
-        },
-        ...tokens,
-      };
+      return await this.generateTokensProvider.generateTokens(user);
     } catch (error) {
       this.logger.error(`Registration failed for ${registerDto.email}: ${error.message}`);
       throw error;
