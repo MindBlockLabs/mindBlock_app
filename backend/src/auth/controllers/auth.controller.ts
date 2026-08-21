@@ -19,9 +19,9 @@ import { NonceResponseDto } from '../dtos/nonceResponse.dto';
 import { StellarWalletLoginDto } from '../dtos/walletLogin.dto';
 import { ResetPasswordDto } from '../dtos/reset-password.dto';
 import { ForgotPasswordDto } from '../dtos/forgot-password.dto';
-import { AuthGuard } from '@nestjs/jwt';
+import { AuthGuard } from '@nestjs/passport';
 import { ActiveUser } from '../decorators/activeUser.decorator';
-import { ActiveInterface } from '../interfaces/activeInterface';
+import { ActiveUserData } from '../interfaces/activeInterface';
 
 import { GuestSessionProvider } from '../providers/guest-session.provider';
 import { ConvertGuestDto } from '../dtos/convert-guest.dto';
@@ -220,23 +220,23 @@ export class AuthController {
   }
 
   @Post('/logout-all')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout from all devices' })
   @ApiResponse({ status: 200, description: 'All sessions invalidated' })
-  public async logoutAll(@ActiveUser() user: ActiveInterface) {
+  public async logoutAll(@ActiveUser() user: ActiveUserData) {
     return await this.authservice.logoutAll(user.sub);
   }
 
   @Get('/me')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get current authenticated user' })
   @ApiResponse({ status: 200, description: 'Current user data retrieved' })
   @ApiResponse({ status: 401, description: 'Unauthorized - invalid or missing token' })
-  public async getCurrentUser(@ActiveUser() user: ActiveInterface) {
+  public async getCurrentUser(@ActiveUser() user: ActiveUserData) {
     return await this.authservice.getCurrentUser(user.sub);
   }
   @HttpCode(HttpStatus.OK)
