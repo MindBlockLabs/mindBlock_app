@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { RegisterDto } from '../dtos/register.dto';
 import { CreateUserService } from '../../users/providers/create-user.service';
