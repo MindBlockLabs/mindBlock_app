@@ -24,6 +24,11 @@ export class AuthService {
     private readonly signInProvider: SignInProvider,
 
     /**
+     * inject registerProvider
+     */
+    private readonly registerProvider: RegisterProvider,
+
+    /**
      *  inject stellarWalletLoginProvider
      */
     private readonly stellarWalletLoginProvider: StellarWalletLoginProvider,
@@ -48,6 +53,10 @@ export class AuthService {
      */
     private readonly nonceService: NonceService,
   ) {}
+
+  public async register(registerDto: RegisterDto) {
+    return await this.registerProvider.register(registerDto);
+  }
 
   public async SignIn(signInDto: LoginDto) {
     return await this.signInProvider.SignIn(signInDto);

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { LoginDto } from '../dtos/login.dto';
+import { RegisterDto } from '../dtos/register.dto';
 import { AuthService } from '../providers/auth.service';
 import { RefreshTokenDto } from '../dtos/refreshTokenDto';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
