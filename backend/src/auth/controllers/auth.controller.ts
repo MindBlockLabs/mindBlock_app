@@ -239,32 +239,4 @@ export class AuthController {
   public async getCurrentUser(@ActiveUser() user: ActiveUserData) {
     return await this.authservice.getCurrentUser(user.sub);
   }
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Reset password with token',
-    description: 'Resets user password using the token from email',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Password reset successfully',
-    schema: {
-      type: 'object',
-      properties: {
-        message: {
-          type: 'string',
-          example: 'Password has been reset successfully',
-        },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid or expired token',
-  })
-  public async resetPassword(
-    @Param('token') token: string,
-    @Body() resetPasswordDto: ResetPasswordDto,
-  ) {
-    return await this.authservice.resetPassword(token, resetPasswordDto);
-  }
 }

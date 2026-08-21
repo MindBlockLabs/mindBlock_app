@@ -88,7 +88,7 @@ export class StellarWalletLoginProvider {
       {
         audience: this.jwtConfiguration.audience,
         issuer: this.jwtConfiguration.issuer,
-        expiresIn: this.jwtConfiguration.ttl,
+        expiresIn: this.jwtConfiguration.accessTokenTtl,
       },
     );
 
