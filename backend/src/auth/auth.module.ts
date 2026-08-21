@@ -1,6 +1,8 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthService } from './providers/auth.service';
 import { UsersModule } from '../users/users.module';
+import { User } from '../users/user.entity';
 import { SignInProvider } from './providers/sign-in.provider';
 import { RegisterProvider } from './providers/register.provider';
 import { ConfigModule } from '@nestjs/config';
