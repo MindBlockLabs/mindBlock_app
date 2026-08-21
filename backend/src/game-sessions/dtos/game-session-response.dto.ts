@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GameSessionStatus } from '../enums/game-session-status.enum';
 import { PuzzleDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
+import { CategoryPerformanceEntry } from '../interfaces/game-session.interface';
 
 export class GameSessionResponseDto {
   @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' })
@@ -48,4 +49,36 @@ export class GameSessionResponseDto {
 
   @ApiProperty({ example: '2026-08-19T12:00:00.000Z' })
   updatedAt: Date;
+
+  @ApiPropertyOptional({
+    example: 80,
+    nullable: true,
+    description: 'Percentage of completed challenges answered correctly',
+  })
+  accuracy: number | null;
+
+  @ApiPropertyOptional({ example: 320, nullable: true })
+  timeSpentSeconds: number | null;
+
+  @ApiPropertyOptional({
+    type: 'array',
+    nullable: true,
+    description: 'Per-category correct/total breakdown for this session',
+  })
+  categoryPerformance: CategoryPerformanceEntry[] | null;
+
+  @ApiPropertyOptional({ example: 4, nullable: true })
+  previousStreak: number | null;
+
+  @ApiPropertyOptional({ example: 5, nullable: true })
+  currentStreak: number | null;
+
+  @ApiPropertyOptional({ example: true, nullable: true })
+  rewardEligible: boolean | null;
+
+  @ApiPropertyOptional({
+    example: 'Player meets reward eligibility requirements',
+    nullable: true,
+  })
+  rewardReason: string | null;
 }

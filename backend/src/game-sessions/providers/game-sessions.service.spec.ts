@@ -15,6 +15,8 @@ import { GameSessionStatus } from '../enums/game-session-status.enum';
 import { PuzzleDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
 import { CreateGameSessionDto } from '../dtos/create-game-session.dto';
 import { UpdateGameSessionStatusDto } from '../dtos/update-game-session-status.dto';
+import { SessionSummaryProvider } from './session-summary.provider';
+import { SessionCompletionStats } from '../interfaces/game-session.interface';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -37,6 +39,13 @@ function makeSession(overrides: Partial<GameSession> = {}): GameSession {
     completedAt: null,
     createdAt: new Date('2026-08-01T10:00:00Z'),
     updatedAt: new Date('2026-08-01T10:00:00Z'),
+    accuracy: null,
+    timeSpentSeconds: null,
+    categoryPerformance: null,
+    previousStreak: null,
+    currentStreak: null,
+    rewardEligible: null,
+    rewardReason: null,
     ...overrides,
   };
 }
@@ -45,9 +54,31 @@ function makeSession(overrides: Partial<GameSession> = {}): GameSession {
 // Suite
 // ─────────────────────────────────────────────────────────────────────────────
 
+/** Default stats stub: no tracked attempts, so completion falls back to
+ *  client-supplied score/xp — matches the pre-existing test fixtures below,
+ *  which don't set up any ChallengeAttempt records. */
+function makeStatsStub(
+  overrides: Partial<SessionCompletionStats> = {},
+): SessionCompletionStats {
+  return {
+    totalScore: 0,
+    xpEarned: 0,
+    challengesCompleted: 0,
+    accuracy: 0,
+    timeSpentSeconds: 0,
+    categoryPerformance: [],
+    previousStreak: null,
+    currentStreak: null,
+    rewardEligible: null,
+    rewardReason: null,
+    ...overrides,
+  };
+}
+
 describe('GameSessionsService', () => {
   let service: GameSessionsService;
   let repo: jest.Mocked<Repository<GameSession>>;
+  let summaryProvider: jest.Mocked<SessionSummaryProvider>;
 
   beforeEach(async () => {
     const mockRepo: Partial<jest.Mocked<Repository<GameSession>>> = {
@@ -58,6 +89,12 @@ describe('GameSessionsService', () => {
       createQueryBuilder: jest.fn(),
     };
 
+    const mockSummaryProvider: Partial<
+      jest.Mocked<SessionSummaryProvider>
+    > = {
+      buildCompletionStats: jest.fn().mockResolvedValue(makeStatsStub()),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameSessionsService,
@@ -65,11 +102,16 @@ describe('GameSessionsService', () => {
           provide: getRepositoryToken(GameSession),
           useValue: mockRepo,
         },
+        {
+          provide: SessionSummaryProvider,
+          useValue: mockSummaryProvider,
+        },
       ],
     }).compile();
 
     service = module.get<GameSessionsService>(GameSessionsService);
     repo = module.get(getRepositoryToken(GameSession));
+    summaryProvider = module.get(SessionSummaryProvider);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -329,13 +371,16 @@ describe('GameSessionsService', () => {
       expect(result.status).toBe(GameSessionStatus.PAUSED);
     });
 
-    it('transitions ACTIVE → COMPLETED, stamps completedAt and persists score/xp', async () => {
+    it('transitions ACTIVE → COMPLETED, stamps completedAt and falls back to client score/xp when no attempts are tracked', async () => {
       const session = makeSession({
         status: GameSessionStatus.ACTIVE,
         startedAt: new Date(),
       });
       repo.findOneBy.mockResolvedValue(session);
       repo.save.mockImplementation(async (s) => s as GameSession);
+      summaryProvider.buildCompletionStats.mockResolvedValue(
+        makeStatsStub({ challengesCompleted: 0 }),
+      );
 
       const dto: UpdateGameSessionStatusDto = {
         status: GameSessionStatus.COMPLETED,
@@ -352,6 +397,63 @@ describe('GameSessionsService', () => {
       expect(result.score).toBe(900);
       expect(result.xpEarned).toBe(200);
       expect(result.completedAt).toBeInstanceOf(Date);
+    });
+
+    it('ignores client-supplied score/xp and uses server-calculated stats when attempts are tracked', async () => {
+      const session = makeSession({
+        status: GameSessionStatus.ACTIVE,
+        startedAt: new Date(),
+      });
+      repo.findOneBy.mockResolvedValue(session);
+      repo.save.mockImplementation(async (s) => s as GameSession);
+      summaryProvider.buildCompletionStats.mockResolvedValue(
+        makeStatsStub({
+          totalScore: 640,
+          xpEarned: 640,
+          challengesCompleted: 5,
+          accuracy: 80,
+          timeSpentSeconds: 210,
+          categoryPerformance: [
+            {
+              categoryId: 'cat-1',
+              categoryName: 'Logic',
+              correct: 4,
+              total: 5,
+              accuracy: 80,
+            },
+          ],
+          previousStreak: 3,
+          currentStreak: 4,
+          rewardEligible: true,
+          rewardReason: 'Player meets reward eligibility requirements',
+        }),
+      );
+
+      const dto: UpdateGameSessionStatusDto = {
+        status: GameSessionStatus.COMPLETED,
+        // A malicious/stale client value that must be ignored.
+        score: 999999,
+        xpEarned: 999999,
+      };
+      const result = await service.updateStatus(
+        'session-uuid-1',
+        dto,
+        userId,
+      );
+
+      expect(summaryProvider.buildCompletionStats).toHaveBeenCalledWith(
+        'session-uuid-1',
+        session.userId,
+        undefined,
+      );
+      expect(result.score).toBe(640);
+      expect(result.xpEarned).toBe(640);
+      expect(result.accuracy).toBe(80);
+      expect(result.timeSpentSeconds).toBe(210);
+      expect(result.categoryPerformance).toHaveLength(1);
+      expect(result.previousStreak).toBe(3);
+      expect(result.currentStreak).toBe(4);
+      expect(result.rewardEligible).toBe(true);
     });
 
     it('transitions ACTIVE → ABANDONED and stamps completedAt', async () => {
@@ -426,13 +528,16 @@ describe('GameSessionsService', () => {
   // ───────────────────────────────────────────────────────────────────────────
 
   describe('completeSession()', () => {
-    it('delegates to updateStatus with COMPLETED status and supplied score/xp', async () => {
+    it('delegates to updateStatus with COMPLETED status and supplied score/xp as fallback', async () => {
       const session = makeSession({
         status: GameSessionStatus.ACTIVE,
         startedAt: new Date(),
       });
       repo.findOneBy.mockResolvedValue(session);
       repo.save.mockImplementation(async (s) => s as GameSession);
+      summaryProvider.buildCompletionStats.mockResolvedValue(
+        makeStatsStub({ challengesCompleted: 0 }),
+      );
 
       const result = await service.completeSession(
         'session-uuid-1',
