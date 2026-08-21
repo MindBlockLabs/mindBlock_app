@@ -7,6 +7,7 @@ import { usePuzzles } from '@/hooks/usePuzzles';
 import type { PuzzleDifficulty, PuzzleFilters } from '@/lib/types/puzzles';
 import { Puzzle as PuzzleIcon, Clock, Zap } from 'lucide-react';
 import Pagination from '@/components/ui/Pagination';
+import { EmptyState, ErrorState, LoadingState } from '@/components/ui/StateDisplay';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -229,7 +230,7 @@ function PuzzleListContent() {
 
       {/* Loading skeleton */}
       {isLoading && (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading puzzles">
+        <div className="relative min-h-[26rem] grid gap-3 sm:grid-cols-2 lg:grid-cols-3" aria-label="Loading puzzles">
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
@@ -237,26 +238,26 @@ function PuzzleListContent() {
               aria-hidden="true"
             />
           ))}
+          <div className="absolute inset-0 flex items-center justify-center">
+            <LoadingState message="Loading puzzles..." />
+          </div>
         </div>
       )}
 
       {/* Error state */}
       {isError && (
-        <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
-          <p className="text-red-400 font-medium">Failed to load puzzles</p>
-          <p className="text-xs text-slate-500">
-            {error instanceof Error ? error.message : 'Please try again later.'}
-          </p>
-        </div>
+        <ErrorState
+          message={error instanceof Error ? error.message : 'Please try again later.'}
+          onRetry={() => window.location.reload()}
+        />
       )}
 
       {/* Empty state */}
       {!isLoading && !isError && puzzles?.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
-          <PuzzleIcon className="h-10 w-10 text-slate-600" />
-          <p className="font-medium text-slate-400">No puzzles found</p>
-          <p className="text-xs text-slate-600">Try clearing your filters or adjusting your search.</p>
-        </div>
+        <EmptyState
+          title="No puzzles found"
+          message="Try clearing your filters or adjusting your search."
+        />
       )}
 
       {/* Puzzle grid */}

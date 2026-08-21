@@ -5,6 +5,7 @@ import { usePuzzles } from '@/hooks/usePuzzles';
 import PuzzleCard from '@/components/puzzles/PuzzleCard';
 import FilterBar from '@/components/puzzles/FilterBar';
 import type { PuzzleFilters } from '@/lib/types/puzzles';
+import { EmptyState, ErrorState } from '@/components/ui/StateDisplay';
 
 const DEFAULT_FILTERS: PuzzleFilters = {
   categoryId: '',
@@ -63,20 +64,12 @@ const PuzzleListPage: React.FC = () => {
 
         {/* Error state */}
         {isError && (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <p className="text-gray-400 text-sm">Failed to load puzzles.</p>
-            <button
-              onClick={() => refetch()}
-              className="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-colors"
-            >
-              Try again
-            </button>
-          </div>
+          <ErrorState message="Failed to load puzzles." onRetry={() => refetch()} />
         )}
 
         {/* Skeleton grid while loading */}
         {isLoading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid min-h-[26rem] grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" aria-label="Loading puzzles">
             {Array.from({ length: 6 }).map((_, i) => (
               <PuzzleCardSkeleton key={i} />
             ))}
@@ -98,11 +91,10 @@ const PuzzleListPage: React.FC = () => {
                 </div>
               </>
             ) : (
-              <div className="flex flex-col items-center justify-center py-20 gap-3">
-                <span className="text-4xl" aria-hidden="true">🔍</span>
-                <p className="text-[#E6E6E6] font-medium">No puzzles found</p>
-                <p className="text-gray-400 text-sm">Try adjusting your filters.</p>
-              </div>
+              <EmptyState
+                title="No puzzles found"
+                message="Try adjusting your filters to discover another challenge."
+              />
             )}
           </>
         )}

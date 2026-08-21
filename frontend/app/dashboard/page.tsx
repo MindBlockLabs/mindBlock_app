@@ -6,6 +6,7 @@ import CategoryCard from "@/components/dashboard/CategoryCard";
 import Image from "next/image";
 import { Flame, Gem, User } from "lucide-react";
 import { useDashboard } from "@/features/dashboard";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateDisplay";
 
 const Dashboard = () => {
   const router = useRouter();
@@ -62,15 +63,11 @@ const Dashboard = () => {
 
       <main className="mx-auto w-full max-w-6xl px-4 pt-20 pb-8 sm:max-w-6xl sm:px-6">
         {isLoading && (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-slate-400">Loading dashboard...</div>
-          </div>
+          <LoadingState message="Loading dashboard..." />
         )}
 
         {error && (
-          <div className="flex items-center justify-center py-8">
-            <div className="text-red-400">Error: {error}</div>
-          </div>
+          <ErrorState message={String(error)} onRetry={() => window.location.reload()} />
         )}
 
         <div className="flex flex-col items-center gap-4">
@@ -96,9 +93,11 @@ const Dashboard = () => {
           <h2 className="text-base font-semibold text-white">Categories</h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
             {categories.length === 0 && !isLoading && (
-              <div className="col-span-full text-center text-slate-400 py-4">
-                No categories available
-              </div>
+              <EmptyState
+                title="No categories available"
+                message="Check back soon for a new path to explore."
+                className="col-span-full"
+              />
             )}
             {categories.map((category) => (
               <CategoryCard

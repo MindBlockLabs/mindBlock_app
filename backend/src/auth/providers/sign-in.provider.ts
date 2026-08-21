@@ -7,7 +7,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigType } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { UsersService } from '../../users/providers/users.service';
+import { User } from '../../users/user.entity';
 import { HashingProvider } from './hashing.provider';
 import jwtConfig from '../authConfig/jwt.config';
 import { LoginDto } from '../dtos/login.dto';
@@ -18,6 +21,10 @@ export class SignInProvider {
     // injecting userService repo
     @Inject(forwardRef(() => UsersService))
     private readonly userService: UsersService,
+
+    // Inject user repository to handle user lookup securely
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
 
     // injecting hashing dependency
     private readonly hashingProvider: HashingProvider,
@@ -30,29 +37,41 @@ export class SignInProvider {
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
   ) {}
   public async SignIn(signInDto: LoginDto) {
-    // check if user exist in db
-    // throw error if user doesnt exist
-    const user = await this.userService.GetOneByEmail(signInDto.email);
-
-    // conpare password
-    let isCheckedPassword: boolean = false;
-
+    // Always use the same error message to prevent email enumeration
+    const invalidCredentialsError = new UnauthorizedException('Email or password is incorrect');
+    
+    // Get user by email - use repository directly to avoid early throwing
+    let user: User | null = null;
     try {
-      if (!user.password) {
-        throw new UnauthorizedException('Email or password is incorrect');
-      }
-      isCheckedPassword = await this.hashingProvider.comparePasswords(
-        signInDto.password,
-        user.password,
-      );
-    } catch (error) {
-      throw new RequestTimeoutException(error, {
-        description: 'error  connecting to the database',
+      user = await this.userRepository.findOneBy({ email: signInDto.email });
+    } catch {
+      throw new RequestTimeoutException('Error connecting to the database', {
+        description: 'Could not fetch user data',
       });
     }
-
-    if (!isCheckedPassword) {
-      throw new UnauthorizedException('email or password is incorrect');
+    
+    // If user doesn't exist, still perform password comparison to prevent timing attacks
+    let isCheckedPassword: boolean = false;
+    
+    try {
+      if (user && user.password) {
+        isCheckedPassword = await this.hashingProvider.comparePasswords(
+          signInDto.password,
+          user.password,
+        );
+      }
+      
+      // If user doesn't exist or password is incorrect, throw the same error
+      if (!user || !isCheckedPassword) {
+        throw invalidCredentialsError;
+      }
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new RequestTimeoutException(error, {
+        description: 'Error connecting to the database',
+      });
     }
 
     const accessToken = await this.jwtService.signAsync(

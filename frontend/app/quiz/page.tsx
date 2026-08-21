@@ -8,6 +8,7 @@ import { LevelComplete } from "@/components/quiz/LevelComplete";
 import { QuizCompletionStats } from "../../components/quiz/QuizCompletionStats";
 import { useQuiz } from "../../hooks/useQuiz";
 import { useAppSelector } from "../../lib/reduxHooks";
+import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateDisplay";
 
 const nunito = Nunito({
   subsets: ["latin"],
@@ -70,35 +71,17 @@ export default function QuizPage() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div
-        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
-      >
-        <div className="text-xl">Loading questions...</div>
-      </div>
-    );
+    return <div className={`${nunito.className} min-h-screen bg-[#050C16] text-white`}><LoadingState message="Loading questions..." /></div>;
   }
 
   // Error state
   if (error && questions.length === 0) {
-    return (
-      <div
-        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
-      >
-        <div className="text-xl text-red-500">Error: {error}</div>
-      </div>
-    );
+    return <div className={`${nunito.className} min-h-screen bg-[#050C16] text-white`}><ErrorState message={String(error)} onRetry={() => window.location.reload()} /></div>;
   }
 
   // No questions state
   if (!currentQuestion && !isLoading) {
-    return (
-      <div
-        className={`${nunito.className} min-h-screen bg-[#050C16] text-white flex flex-col items-center justify-center p-6`}
-      >
-        <div className="text-xl">No questions available</div>
-      </div>
-    );
+    return <div className={`${nunito.className} min-h-screen bg-[#050C16] text-white`}><EmptyState title="No questions available" message="Check back later for your next daily quest." /></div>;
   }
 
   if (!currentQuestion) {

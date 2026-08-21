@@ -5,10 +5,11 @@ import { useRouter } from "next/navigation";
 import DauMauChart from "@/components/analytics/DauMauChart";
 import OnboardingFunnelChart from "@/src/components/analytics/OnboardingFunnelChart";
 import { useAuth } from "@/hooks/useAuth";
+import { LoadingState } from "@/components/ui/StateDisplay";
 
 function AnalyticsPageSkeleton() {
   return (
-    <div className="space-y-6" aria-label="Loading analytics dashboard">
+    <div className="min-h-[34rem] space-y-6" aria-label="Loading analytics dashboard">
       <div className="animate-pulse rounded-2xl border border-slate-800 bg-[#0F172A]/70 p-6">
         <div className="h-4 w-32 rounded bg-slate-700" />
         <div className="mt-4 h-3 w-48 rounded bg-slate-800" />
@@ -64,7 +65,14 @@ export default function AnalyticsPage() {
   }, []);
 
   if (isCheckingAccess || isLoadingContent) {
-    return <AnalyticsPageSkeleton />;
+    return (
+      <div className="relative">
+        <AnalyticsPageSkeleton />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <LoadingState message="Loading analytics..." />
+        </div>
+      </div>
+    );
   }
 
   return (
