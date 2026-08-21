@@ -52,6 +52,17 @@ const SideNav = ({ open, onClose }: { open: boolean; onClose: () => void }) => {
               </Link>
             );
           })}
+          
+          {/* Logout button - only show if authenticated */}
+          {isAuthenticated && (
+            <button
+              onClick={logout}
+              className="flex items-center justify-start gap-3 rounded-xl px-3 py-3 text-sm font-medium transition text-red-300 hover:bg-red-900/30 hover:text-red-200 mt-4"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Logout</span>
+            </button>
+          )}
         </nav>
       </div>
     </aside>
