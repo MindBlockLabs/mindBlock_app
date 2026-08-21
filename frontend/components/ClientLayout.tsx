@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SideNav from "@/components/SideNav";
 import { Menu } from "lucide-react";
 import ErrorBoundary from "@/components/error/ErrorBoundary";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function ClientLayout({
   children,
@@ -11,6 +12,12 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { restoreSession } = useAuth();
+
+  // Restore session on app initialization
+  useEffect(() => {
+    restoreSession();
+  }, [restoreSession]);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden bg-[#0A0F1A] text-slate-100 flex flex-col md:flex-row">
