@@ -6,13 +6,9 @@ export class ChallengeValidationService {
    * Validates a player's answer against the authoritative
    * answer stored on the backend.
    */
-  validateAnswer(
-    userAnswer: string,
-    correctAnswer: string,
-  ): boolean {
+  validateAnswer(userAnswer: string, correctAnswer: string): boolean {
     return (
-      userAnswer.trim().toLowerCase() ===
-      correctAnswer.trim().toLowerCase()
+      userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
     );
   }
 

@@ -37,8 +37,16 @@ export class ChallengeAttempt {
   @Column({ type: 'varchar', length: 100, nullable: true })
   sessionId?: string;
 
-  /** FK to the user who made this attempt. */
-  @Column({ type: 'uuid' })
+  /**
+   * FK to the user who made this attempt.
+   *
+   * Not a `uuid` column: `User.id` is a plain auto-increment integer
+   * (`@PrimaryGeneratedColumn()`, no `'uuid'` strategy) despite being
+   * TS-typed as `string` on the `User` entity — this column matches that
+   * real underlying type rather than the `User` entity's misleading TS
+   * annotation.
+   */
+  @Column({ type: 'varchar' })
   userId: string;
 
   @ManyToOne(() => User, { onDelete: 'CASCADE', eager: false })
@@ -91,4 +99,20 @@ export class ChallengeAttempt {
   /** When the player submitted their answer (null until submitted). */
   @Column({ name: 'submitted_at', type: 'timestamptz', nullable: true })
   submittedAt?: Date;
+
+  /**
+   * The puzzle selected as "what's next" at submit time, persisted so a
+   * duplicate/replayed submit returns the same next challenge instead of
+   * re-randomizing it.
+   */
+  @Column({ type: 'uuid', nullable: true })
+  nextChallengeId?: string;
+
+  /** Whether this submission completed the session (target reached or challenge pool exhausted). */
+  @Column({ type: 'boolean', default: false })
+  sessionCompleted: boolean;
+
+  /** XP actually granted for this attempt (0 if incorrect), cached for idempotent replay. */
+  @Column({ type: 'int', nullable: true })
+  xpAwarded?: number;
 }
