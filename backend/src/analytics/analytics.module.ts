@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AnalyticsEvent } from './entities/analytics-event.entity';
 import { RetentionCohort } from './entities/retention-cohort.entity';
 import { DailyActiveUser } from './entities/daily-active-user.entity';
@@ -21,6 +22,7 @@ import { RetentionCohortRollupJob } from './jobs/retention-cohort-rollup.job';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forFeature([
       AnalyticsEvent,
       RetentionCohort,
@@ -55,6 +57,5 @@ import { RetentionCohortRollupJob } from './jobs/retention-cohort-rollup.job';
     ExportCsvProvider,
     TypeOrmModule,
   ],
-
 })
 export class AnalyticsModule {}
