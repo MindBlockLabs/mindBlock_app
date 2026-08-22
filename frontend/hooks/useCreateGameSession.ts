@@ -111,7 +111,6 @@ export function useCreateGameSession(): UseCreateGameSessionResult {
           }
 
           const result = await createGameSession({
-            userId: user.id,
             challengeId: fallbackPuzzles[0].id,
             sessionId,
           });
@@ -121,7 +120,6 @@ export function useCreateGameSession(): UseCreateGameSessionResult {
         }
 
         const result = await createGameSession({
-          userId: user.id,
           challengeId: puzzles[0].id,
           sessionId,
         });

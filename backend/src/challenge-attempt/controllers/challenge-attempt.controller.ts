@@ -8,8 +8,12 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 import {
+  ApiBearerAuth,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -21,13 +25,25 @@ import { SubmitAttemptDto } from '../dtos/submit-attempt.dto';
 import { RevealSolutionDto } from '../dtos/reveal-solution.dto';
 import { UseHintDto } from '../dtos/use-hint.dto';
 import { ChallengeAttempt } from '../entities/challenge-attempt.entity';
+import { SubmitAttemptResponseDto } from '../dtos/submit-attempt-response.dto';
+import { ActiveUser } from '../../auth/decorators/activeUser.decorator';
+import { ActiveUserData } from '../../auth/interfaces/activeInterface';
 
 @ApiTags('challenge-attempts')
+@ApiBearerAuth()
+@UseGuards(AuthGuard('jwt'))
 @Controller('challenge-attempts')
 export class ChallengeAttemptController {
   constructor(
     private readonly challengeAttemptService: ChallengeAttemptService,
   ) {}
+
+  private requireUserId(user: ActiveUserData): string {
+    if (!user?.sub) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+    return user.sub;
+  }
 
   // ─────────────────────────────────────────────────────────────────────────────
   // POST /challenge-attempts  →  start a new attempt
@@ -49,9 +65,13 @@ export class ChallengeAttemptController {
   @ApiResponse({ status: 400, description: 'Validation failed' })
   @ApiResponse({ status: 404, description: 'Challenge not found' })
   async createAttempt(
+    @ActiveUser() user: ActiveUserData,
     @Body() dto: CreateChallengeAttemptDto,
   ): Promise<ChallengeAttempt> {
-    return this.challengeAttemptService.createAttempt(dto);
+    return this.challengeAttemptService.createAttempt(
+      dto,
+      this.requireUserId(user),
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -63,24 +83,30 @@ export class ChallengeAttemptController {
   @ApiOperation({
     summary: 'Submit an answer for an existing attempt',
     description:
-      'Records the player answer, validates it against the correct answer, ' +
-      'calculates the score (with time bonus), and transitions the attempt ' +
-      'to CORRECT or INCORRECT.',
+      'Runs the full post-submission pipeline: validates the answer, persists ' +
+      'the attempt, records progress, calculates score and XP, selects the ' +
+      'next challenge, and detects session completion. Idempotent: a repeat ' +
+      'submit on an already-graded attempt returns the original cached result ' +
+      '(isDuplicateReplay: true) instead of re-running the pipeline.',
   })
   @ApiResponse({
     status: 200,
-    description: 'Answer submitted; attempt updated with result',
-    type: ChallengeAttempt,
+    description: 'Answer submitted; full pipeline result returned',
+    type: SubmitAttemptResponseDto,
   })
   @ApiResponse({
-    status: 400,
-    description: 'Attempt already in terminal state or validation failed',
+    status: 403,
+    description: 'Attempt does not belong to the authenticated user',
   })
   @ApiResponse({ status: 404, description: 'Attempt or challenge not found' })
   async submitAttempt(
+    @ActiveUser() user: ActiveUserData,
     @Body() dto: SubmitAttemptDto,
-  ): Promise<ChallengeAttempt> {
-    return this.challengeAttemptService.submitAttempt(dto);
+  ): Promise<SubmitAttemptResponseDto> {
+    return this.challengeAttemptService.submitAttempt(
+      dto,
+      this.requireUserId(user),
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -193,14 +219,14 @@ export class ChallengeAttemptController {
   @Get('user/:userId')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Get all attempts for a given user' })
-  @ApiParam({ name: 'userId', description: 'UUID of the user' })
+  @ApiParam({ name: 'userId', description: 'ID of the user' })
   @ApiResponse({
     status: 200,
     description: 'Attempts retrieved successfully',
     type: [ChallengeAttempt],
   })
   async findByUser(
-    @Param('userId', ParseUUIDPipe) userId: string,
+    @Param('userId') userId: string,
   ): Promise<ChallengeAttempt[]> {
     return this.challengeAttemptService.findByUser(userId);
   }

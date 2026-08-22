@@ -4,17 +4,18 @@
  * Wraps POST /challenge-attempts to create a new game session entry.
  * A game session groups challenge attempts under a shared sessionId (UUID).
  *
- * The backend requires a valid challengeId (UUID of an existing puzzle) in
- * addition to the userId and the generated sessionId. The challengeId used
- * here is a well-known "session opener" sentinel that the caller supplies —
- * in practice it is the first challenge the player will attempt.
+ * The backend requires a valid challengeId (UUID of an existing puzzle) and
+ * the generated sessionId. `userId` is intentionally NOT sent — the backend
+ * derives the authenticated user from the JWT (see
+ * `ChallengeAttemptController`/`CreateChallengeAttemptDto`), and the
+ * ValidationPipe rejects unknown body fields
+ * (`forbidNonWhitelisted: true`), so sending a client-supplied userId would
+ * now 400.
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? '';
 
 export interface CreateGameSessionDto {
-  /** UUID of the authenticated user */
-  userId: string;
   /** UUID of the first challenge to attempt (required by the backend) */
   challengeId: string;
   /** Client-generated UUID that groups all attempts in this session */
