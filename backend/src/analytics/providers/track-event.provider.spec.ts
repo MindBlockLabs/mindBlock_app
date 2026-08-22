@@ -232,4 +232,135 @@ describe('TrackEventProvider', () => {
       );
     });
   });
+
+  describe('PII sanitization', () => {
+    const HASH_PATTERN = /^sha256:[0-9a-f]{16}$/;
+
+    /** Mocks create/save as identity passthroughs so the sanitized payload survives to the response. */
+    function mockRepositoryAsPassthrough() {
+      repository.create.mockImplementation(
+        (data: any) => data as AnalyticsEvent,
+      );
+      repository.save.mockImplementation(async (data: any) => ({
+        id: 'evt-uuid-pii',
+        ...(data as object),
+        timestamp: new Date('2026-08-01T00:00:00.000Z'),
+      }));
+    }
+
+    it('should strip or hash known PII field names from a deliberately dirty payload before insert', async () => {
+      mockRepositoryAsPassthrough();
+
+      const dto: TrackEventDto = {
+        eventType: 'profile_updated',
+        userId: 'user-pii-1',
+        payload: {
+          entityId: 'profile-1',
+          email: 'jane.doe@example.com',
+          walletAddress: '0xAbC1234567890000000000000000000000dEaD',
+          password: 'super-secret-password',
+          accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+          difficulty: 'hard', // non-PII — must survive untouched
+          nested: {
+            phoneNumber: '+1-555-123-4567',
+            note: 'call me anytime',
+          },
+        },
+      };
+
+      const result = await provider.track(dto);
+      const persistedPayload = result.data.payload as Record<string, any>;
+
+      // Non-PII fields, including nested ones, pass through unchanged.
+      expect(persistedPayload.entityId).toBe('profile-1');
+      expect(persistedPayload.difficulty).toBe('hard');
+      expect(persistedPayload.nested.note).toBe('call me anytime');
+
+      // Credentials/secrets are dropped entirely — no analytics value even hashed.
+      expect(persistedPayload.password).toBeUndefined();
+      expect(persistedPayload.accessToken).toBeUndefined();
+
+      // Correlatable PII is hashed, never stored raw.
+      expect(persistedPayload.email).not.toBe('jane.doe@example.com');
+      expect(persistedPayload.email).toMatch(HASH_PATTERN);
+      expect(persistedPayload.walletAddress).not.toBe(
+        '0xAbC1234567890000000000000000000000dEaD',
+      );
+      expect(persistedPayload.walletAddress).toMatch(HASH_PATTERN);
+      expect(persistedPayload.nested.phoneNumber).not.toBe('+1-555-123-4567');
+      expect(persistedPayload.nested.phoneNumber).toMatch(HASH_PATTERN);
+
+      // Final sweep: none of the raw sensitive values appear anywhere in
+      // what actually gets written, however it's nested.
+      const serialized = JSON.stringify(persistedPayload);
+      expect(serialized).not.toContain('jane.doe@example.com');
+      expect(serialized).not.toContain(
+        '0xAbC1234567890000000000000000000000dEaD',
+      );
+      expect(serialized).not.toContain('super-secret-password');
+      expect(serialized).not.toContain('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9');
+      expect(serialized).not.toContain('+1-555-123-4567');
+    });
+
+    it('should hash PII field names case-insensitively', async () => {
+      mockRepositoryAsPassthrough();
+
+      const dto: TrackEventDto = {
+        eventType: 'signup_completed',
+        userId: 'user-pii-2',
+        payload: { Email: 'Weird.Casing@Example.com', WALLETADDRESS: '0xdead' },
+      };
+
+      const result = await provider.track(dto);
+      const persistedPayload = result.data.payload as Record<string, any>;
+
+      expect(persistedPayload.Email).toMatch(HASH_PATTERN);
+      expect(persistedPayload.WALLETADDRESS).toMatch(HASH_PATTERN);
+    });
+
+    it('should hash the same raw value to the same hash deterministically, enabling correlation without exposing PII', async () => {
+      mockRepositoryAsPassthrough();
+
+      const makeDto = (): TrackEventDto => ({
+        eventType: 'wallet_connected',
+        userId: 'user-1',
+        payload: {
+          walletAddress: '0xSAMEADDRESS0000000000000000000000000000',
+        },
+      });
+
+      const first = await provider.track(makeDto());
+      const second = await provider.track(makeDto());
+
+      const firstPayload = first.data.payload as Record<string, any>;
+      const secondPayload = second.data.payload as Record<string, any>;
+
+      expect(firstPayload.walletAddress).toBe(secondPayload.walletAddress);
+      expect(firstPayload.walletAddress).toMatch(HASH_PATTERN);
+    });
+
+    it('should leave a payload with no PII fields completely unaffected', async () => {
+      mockRepositoryAsPassthrough();
+
+      const dto: TrackEventDto = {
+        eventType: 'puzzle_attempted',
+        userId: 'user-clean',
+        payload: { entityId: 'puzzle-1', difficulty: 'easy', timeSpent: 12 },
+      };
+
+      const result = await provider.track(dto);
+
+      expect(result.data.payload).toEqual(dto.payload);
+    });
+
+    it('should return undefined payload unchanged when no payload is provided', async () => {
+      mockRepositoryAsPassthrough();
+
+      const dto: TrackEventDto = { eventType: 'session_started' };
+
+      const result = await provider.track(dto);
+
+      expect(result.data.payload).toBeUndefined();
+    });
+  });
 });
