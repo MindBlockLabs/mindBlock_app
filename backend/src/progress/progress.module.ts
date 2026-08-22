@@ -13,10 +13,12 @@ import { ProgressCalculationProvider } from './providers/progress-calculation.pr
 import { Puzzle } from '../puzzles/entities/puzzle.entity';
 import { XpLevelService } from '../users/providers/xp-level.service';
 import { ScoreService } from '../score/providers/score.service';
+import { IdempotencyModule } from '../common/idempotency/idempotency.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserProgress, User, Puzzle, Streak, DailyQuest]),
+    IdempotencyModule,
   ],
   controllers: [ProgressController],
   providers: [

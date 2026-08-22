@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Param,
@@ -10,6 +11,7 @@ import {
   Post,
 } from '@nestjs/common';
 import {
+  ApiHeader,
   ApiOperation,
   ApiParam,
   ApiResponse,
@@ -65,7 +67,14 @@ export class ChallengeAttemptController {
     description:
       'Records the player answer, validates it against the correct answer, ' +
       'calculates the score (with time bonus), and transitions the attempt ' +
-      'to CORRECT or INCORRECT.',
+      'to CORRECT or INCORRECT. ' +
+      'Supports idempotency via the Idempotency-Key header or the idempotencyKey body field.',
+  })
+  @ApiHeader({
+    name: 'Idempotency-Key',
+    required: false,
+    description:
+      'Client-generated idempotency key (UUID v4 recommended). Prevents duplicate XP awards, session advances, and reward eligibility on retries.',
   })
   @ApiResponse({
     status: 200,
@@ -79,7 +88,12 @@ export class ChallengeAttemptController {
   @ApiResponse({ status: 404, description: 'Attempt or challenge not found' })
   async submitAttempt(
     @Body() dto: SubmitAttemptDto,
+    @Headers('Idempotency-Key') idempotencyKey?: string,
   ): Promise<ChallengeAttempt> {
+    // Header takes precedence over body field for idempotency key.
+    if (idempotencyKey && !dto.idempotencyKey) {
+      dto.idempotencyKey = idempotencyKey;
+    }
     return this.challengeAttemptService.submitAttempt(dto);
   }
 

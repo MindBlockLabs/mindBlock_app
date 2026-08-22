@@ -1,5 +1,5 @@
-import { IsUUID, IsString, IsNumber, IsNotEmpty } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsUUID, IsString, IsNumber, IsNotEmpty, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubmitAnswerDto {
   @ApiProperty({
@@ -42,4 +42,12 @@ export class SubmitAnswerDto {
   @IsNumber()
   @IsNotEmpty()
   timeSpent: number; // seconds
+
+  @ApiPropertyOptional({
+    description:
+      'Client-generated idempotency key (UUID v4 recommended). Prevents duplicate XP awards and progress records on retries.',
+  })
+  @IsOptional()
+  @IsString()
+  idempotencyKey?: string;
 }

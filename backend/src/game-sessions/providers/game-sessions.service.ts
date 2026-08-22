@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,6 +13,7 @@ import { CreateGameSessionDto } from '../dtos/create-game-session.dto';
 import { UpdateGameSessionStatusDto } from '../dtos/update-game-session-status.dto';
 import { SessionTransitionMap } from '../interfaces/game-session.interface';
 import { SessionSummaryProvider } from './session-summary.provider';
+import { IdempotencyService } from '../../common/idempotency/idempotency.service';
 
 /**
  * Valid state transitions for a GameSession.
@@ -48,10 +50,13 @@ const TERMINAL_STATES = new Set<GameSessionStatus>([
 
 @Injectable()
 export class GameSessionsService {
+  private readonly logger = new Logger(GameSessionsService.name);
+
   constructor(
     @InjectRepository(GameSession)
     private readonly sessionRepository: Repository<GameSession>,
     private readonly sessionSummaryProvider: SessionSummaryProvider,
+    private readonly idempotencyService: IdempotencyService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -187,6 +192,74 @@ export class GameSessionsService {
 
     this.assertValidTransition(session.status, dto.status);
 
+    // Session completion is idempotent — the session ID is the key.
+    // This prevents double-completion from race conditions, retries,
+    // or browser refreshes, which would otherwise double-award XP,
+    // streak updates, and reward eligibility.
+    if (dto.status === GameSessionStatus.COMPLETED) {
+      const { duplicate, data: completedSession } =
+        await this.idempotencyService.execute<GameSession>(
+          `session-complete:${id}`,
+          () => this.processSessionCompletion(session, dto),
+        );
+
+      if (duplicate) {
+        this.logger.log(
+          `Duplicate completion detected for session ${id}. Returning cached result.`,
+        );
+      }
+
+      return completedSession;
+    }
+
+    return this.processStatusUpdate(session, dto);
+  }
+
+  /**
+   * Internal method that performs session completion logic.
+   * Called inside an idempotency guard — only executes once per session ID.
+   */
+  private async processSessionCompletion(
+    session: GameSession,
+    dto: UpdateGameSessionStatusDto,
+  ): Promise<GameSession> {
+    session.completedAt = new Date();
+
+    const stats = await this.sessionSummaryProvider.buildCompletionStats(
+      session.id,
+      session.userId,
+      dto.userTimezone,
+    );
+
+    // Statistics are calculated server-side from persisted challenge
+    // attempts. Client-supplied score/xpEarned are only used as a
+    // fallback when the session has no tracked attempts (e.g. legacy
+    // or externally-managed sessions), so completion never regresses
+    // to an unscored state.
+    const hasTrackedAttempts = stats.challengesCompleted > 0;
+    session.score = hasTrackedAttempts ? stats.totalScore : dto.score ?? 0;
+    session.xpEarned = hasTrackedAttempts
+      ? stats.xpEarned
+      : dto.xpEarned ?? 0;
+    session.accuracy = stats.accuracy;
+    session.timeSpentSeconds = stats.timeSpentSeconds;
+    session.categoryPerformance = stats.categoryPerformance;
+    session.previousStreak = stats.previousStreak;
+    session.currentStreak = stats.currentStreak;
+    session.rewardEligible = stats.rewardEligible;
+    session.rewardReason = stats.rewardReason;
+    session.status = dto.status;
+
+    return this.sessionRepository.save(session);
+  }
+
+  /**
+   * Handles non-completion status updates (ACTIVE, PAUSED, ABANDONED, EXPIRED).
+   */
+  private async processStatusUpdate(
+    session: GameSession,
+    dto: UpdateGameSessionStatusDto,
+  ): Promise<GameSession> {
     // Apply state-specific side-effects
     if (
       dto.status === GameSessionStatus.ACTIVE &&
@@ -197,32 +270,6 @@ export class GameSessionsService {
 
     if (TERMINAL_STATES.has(dto.status)) {
       session.completedAt = new Date();
-    }
-
-    if (dto.status === GameSessionStatus.COMPLETED) {
-      const stats = await this.sessionSummaryProvider.buildCompletionStats(
-        session.id,
-        session.userId,
-        dto.userTimezone,
-      );
-
-      // Statistics are calculated server-side from persisted challenge
-      // attempts. Client-supplied score/xpEarned are only used as a
-      // fallback when the session has no tracked attempts (e.g. legacy
-      // or externally-managed sessions), so completion never regresses
-      // to an unscored state.
-      const hasTrackedAttempts = stats.challengesCompleted > 0;
-      session.score = hasTrackedAttempts ? stats.totalScore : dto.score ?? 0;
-      session.xpEarned = hasTrackedAttempts
-        ? stats.xpEarned
-        : dto.xpEarned ?? 0;
-      session.accuracy = stats.accuracy;
-      session.timeSpentSeconds = stats.timeSpentSeconds;
-      session.categoryPerformance = stats.categoryPerformance;
-      session.previousStreak = stats.previousStreak;
-      session.currentStreak = stats.currentStreak;
-      session.rewardEligible = stats.rewardEligible;
-      session.rewardReason = stats.rewardReason;
     }
 
     session.status = dto.status;

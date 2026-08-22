@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindOptionsWhere, MoreThan, Repository } from 'typeorm';
+import { createHash } from 'crypto';
+import { Repository } from 'typeorm';
 import { Puzzle } from '../../puzzles/entities/puzzle.entity';
 import { UserProgress } from '../entities/progress.entity';
 import { SubmitAnswerDto } from '../dtos/submit-answer.dto';
@@ -9,7 +10,7 @@ import { User } from '../../users/user.entity';
 import { DailyQuest } from '../../quests/entities/daily-quest.entity';
 import { getPointsByDifficulty } from '../../puzzles/enums/puzzle-difficulty.enum';
 import { ScoreService } from '../../score/providers/score.service';
-
+import { IdempotencyService } from '../../common/idempotency/idempotency.service';
 
 export interface AnswerValidationResult {
   isCorrect: boolean;
@@ -24,6 +25,8 @@ export interface ProgressCalculationResult {
 
 @Injectable()
 export class ProgressCalculationProvider {
+  private readonly logger = new Logger(ProgressCalculationProvider.name);
+
   constructor(
     @InjectRepository(Puzzle)
     private readonly puzzleRepository: Repository<Puzzle>,
@@ -35,6 +38,7 @@ export class ProgressCalculationProvider {
     @InjectRepository(DailyQuest)
     private readonly dailyQuestRepository: Repository<DailyQuest>,
     private readonly scoreService: ScoreService,
+    private readonly idempotencyService: IdempotencyService,
   ) {}
 
   /**
@@ -87,11 +91,40 @@ export class ProgressCalculationProvider {
     );
   }
 
-  
   /**
-   * Processes answer submission and creates user progress record
+   * Processes answer submission and creates user progress record.
+   *
+   * Uses idempotency to prevent duplicate XP awards and progress records.
+   * If an idempotencyKey is provided, it is used directly; otherwise a
+   * deterministic key is derived from userId + puzzleId + userAnswer + timeSpent.
    */
   async processAnswerSubmission(
+    submitAnswerDto: SubmitAnswerDto,
+  ): Promise<ProgressCalculationResult> {
+    const idempotencyKey =
+      submitAnswerDto.idempotencyKey ??
+      this.deriveIdempotencyKey(submitAnswerDto);
+
+    const { duplicate, data: result } =
+      await this.idempotencyService.execute<ProgressCalculationResult>(
+        `progress-submit:${idempotencyKey}`,
+        () => this.processAnswerSubmissionInternal(submitAnswerDto),
+      );
+
+    if (duplicate) {
+      this.logger.log(
+        `Duplicate progress submission detected for key: ${idempotencyKey}. Returning cached result.`,
+      );
+    }
+
+    return result;
+  }
+
+  /**
+   * Internal method that performs the actual progress processing logic.
+   * Called inside an idempotency guard — only executes once per key.
+   */
+  private async processAnswerSubmissionInternal(
     submitAnswerDto: SubmitAnswerDto,
   ): Promise<ProgressCalculationResult> {
     // Get puzzle to validate against
@@ -99,23 +132,10 @@ export class ProgressCalculationProvider {
       where: { id: submitAnswerDto.puzzleId },
     });
 
-    // In processAnswerSubmission, check for recent duplicate:
-    const recentAttempt = await this.userProgressRepository.findOne({
-      where: {
-        userId: submitAnswerDto.userId,
-        puzzleId: submitAnswerDto.puzzleId,
-        attemptedAt: MoreThan(new Date(Date.now() - 5000)), // 5 second window
-      },
-    });
-
     if (!puzzle) {
       throw new NotFoundException(
         `Puzzle with ID ${submitAnswerDto.puzzleId} not found`,
       );
-    }
-
-    if (recentAttempt) {
-      throw new Error('Duplicate submission detected');
     }
 
     // Validate answer
@@ -126,15 +146,15 @@ export class ProgressCalculationProvider {
 
     // Calculate points
     const basePoints = this.calculatePoints(
-  puzzle,
-  submitAnswerDto.timeSpent,
-  validation.isCorrect,
-);
+      puzzle,
+      submitAnswerDto.timeSpent,
+      validation.isCorrect,
+    );
 
-   const scoreResult = this.scoreService.calculateScore({
-  correct: validation.isCorrect,
-  basePoints,
-  });
+    const scoreResult = this.scoreService.calculateScore({
+      correct: validation.isCorrect,
+      basePoints,
+    });
 
     let pointsEarned = scoreResult.score;
 
@@ -145,20 +165,18 @@ export class ProgressCalculationProvider {
     });
 
     if (user && validation.isCorrect) {
-   const streakCount = user.streak?.currentStreak || 0;
+      const streakCount = user.streak?.currentStreak || 0;
 
-   let streakMultiplier = 0;
+      let streakMultiplier = 0;
 
-   if (streakCount >= 7) {
-    streakMultiplier = 0.25;
-   } else if (streakCount >= 3) {
-    streakMultiplier = 0.1;
-   }
+      if (streakCount >= 7) {
+        streakMultiplier = 0.25;
+      } else if (streakCount >= 3) {
+        streakMultiplier = 0.1;
+      }
 
-   pointsEarned = Math.round(
-    pointsEarned * (1 + streakMultiplier),
-   );
-   }
+      pointsEarned = Math.round(pointsEarned * (1 + streakMultiplier));
+    }
 
     validation.pointsEarned = pointsEarned;
 
@@ -192,10 +210,10 @@ export class ProgressCalculationProvider {
             dailyQuest.completedAt = new Date();
             // Award bonus XP for daily quest completion (e.g., 50 XP as hinted in "completion screen")
             if (user) {
-            await this.xpLevelService.addXp(user.id, 50);
-}
+              await this.xpLevelService.addXp(user.id, 50);
             }
-            await this.dailyQuestRepository.save(dailyQuest);
+          }
+          await this.dailyQuestRepository.save(dailyQuest);
         }
       }
     }
@@ -227,10 +245,20 @@ export class ProgressCalculationProvider {
   }
 
   /**
+   * Derives a deterministic idempotency key from request parameters.
+   * This ensures the same logical answer submission is only processed once,
+   * even when the client doesn't provide an explicit idempotency key.
+   */
+  private deriveIdempotencyKey(dto: SubmitAnswerDto): string {
+    const payload = `${dto.userId}:${dto.puzzleId}:${dto.userAnswer}:${dto.timeSpent}`;
+    return createHash('sha256').update(payload).digest('hex').slice(0, 32);
+  }
+
+  /**
    * Gets user progress statistics for a category
    */
   async getUserProgressStats(userId: string, categoryId: string) {
-    const where: FindOptionsWhere<UserProgress> = {
+    const where = {
       userId,
       categoryId,
     };
