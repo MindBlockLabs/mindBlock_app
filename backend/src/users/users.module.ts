@@ -37,6 +37,6 @@ import { XpLevelService } from './providers/xp-level.service';
     UpdateUserService,
     XpLevelService,
   ],
-  exports: [UsersService, TypeOrmModule, XpLevelService],
+  exports: [UsersService, CreateUserService, TypeOrmModule, XpLevelService],
 })
 export class UsersModule {}

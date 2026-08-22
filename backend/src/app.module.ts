@@ -137,6 +137,7 @@ export class AppModule implements NestModule {
     consumer
       .apply(JwtAuthMiddleware)
       .exclude(
+        { path: '/', method: RequestMethod.GET },
         { path: 'auth/(.*)', method: RequestMethod.ALL },
         { path: 'api', method: RequestMethod.GET },
         { path: 'docs', method: RequestMethod.GET },
