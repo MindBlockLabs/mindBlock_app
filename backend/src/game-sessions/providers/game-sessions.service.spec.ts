@@ -17,6 +17,7 @@ import { CreateGameSessionDto } from '../dtos/create-game-session.dto';
 import { UpdateGameSessionStatusDto } from '../dtos/update-game-session-status.dto';
 import { SessionSummaryProvider } from './session-summary.provider';
 import { SessionCompletionStats } from '../interfaces/game-session.interface';
+import { IdempotencyService } from '../../common/idempotency/idempotency.service';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Fixtures
@@ -79,6 +80,7 @@ describe('GameSessionsService', () => {
   let service: GameSessionsService;
   let repo: jest.Mocked<Repository<GameSession>>;
   let summaryProvider: jest.Mocked<SessionSummaryProvider>;
+  let idempotencyService: { execute: jest.Mock<any> };
 
   beforeEach(async () => {
     const mockRepo: Partial<jest.Mocked<Repository<GameSession>>> = {
@@ -95,6 +97,10 @@ describe('GameSessionsService', () => {
       buildCompletionStats: jest.fn().mockResolvedValue(makeStatsStub()),
     };
 
+    const mockIdempotencyService = {
+      execute: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GameSessionsService,
@@ -106,12 +112,17 @@ describe('GameSessionsService', () => {
           provide: SessionSummaryProvider,
           useValue: mockSummaryProvider,
         },
+        {
+          provide: IdempotencyService,
+          useValue: mockIdempotencyService,
+        },
       ],
     }).compile();
 
     service = module.get<GameSessionsService>(GameSessionsService);
     repo = module.get(getRepositoryToken(GameSession));
     summaryProvider = module.get(SessionSummaryProvider);
+    idempotencyService = module.get(IdempotencyService);
   });
 
   afterEach(() => jest.clearAllMocks());
@@ -382,6 +393,14 @@ describe('GameSessionsService', () => {
         makeStatsStub({ challengesCompleted: 0 }),
       );
 
+      // Idempotency mock: call the fn (first request)
+      idempotencyService.execute!.mockImplementation(
+        async (key: string, fn: () => Promise<GameSession>) => {
+          const data = await fn();
+          return { duplicate: false, data };
+        },
+      );
+
       const dto: UpdateGameSessionStatusDto = {
         status: GameSessionStatus.COMPLETED,
         score: 900,
@@ -397,6 +416,10 @@ describe('GameSessionsService', () => {
       expect(result.score).toBe(900);
       expect(result.xpEarned).toBe(200);
       expect(result.completedAt).toBeInstanceOf(Date);
+      expect(idempotencyService.execute).toHaveBeenCalledWith(
+        'session-complete:session-uuid-1',
+        expect.any(Function),
+      );
     });
 
     it('ignores client-supplied score/xp and uses server-calculated stats when attempts are tracked', async () => {
@@ -427,6 +450,14 @@ describe('GameSessionsService', () => {
           rewardEligible: true,
           rewardReason: 'Player meets reward eligibility requirements',
         }),
+      );
+
+      // Idempotency mock: call the fn (first request)
+      idempotencyService.execute!.mockImplementation(
+        async (key: string, fn: () => Promise<GameSession>) => {
+          const data = await fn();
+          return { duplicate: false, data };
+        },
       );
 
       const dto: UpdateGameSessionStatusDto = {
@@ -539,6 +570,14 @@ describe('GameSessionsService', () => {
         makeStatsStub({ challengesCompleted: 0 }),
       );
 
+      // Idempotency mock: call the fn (first request)
+      idempotencyService.execute!.mockImplementation(
+        async (key: string, fn: () => Promise<GameSession>) => {
+          const data = await fn();
+          return { duplicate: false, data };
+        },
+      );
+
       const result = await service.completeSession(
         'session-uuid-1',
         500,
@@ -595,6 +634,139 @@ describe('GameSessionsService', () => {
       const count = await service.expireIdleSessions(30);
       expect(count).toBe(0);
       expect(repo.save).not.toHaveBeenCalled();
+    });
+  });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Idempotency — session completion
+  // ───────────────────────────────────────────────────────────────────────────
+
+  describe('session completion idempotency', () => {
+    const userId = 'user-uuid-1';
+
+    it('should return cached result for a duplicate COMPLETED request', async () => {
+      const session = makeSession({
+        status: GameSessionStatus.ACTIVE,
+        startedAt: new Date(),
+      });
+      repo.findOneBy.mockResolvedValue(session);
+
+      const completedSession = makeSession({
+        status: GameSessionStatus.COMPLETED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        score: 500,
+        xpEarned: 500,
+        accuracy: 80,
+        rewardEligible: true,
+        rewardReason: 'Player meets reward eligibility requirements',
+      });
+
+      // Simulate a cached result from a prior in-flight request
+      idempotencyService.execute!.mockResolvedValue({
+        duplicate: true,
+        data: completedSession,
+      });
+
+      const dto: UpdateGameSessionStatusDto = {
+        status: GameSessionStatus.COMPLETED,
+      };
+      const result = await service.updateStatus(
+        'session-uuid-1',
+        dto,
+        userId,
+      );
+
+      expect(result).toBe(completedSession);
+      expect(result.status).toBe(GameSessionStatus.COMPLETED);
+      expect(result.score).toBe(500);
+
+      // summaryProvider should NOT have been called — the cached result is returned directly
+      expect(summaryProvider.buildCompletionStats).not.toHaveBeenCalled();
+    });
+
+    it('should use session-complete:{id} as the idempotency key', async () => {
+      const session = makeSession({
+        status: GameSessionStatus.ACTIVE,
+        startedAt: new Date(),
+      });
+      repo.findOneBy.mockResolvedValue(session);
+      repo.save.mockImplementation(async (s) => s as GameSession);
+      summaryProvider.buildCompletionStats.mockResolvedValue(makeStatsStub());
+
+      // Idempotency mock: call the fn (first request)
+      idempotencyService.execute!.mockImplementation(
+        async (key: string, fn: () => Promise<GameSession>) => {
+          const data = await fn();
+          return { duplicate: false, data };
+        },
+      );
+
+      const dto: UpdateGameSessionStatusDto = {
+        status: GameSessionStatus.COMPLETED,
+      };
+      await service.updateStatus('session-uuid-1', dto, userId);
+
+      expect(idempotencyService.execute).toHaveBeenCalledWith(
+        'session-complete:session-uuid-1',
+        expect.any(Function),
+      );
+    });
+
+    it('should not use idempotency for non-COMPLETED transitions', async () => {
+      const session = makeSession({
+        status: GameSessionStatus.ACTIVE,
+        startedAt: new Date(),
+      });
+      repo.findOneBy.mockResolvedValue(session);
+      repo.save.mockImplementation(async (s) => s as GameSession);
+
+      const dto: UpdateGameSessionStatusDto = {
+        status: GameSessionStatus.PAUSED,
+      };
+      const result = await service.updateStatus('session-uuid-1', dto, userId);
+
+      // Idempotency should NOT be invoked for PAUSED transitions
+      expect(idempotencyService.execute).not.toHaveBeenCalled();
+      expect(result).toBeDefined();
+      expect(result.status).toBe(GameSessionStatus.PAUSED);
+    });
+
+    it('should prevent double XP awards on duplicate COMPLETED requests', async () => {
+      const session = makeSession({
+        status: GameSessionStatus.ACTIVE,
+        startedAt: new Date(),
+      });
+      repo.findOneBy.mockResolvedValue(session);
+
+      const completedSession = makeSession({
+        status: GameSessionStatus.COMPLETED,
+        startedAt: new Date(),
+        completedAt: new Date(),
+        score: 300,
+        xpEarned: 300,
+        rewardEligible: true,
+        rewardReason: 'Eligible',
+      });
+
+      idempotencyService.execute!.mockResolvedValue({
+        duplicate: true,
+        data: completedSession,
+      });
+
+      const dto: UpdateGameSessionStatusDto = {
+        status: GameSessionStatus.COMPLETED,
+      };
+
+      const result1 = await service.updateStatus('session-uuid-1', dto, userId);
+      const result2 = await service.updateStatus('session-uuid-1', dto, userId);
+
+      expect(result1).toBe(completedSession);
+      expect(result2).toBe(completedSession);
+      expect(result1.score).toBe(300);
+
+      // summaryProvider should not have been called at all — cached result returned
+      expect(summaryProvider.buildCompletionStats).not.toHaveBeenCalled();
     });
   });
 });

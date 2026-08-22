@@ -8,12 +8,14 @@ import { SessionSummaryProvider } from './providers/session-summary.provider';
 import { GameSessionsController } from './controllers/game-sessions.controller';
 import { StreakModule } from '../streak/strerak.module';
 import { RewardsModule } from '../rewards/rewards.module';
+import { IdempotencyModule } from '../common/idempotency/idempotency.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([GameSession, ChallengeAttempt, Puzzle]),
     StreakModule,
     RewardsModule,
+    IdempotencyModule,
   ],
   controllers: [GameSessionsController],
   providers: [GameSessionsService, SessionSummaryProvider],
