@@ -11,6 +11,7 @@ import { PuzzlesModule } from '../puzzles/puzzles.module';
 import { ProgressModule } from '../progress/progress.module';
 import { UsersModule } from '../users/users.module';
 import { StreakModule } from '../streak/strerak.module';
+import { BlockchainModule } from '../blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -19,6 +20,9 @@ import { StreakModule } from '../streak/strerak.module';
     ProgressModule,
     UsersModule,
     StreakModule,
+    // BlockchainService is needed by CompleteDailyQuestProvider for
+    // syncXpMilestone after the daily quest completion bonus XP is awarded.
+    BlockchainModule,
   ],
   controllers: [DailyQuestController],
   providers: [

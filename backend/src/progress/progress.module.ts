@@ -13,10 +13,14 @@ import { ProgressCalculationProvider } from './providers/progress-calculation.pr
 import { Puzzle } from '../puzzles/entities/puzzle.entity';
 import { XpLevelService } from '../users/providers/xp-level.service';
 import { ScoreService } from '../score/providers/score.service';
+import { BlockchainModule } from '../blockchain/blockchain.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([UserProgress, User, Puzzle, Streak, DailyQuest]),
+    // BlockchainService is needed by ProgressCalculationProvider for
+    // submitPuzzleOnChain after puzzle answer verification.
+    BlockchainModule,
   ],
   controllers: [ProgressController],
   providers: [
