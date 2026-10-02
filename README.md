@@ -234,3 +234,5 @@ git commit -m "feat: add puzzle leaderboard"
 📜 License
 
 This project is licensed under the MIT License.
+
+<!-- Updated documentation reference -->
